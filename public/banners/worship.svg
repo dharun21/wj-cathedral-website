@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Sunday worship artwork placeholder</title><desc id="desc">Abstract warm light and architectural windows prepared for replacement with an approved worship photograph.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#081d30"/><stop offset=".48" stop-color="#18415b"/><stop offset="1" stop-color="#c08b46"/></linearGradient><radialGradient id="sun"><stop stop-color="#fff3cf" stop-opacity=".88"/><stop offset=".33" stop-color="#e8bd72" stop-opacity=".43"/><stop offset="1" stop-color="#e8bd72" stop-opacity="0"/></radialGradient></defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/><circle cx="1460" cy="310" r="520" fill="url(#sun)"/><g opacity=".28" fill="none" stroke="#f7e1ad" stroke-width="3"><path d="M1020 1080V575c0-235 145-405 330-405s330 170 330 405v505"/><path d="M1225 1080V590c0-108 61-190 135-190s135 82 135 190v490"/><path d="M1600 1080V680c0-125 72-220 160-220s160 95 160 220v400"/></g><g fill="#f9e5b7" opacity=".7"><rect x="1356" y="330" width="8" height="210" rx="4"/><rect x="1302" y="390" width="116" height="8" rx="4"/></g><path d="M0 900C380 785 660 980 1000 885c320-90 565-44 920 80v115H0Z" fill="#071827" opacity=".3"/>
+</svg>
+

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Replace the reserved domain below after the church confirms its production domain.
+Sitemap: https://wjcathedral.example/sitemap.xml
+
