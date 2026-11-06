@@ -12,14 +12,14 @@ export const galleryItems: GalleryItem[] = [
     approved: true,
   },
   {
-    id: 'worship-placeholder',
-    src: './banners/worship.svg',
+    id: 'vbs',
+    src: './gallery/vacation-bible-school-2026/vbs-2026-01.jpg',
     alt: {
-      en: 'Placeholder for an approved WJ Cathedral worship photograph',
-      ta: 'WJ Cathedral ஆராதனையின் அங்கீகரிக்கப்பட்ட புகைப்படத்திற்கான இடம்',
+      en: 'A child speaking on stage with an adult leader during Vacation Bible School 2026',
+      ta: '2026 விடுமுறை வேதாகமப் பள்ளியில் ஒரு பெரியவர் வழிநடத்த, மேடையில் பேசும் சிறுமி',
     },
-    category: { en: 'Worship', ta: 'ஆராதனை' },
-    approved: false,
+    category: { en: 'Vacation Bible School', ta: 'விடுமுறை வேதாகமப் பள்ளி' },
+    approved: true,
   },
   {
     id: 'prayer',

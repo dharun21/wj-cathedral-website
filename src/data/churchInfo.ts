@@ -27,3 +27,21 @@ export const navItems = [
   { id: 'contact', href: '#contact', labelKey: 'nav.contact' },
 ] as const
 
+export const headerNavItems = [
+  { id: 'home', href: '#home', labelKey: 'nav.home' },
+  { id: 'about', href: '#about', labelKey: 'nav.about' },
+  {
+    id: 'ministries',
+    labelKey: 'nav.ministries',
+    children: [
+      { id: 'church', href: '#church', labelKey: 'nav.church', descriptionKey: 'nav.churchDesc', icon: 'church' },
+      { id: 'events', href: '#events', labelKey: 'nav.events', descriptionKey: 'nav.eventsDesc', icon: 'events' },
+      { id: 'sermons', href: '#sermons', labelKey: 'nav.media', descriptionKey: 'nav.mediaDesc', icon: 'media' },
+      { id: 'gallery', href: '#gallery', labelKey: 'nav.gallery', descriptionKey: 'nav.galleryDesc', icon: 'gallery' },
+      { id: 'prayer-helpline', href: '#prayer-helpline', labelKey: 'nav.prayerHelpline', descriptionKey: 'nav.prayerHelplineDesc', icon: 'prayer' },
+    ],
+  },
+  { id: 'academics', href: '#academics', labelKey: 'nav.academics' },
+  { id: 'community-care', href: '#community-care', labelKey: 'nav.communityCare' },
+] as const
+

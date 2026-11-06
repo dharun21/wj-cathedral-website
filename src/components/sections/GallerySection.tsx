@@ -1,4 +1,4 @@
-import { Camera, ChevronLeft, ChevronRight, ImageIcon, Maximize2, Sparkles, X } from 'lucide-react'
+import { Camera, ChevronLeft, ChevronRight, ImageIcon, Maximize2, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -81,46 +81,26 @@ export function GallerySection() {
             <Reveal key={item.id} className={`gallery-item gallery-item--${index + 1}`} delay={index * 0.06}>
               <button
                 type="button"
-                onClick={() => item.id === 'prayer'
-                  ? openGallery(prayerGalleryItems, 2, 'prayer')
-                  : openGallery([item], 0, item.approved ? 'approved' : 'pending')}
+                onClick={() => {
+                  if (item.id === 'vbs') {
+                    openGallery(vacationBibleSchoolItems, 0, 'vbs')
+                  } else if (item.id === 'prayer') {
+                    openGallery(prayerGalleryItems, 2, 'prayer')
+                  } else {
+                    openGallery([item], 0, item.approved ? 'approved' : 'pending')
+                  }
+                }}
                 aria-label={`${t('gallery.open')}: ${localize(item.category)}`}
               >
                 <img src={item.src} alt={localize(item.alt)} loading="lazy" />
                 <span className="gallery-item__overlay" />
                 {item.approved
-                  ? <span className="gallery-item__pending gallery-item__pending--approved"><Camera size={15} aria-hidden="true" /> {item.id === 'prayer' ? t('gallery.prayerPhotos') : t('gallery.approvedPhoto')}</span>
+                  ? <span className="gallery-item__pending gallery-item__pending--approved"><Camera size={15} aria-hidden="true" /> {item.id === 'vbs' ? t('gallery.vbsPhotos') : item.id === 'prayer' ? t('gallery.prayerPhotos') : t('gallery.approvedPhoto')}</span>
                   : <span className="gallery-item__pending"><ImageIcon size={15} aria-hidden="true" /> {t('gallery.pending')}</span>}
                 <span className="gallery-item__label">{localize(item.category)} <Maximize2 size={18} aria-hidden="true" /></span>
               </button>
             </Reveal>
           ))}
-        </div>
-
-        <div className="gallery-collection" aria-labelledby="vacation-bible-school-title">
-          <div className="gallery-collection__heading">
-            <div>
-              <p className="eyebrow"><Sparkles size={15} aria-hidden="true" /> {t('gallery.vbsEyebrow')}</p>
-              <h3 id="vacation-bible-school-title">{t('gallery.vbsTitle')}</h3>
-            </div>
-            <p>{t('gallery.vbsIntro')}</p>
-          </div>
-          <div className="vbs-gallery-grid">
-            {vacationBibleSchoolItems.map((item, index) => (
-              <Reveal key={item.id} className="vbs-gallery-item" delay={(index % 4) * 0.05}>
-                <button
-                  type="button"
-                  onClick={() => openGallery(vacationBibleSchoolItems, index, 'vbs')}
-                  aria-label={`${t('gallery.open')}: ${localize(item.alt)}`}
-                >
-                  <img src={item.src} alt={localize(item.alt)} loading="lazy" decoding="async" />
-                  <span className="vbs-gallery-item__overlay" />
-                  <span className="vbs-gallery-item__number">{String(index + 1).padStart(2, '0')}</span>
-                  <span className="vbs-gallery-item__action"><Camera size={17} aria-hidden="true" /> {t('gallery.open')}</span>
-                </button>
-              </Reveal>
-            ))}
-          </div>
         </div>
       </div>
       <AnimatePresence>

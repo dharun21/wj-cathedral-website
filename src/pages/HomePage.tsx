@@ -9,7 +9,7 @@ import { WorshipSection } from '../components/sections/WorshipSection'
 
 export function HomePage() {
   return (
-    <main id="main-content">
+    <main id="main-content" tabIndex={-1}>
       <HeroSection />
       <WelcomeSection />
       <WorshipSection />
