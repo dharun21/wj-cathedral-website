@@ -6,7 +6,8 @@ Complete this before any public launch.
 
 - [ ] Confirm official English name and capitalisation.
 - [ ] Approve Tamil rendering of the name (currently the proper name remains in English).
-- [ ] Confirm complete postal address, landmark, PIN code and Google Maps place link.
+- [x] Google Maps place link supplied and approved for Directions.
+- [ ] Confirm complete postal address, landmark and PIN code.
 - [ ] Confirm whether `+91 97880 56467` is owned/approved for public church enquiries.
 - [ ] Confirm whether the phone number may be used for WhatsApp. WhatsApp is currently disabled.
 - [ ] Confirm Sunday worship day/time: 7:30 AM–11:30 AM.

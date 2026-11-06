@@ -77,7 +77,7 @@ const ta: Record<TranslationKey, string> = {
   'contact.phone': 'ஜெபத் தொடர்பு',
   'contact.timings': 'ஆராதனை நேரங்கள்',
   'contact.mapTitle': 'WJ Cathedral-க்கு வழி',
-  'contact.mapBody': 'பயண வழிகாட்டலுக்கு Google Maps-ஐத் திறக்கவும். பொதுவெளியீட்டிற்கு முன் துல்லியமான வரைபடப் பதிவு திருச்சபையால் உறுதிப்படுத்தப்பட வேண்டும்.',
+  'contact.mapBody': 'பயண வழிகாட்டலுக்கு Google Maps-இல் திருச்சபையின் இருப்பிடத்தைத் திறக்கவும்.',
   'contact.noForm': 'படிவம் தேவையில்லை—ஜெபம் அல்லது வருகை விவரங்களுக்கு திருச்சபையை நேரடியாக அழையுங்கள்.',
   'footer.quickLinks': 'விரைவு இணைப்புகள்',
   'footer.visit': 'WJ Cathedral-க்கு வாருங்கள்',

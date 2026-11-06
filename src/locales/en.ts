@@ -75,7 +75,7 @@ const en = {
   'contact.phone': 'Prayer contact',
   'contact.timings': 'Worship times',
   'contact.mapTitle': 'Directions to WJ Cathedral',
-  'contact.mapBody': 'Open Google Maps for turn-by-turn directions. The precise map listing must be confirmed by the church before public launch.',
+  'contact.mapBody': 'Open the church location in Google Maps for turn-by-turn directions.',
   'contact.noForm': 'No form is needed—call the church directly for prayer or visit information.',
   'footer.quickLinks': 'Quick links',
   'footer.visit': 'Visit WJ Cathedral',

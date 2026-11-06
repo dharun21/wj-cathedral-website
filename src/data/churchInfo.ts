@@ -10,8 +10,7 @@ export const churchInfo = {
   } satisfies LocalizedText,
   phone: '+919788056467',
   phoneDisplay: '+91 97880 56467',
-  mapsUrl:
-    'https://www.google.com/maps/search/?api=1&query=Worship%20to%20Jesus%20Cathedral%2C%20Sothakudi%20Road%2C%20Nannilam%2C%20Tamil%20Nadu',
+  mapsUrl: 'https://maps.app.goo.gl/Dc9ohp6aNdBD265K9?g_st=ic',
   verificationNote: {
     en: 'Address, phone number and recurring times were supplied as public details and require final church confirmation before launch.',
     ta: 'முகவரி, தொலைபேசி எண் மற்றும் வழக்கமான நேரங்கள் பொது விவரங்களாக வழங்கப்பட்டவை. வெளியீட்டிற்கு முன் திருச்சபையின் இறுதி உறுதிப்படுத்தல் தேவை.',
