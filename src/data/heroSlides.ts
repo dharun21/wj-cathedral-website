@@ -26,13 +26,13 @@ export const heroSlides: HeroSlide[] = [
       en: 'A simple invitation to worship, hear God’s word and share fellowship with the church family.',
       ta: 'ஆராதிக்கவும், தேவ வார்த்தையைக் கேட்கவும், திருச்சபைக் குடும்பத்தோடு ஐக்கியப்படவும் அன்புடன் அழைக்கிறோம்.',
     },
-    image: './banners/worship.svg',
+    image: './hero/come-as-you-are-sunday.jpg',
     imageAlt: {
-      en: 'Decorative warm artwork reserved for an approved Sunday worship photograph',
-      ta: 'அங்கீகரிக்கப்பட்ட ஞாயிறு ஆராதனைப் புகைப்படத்திற்கான அலங்காரப் படம்',
+      en: 'A speaker sharing a joyful Sunday message at WJ Cathedral',
+      ta: 'WJ Cathedral மேடையில் மகிழ்ச்சியுடன் ஞாயிறு செய்தியைப் பகிரும் பேச்சாளர்',
     },
     cta: { href: '#worship', label: { en: 'See worship timings', ta: 'ஆராதனை நேரங்களைப் பாருங்கள்' } },
-    mediaStatus: 'placeholder-awaiting-approved-photo',
+    mediaStatus: 'approved-client-supplied',
   },
   {
     id: 'prayer',

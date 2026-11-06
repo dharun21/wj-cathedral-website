@@ -2,26 +2,45 @@ import type { Sermon } from '../types/content'
 
 export const sermons: Sermon[] = [
   {
-    id: 'video-zevj',
-    videoId: 'ZeVjCUK8Pbg',
-    title: { en: 'WJ Cathedral service recording', ta: 'WJ Cathedral ஆராதனைப் பதிவு' },
+    id: 'good-friday-service-2026',
+    videoId: 'ul8G9GUBCXA',
+    title: {
+      en: 'Good Friday Service 03-04-2026 | TAMIL CHRISTIAN MESSAGE | #WJCATHEDRAL #sundayservice  | NANNILAM',
+      ta: 'Good Friday Service 03-04-2026 | TAMIL CHRISTIAN MESSAGE | #WJCATHEDRAL #sundayservice  | NANNILAM',
+    },
     description: {
-      en: 'Public YouTube video supplied for this website project.',
-      ta: 'இந்த இணையதளத் திட்டத்திற்காக வழங்கப்பட்ட பொது YouTube காணொளி.',
+      en: 'Good Friday service from the official WJ Cathedral Nannilam YouTube channel.',
+      ta: 'அதிகாரப்பூர்வ WJ Cathedral Nannilam YouTube சேனலின் புனித வெள்ளி ஆராதனை.',
     },
     verification: 'public-source',
   },
   {
-    id: 'video-ovj',
-    videoId: 'Ovj6pE-0KO4',
-    title: { en: 'WJ Cathedral worship recording', ta: 'WJ Cathedral ஆராதனைக் காணொளி' },
+    id: 'enna-marakala-song',
+    videoId: 'aYlDedVM1us',
+    title: {
+      en: 'Enna Marakala / என்ன மறக்கல I I AaronJebaraj I Tamil I  #tamilchristiansongs  #newchristiansong#song',
+      ta: 'Enna Marakala / என்ன மறக்கல I I AaronJebaraj I Tamil I  #tamilchristiansongs  #newchristiansong#song',
+    },
     description: {
-      en: 'Public YouTube video supplied for this website project.',
-      ta: 'இந்த இணையதளத் திட்டத்திற்காக வழங்கப்பட்ட பொது YouTube காணொளி.',
+      en: 'Tamil Christian song from the official WJ Cathedral Nannilam YouTube channel.',
+      ta: 'அதிகாரப்பூர்வ WJ Cathedral Nannilam YouTube சேனலின் தமிழ் கிறிஸ்தவப் பாடல்.',
+    },
+    verification: 'public-source',
+  },
+  {
+    id: 'sunday-service-2025-08-10',
+    videoId: 'Zgd1Oxj7HiA',
+    title: {
+      en: '🔴Sunday Service /10/08/2025| TAMIL CHRISTIAN MESSAGE | #WJCATHEDRAL #NANNILAM',
+      ta: '🔴Sunday Service /10/08/2025| TAMIL CHRISTIAN MESSAGE | #WJCATHEDRAL #NANNILAM',
+    },
+    description: {
+      en: 'Sunday service from the official WJ Cathedral Nannilam YouTube channel.',
+      ta: 'அதிகாரப்பூர்வ WJ Cathedral Nannilam YouTube சேனலின் ஞாயிறு ஆராதனை.',
     },
     verification: 'public-source',
   },
 ]
 
-export const youtubeChannelUrl: string | null = null
+export const youtubeChannelUrl = 'https://www.youtube.com/@wjcathedralnannilam1376'
 

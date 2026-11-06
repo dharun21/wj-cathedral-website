@@ -1,6 +1,6 @@
-import { ExternalLink, Play, SquarePlay, WifiOff } from 'lucide-react'
+import { ExternalLink, Play, SquarePlay } from 'lucide-react'
 import { useState } from 'react'
-import { sermons } from '../../data/sermons'
+import { sermons, youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
 import { Reveal } from '../common/Reveal'
 import { SectionHeading } from '../common/SectionHeading'
@@ -49,7 +49,13 @@ export function SermonsSection() {
             </Reveal>
           ))}
         </div>
-        <p className="channel-note"><WifiOff size={18} aria-hidden="true" /> {t('sermons.channelPending')}</p>
+        <div className="channel-note channel-note--verified">
+          <SquarePlay size={20} aria-hidden="true" />
+          <p>{t('sermons.channelPending')}</p>
+          <a href={youtubeChannelUrl} target="_blank" rel="noreferrer">
+            {t('sermons.channelCta')} <ExternalLink size={15} aria-hidden="true" />
+          </a>
+        </div>
       </div>
     </section>
   )

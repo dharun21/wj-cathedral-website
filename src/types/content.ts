@@ -19,7 +19,7 @@ export interface HeroSlide {
   imageAlt: LocalizedText
   cta: { href: `#${string}`; label: LocalizedText }
   secondaryCta?: { href: `#${string}`; label: LocalizedText }
-  mediaStatus: 'placeholder-awaiting-approved-photo'
+  mediaStatus: 'approved-client-supplied' | 'placeholder-awaiting-approved-photo'
 }
 
 export interface Service {

@@ -25,16 +25,19 @@ Complete this before any public launch.
 
 ## Official online links
 
-- [ ] YouTube channel URL.
+- [x] YouTube channel URL verified from official video metadata.
 - [ ] Instagram profile URL.
 - [ ] Facebook page URL.
 - [ ] Any approved WhatsApp link.
-- [ ] Confirm the two supplied YouTube videos and their exact titles.
+- [x] Confirm the three supplied YouTube videos and their exact public titles.
 
 ## Approved media
 
-- [ ] 3–4 landscape hero photos (minimum 1920×1080).
-- [ ] Exterior/building photos.
+- [x] Vacation Bible School 2026 gallery photos supplied for website use.
+- [x] Prayer gallery photos supplied for website use.
+- [x] Exterior/building photo supplied for website use.
+- [x] One approved Sunday invitation hero photo supplied for website use.
+- [ ] 2–3 additional landscape hero photos (minimum 1920×1080 where available).
 - [ ] Worship/congregation photos with consent.
 - [ ] Special event and celebration photos with dates/captions.
 - [ ] Leadership photos with consent.

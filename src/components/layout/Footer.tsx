@@ -1,6 +1,6 @@
 import { ArrowUpRight, MapPin, Phone, SquarePlay } from 'lucide-react'
 import { churchInfo, navItems } from '../../data/churchInfo'
-import { sermons } from '../../data/sermons'
+import { sermons, youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
 import { LogoMark } from '../common/LogoMark'
 
@@ -43,7 +43,7 @@ export function Footer() {
         </div>
         <div>
           <h3>{t('footer.follow')}</h3>
-          <a className="footer-youtube" href={`https://www.youtube.com/watch?v=${sermons[0]?.videoId ?? ''}`} target="_blank" rel="noreferrer">
+          <a className="footer-youtube" href={youtubeChannelUrl || `https://www.youtube.com/watch?v=${sermons[0]?.videoId ?? ''}`} target="_blank" rel="noreferrer">
             <SquarePlay size={19} aria-hidden="true" />
             {t('footer.youtubeVideos')}
             <ArrowUpRight size={15} aria-hidden="true" />

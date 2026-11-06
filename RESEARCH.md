@@ -16,21 +16,23 @@ Scope: public web sources and information supplied in the project brief. No priv
 | Public prayer contact: 9788056467. | Project brief, described as preliminary | Medium / needs church approval | Displayed as a prayer contact with launch approval warning. WhatsApp is not enabled. |
 | Friday prayer schedule. | No reliable first-party schedule found. | Unverified | Not published. |
 | Pastor names, denomination, founding year and church history. | Search snippets contain names/hashtags but no reliable official profile or history was verified. | Unverified | Not published. |
-| Official Instagram, Facebook and a stable YouTube channel URL. | Search did not yield a clearly attributable first-party profile/channel URL. | Unverified | No social icons link to guessed profiles. Direct supplied YouTube videos only. |
+| Official YouTube channel. | YouTube oEmbed metadata for all three client-supplied videos identifies the author as “WJ Cathedral Nannilam” and returns the same channel URL. | High | The verified channel is linked from the sermon section and footer. |
+| Official Instagram and Facebook profiles. | Search did not yield clearly attributable first-party profile URLs. | Unverified | No social icons link to guessed profiles. |
 | Official Google Maps listing. | No reliable place URL/place ID verified. | Unverified | Generic Maps search URL used and labelled for confirmation. |
 | Current events and recurring celebrations. | No verified current calendar found. | Unverified | Friendly no-confirmed-events state; no fabricated dates. |
-| Approved church building, congregation, event and pastor photography. | No client-owned media was supplied. Third-party image downloading was prohibited. | Missing | Original abstract placeholder artwork is labelled clearly. No unrelated church photography is used. |
+| Approved church photography. | The client supplied eight Vacation Bible School 2026 photos, three prayer-gallery photos, one church-building photo and one Sunday invitation hero photo for website use. Additional hero, general worship and pastor photography remain missing. | Mixed | The approved Sunday hero, building, VBS and prayer media are published; abstract hero and worship placeholders remain where approved photography has not yet been supplied. |
 
-## Supplied public videos
+## Verified public videos
 
-- [YouTube video 1](https://www.youtube.com/watch?v=ZeVjCUK8Pbg)
-- [YouTube video 2](https://www.youtube.com/watch?v=Ovj6pE-0KO4)
+- [Good Friday Service 03-04-2026](https://www.youtube.com/watch?v=ul8G9GUBCXA)
+- [Enna Marakala / என்ன மறக்கல](https://www.youtube.com/watch?v=aYlDedVM1us)
+- [Sunday Service / 10-08-2025](https://www.youtube.com/watch?v=Zgd1Oxj7HiA)
 
-The video titles could not be reliably retrieved during research, so the website uses neutral labels (“service recording” / “worship recording”) and does not name a preacher, date or event.
+YouTube’s oEmbed endpoint returned the exact public title, original thumbnail URL, author name and the same [WJ Cathedral Nannilam channel](https://www.youtube.com/@wjcathedralnannilam1376) for each video. The website preserves the exact public titles and uses YouTube’s original `hqdefault.jpg` thumbnails.
 
 ## Research limitations
 
-Search-engine coverage for this local church was sparse. YouTube watch pages were intermittently throttled, and no clearly official Instagram or Facebook profile could be verified. The current implementation therefore distinguishes supplied-but-unconfirmed details from high-confidence public evidence. A church representative must complete `CONTENT_CHECKLIST.md` before launch.
+Search-engine coverage for this local church remains sparse. The official YouTube channel is now verified through first-party video metadata, but no clearly official Instagram or Facebook profile could be verified. The current implementation distinguishes supplied-but-unconfirmed details from high-confidence public evidence. A church representative must complete `CONTENT_CHECKLIST.md` before launch.
 
 ## Media policy
 
