@@ -50,7 +50,7 @@ export function EventsPage() {
           <div className="page-section-heading page-section-heading--split">
             <div>
               <p className="eyebrow">{localize({ en: 'Life of the church', ta: 'திருச்சபை வாழ்க்கை' })}</p>
-              <h2>{localize({ en: 'Regular Church Gatherings', ta: 'வழக்கமான திருச்சபைக் கூடுகைகள்' })}</h2>
+              <h2>{localize({ en: 'Cathedral Worship & Prayer Schedule', ta: 'பேராலய ஆராதனை மற்றும் ஜெப அட்டவணை' })}</h2>
             </div>
             <p>{localize({
               en: 'Please confirm the latest day and time with the church before planning your visit.',
