@@ -65,6 +65,10 @@ Test the complete flow before launch:
 
 The browser calls the Edge Function with the owner's session. The function independently verifies an active owner membership, creates only `editor` accounts and keeps privileged Auth administration on the server.
 
+Migration `202611070031_admin_membership_realtime.sql` adds only `admin_memberships` to the Realtime publication so the visible admin session reacts immediately to removal, restoration or deletion. RLS remains the authorization boundary, and the client also rechecks membership when the tab regains focus and every 60 seconds.
+
+Migration `202611070032_content_review_history.sql` creates the editor submission ledger, owner decision history, 30-day visibility/cleanup rules and Realtime synchronization used by **Pending Approval** and **Attention Required**.
+
 ## Authentication settings
 
 - Add local and eventual production `/#/admin/reset-password` redirect URLs.

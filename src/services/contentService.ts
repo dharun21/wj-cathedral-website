@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { requireSupabase } from '../lib/supabase'
 import type {
   AnnouncementRow,
+  ContentReviewRequestRow,
   DailyBibleVerseRow,
   CmsTableName,
   EventRow,
@@ -148,6 +149,50 @@ export async function listAdminRecords<Row extends Record<string, unknown>>(tabl
   return (data ?? []) as Row[]
 }
 
+export async function listPendingApprovalRecords<Row extends Record<string, unknown>>(table: CmsTableName) {
+  const { data, error } = await genericClient()
+    .from(table)
+    .select('*')
+    .eq('status', 'pending_review')
+    .order('updated_at', { ascending: false })
+  throwIfError(error)
+  return (data ?? []) as Row[]
+}
+
+export async function listPendingMediaApprovalRecords<Row extends Record<string, unknown>>() {
+  const { data, error } = await genericClient()
+    .from('media_assets')
+    .select('*')
+    .eq('approval_status', 'pending')
+    .order('created_at', { ascending: false })
+  throwIfError(error)
+  return (data ?? []) as Row[]
+}
+
+export async function listContentReviewRequests() {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60_000).toISOString()
+  const { data, error } = await requireSupabase()
+    .from('content_review_requests')
+    .select('*')
+    .or(`resolution.eq.pending,resolved_at.gte.${cutoff}`)
+    .order('submitted_at', { ascending: false })
+  throwIfError(error)
+  return (data ?? []) as ContentReviewRequestRow[]
+}
+
+export function subscribeToContentReviewRequests(callback: () => void) {
+  const client = requireSupabase()
+  const channel = client
+    .channel('content-review-activity')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'content_review_requests',
+    }, callback)
+    .subscribe()
+  return () => { void client.removeChannel(channel) }
+}
+
 export async function saveAdminRecord<Row extends Record<string, unknown>>(table: CmsTableName, values: Row, id?: string) {
   const query = id
     ? genericClient().from(table).update(values as never).eq('id', id).select().single()
@@ -179,15 +224,16 @@ export async function fetchDashboardCounts() {
     return total ?? 0
   }
   const now = new Date().toISOString()
-  const [announcements, events, gallery, slides, videos, verses, draftGroups, pendingGroups] = await Promise.all([
+  const [announcements, events, gallery, slides, videos, verses, draftGroups, pendingGroups, pendingMedia] = await Promise.all([
     count('announcements', { status: 'published' }),
     client.from('events').select('*', { count: 'exact', head: true }).eq('status', 'published').gte('starts_at', now),
     count('gallery_images', { status: 'published' }),
     count('hero_slides', { status: 'published', enabled: 'true' }),
     count('videos', { status: 'published' }),
     count('daily_bible_verses', { status: 'published', active: 'true' }),
-    Promise.all(['announcements', 'events', 'gallery_images', 'hero_slides', 'videos', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'draft' }))),
-    Promise.all(['announcements', 'events', 'gallery_images', 'hero_slides', 'videos', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'pending_review' }))),
+    Promise.all(['announcements', 'events', 'gallery_albums', 'gallery_images', 'hero_slides', 'videos', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'draft' }))),
+    Promise.all(['announcements', 'events', 'gallery_albums', 'gallery_images', 'hero_slides', 'videos', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'pending_review' }))),
+    count('media_assets', { approval_status: 'pending' }),
   ])
   throwIfError(events.error)
   return {
@@ -198,6 +244,6 @@ export async function fetchDashboardCounts() {
     videos,
     verses,
     drafts: draftGroups.reduce((sum, value) => sum + value, 0),
-    pendingApprovals: pendingGroups.reduce((sum, value) => sum + value, 0),
+    pendingApprovals: pendingGroups.reduce((sum, value) => sum + value, 0) + pendingMedia,
   }
 }

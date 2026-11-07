@@ -59,14 +59,14 @@ export const heroSlides: HeroSlide[] = [
       en: 'Apply to Worship To Jesus Bible Institute & College. B.Th, C.Th and Diploma in Music classes begin in January 2027.',
       ta: 'Worship To Jesus Bible Institute & College-ல் விண்ணப்பிக்கலாம். B.Th, C.Th மற்றும் இசைப் பட்டயப் படிப்பு வகுப்புகள் ஜனவரி 2027-ல் தொடங்குகின்றன.',
     },
-    image: './banners/academics.svg',
+    image: './hero/admissions-2027.jpg',
     imageAlt: {
-      en: 'Decorative Bible college admissions artwork with an open book and cross',
-      ta: 'திறந்த புத்தகமும் சிலுவையும் கொண்ட வேதாகமக் கல்லூரி சேர்க்கை அலங்காரப் படம்',
+      en: 'Bible college graduates wearing academic gowns and holding their certificates',
+      ta: 'கல்வி அங்கிகளை அணிந்து சான்றிதழ்களை ஏந்தியுள்ள வேதாகமக் கல்லூரிப் பட்டதாரிகள்',
     },
     cta: { href: '#academics-admission', label: { en: 'Apply now', ta: 'இப்போதே விண்ணப்பிக்கவும்' } },
     secondaryCta: { href: '#academics-syllabus', label: { en: 'View courses', ta: 'பாடநெறிகளைப் பாருங்கள்' } },
-    mediaStatus: 'placeholder-awaiting-approved-photo',
+    mediaStatus: 'approved-client-supplied',
   },
   {
     id: 'ministries-for-every-generation',

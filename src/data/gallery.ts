@@ -149,4 +149,67 @@ export const vacationBibleSchoolItems: GalleryItem[] = [
   },
 ]
 
+export const graduationGalleryItems: GalleryItem[] = [
+  {
+    id: 'graduation-certificate-01',
+    src: './academics/graduation/graduation-01.jpg',
+    alt: {
+      en: 'A Bible college graduate receiving a certificate during the graduation ceremony',
+      ta: 'பட்டமளிப்பு விழாவில் சான்றிதழைப் பெறும் வேதாகமக் கல்லூரிப் பட்டதாரி',
+    },
+    category: { en: 'Graduation', ta: 'பட்டமளிப்பு' },
+    approved: true,
+  },
+  {
+    id: 'graduation-certificate-02',
+    src: './academics/graduation/graduation-02.jpg',
+    alt: {
+      en: 'A woman graduate receiving her certificate during the Bible college graduation ceremony',
+      ta: 'வேதாகமக் கல்லூரிப் பட்டமளிப்பு விழாவில் சான்றிதழைப் பெறும் பெண் பட்டதாரி',
+    },
+    category: { en: 'Graduation', ta: 'பட்டமளிப்பு' },
+    approved: true,
+  },
+  {
+    id: 'graduation-address',
+    src: './academics/graduation/graduation-03.jpg',
+    alt: {
+      en: 'A church leader speaking from the lectern during the graduation ceremony',
+      ta: 'பட்டமளிப்பு விழாவில் மேடையிலிருந்து உரையாற்றும் திருச்சபைத் தலைவர்',
+    },
+    category: { en: 'Graduation', ta: 'பட்டமளிப்பு' },
+    approved: true,
+  },
+  {
+    id: 'graduation-certificate-03',
+    src: './academics/graduation/graduation-04.jpg',
+    alt: {
+      en: 'A graduate receiving a certificate from a senior church leader at the graduation ceremony',
+      ta: 'பட்டமளிப்பு விழாவில் மூத்த திருச்சபைத் தலைவரிடமிருந்து சான்றிதழைப் பெறும் பட்டதாரி',
+    },
+    category: { en: 'Graduation', ta: 'பட்டமளிப்பு' },
+    approved: true,
+  },
+  {
+    id: 'graduation-certificate-04',
+    src: './academics/graduation/graduation-05.jpg',
+    alt: {
+      en: 'A smiling graduate receiving a certificate during the Bible college graduation ceremony',
+      ta: 'வேதாகமக் கல்லூரிப் பட்டமளிப்பு விழாவில் மகிழ்ச்சியுடன் சான்றிதழைப் பெறும் பட்டதாரி',
+    },
+    category: { en: 'Graduation', ta: 'பட்டமளிப்பு' },
+    approved: true,
+  },
+  {
+    id: 'graduation-certificate-05',
+    src: './academics/graduation/graduation-06.jpg',
+    alt: {
+      en: 'A Bible college graduate and ceremony leader presenting a graduation certificate',
+      ta: 'பட்டமளிப்புச் சான்றிதழை வழங்கும் விழாத் தலைவரும் வேதாகமக் கல்லூரிப் பட்டதாரியும்',
+    },
+    category: { en: 'Graduation', ta: 'பட்டமளிப்பு' },
+    approved: true,
+  },
+]
+
 

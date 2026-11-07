@@ -1,7 +1,7 @@
 import type { Session, User } from '@supabase/supabase-js'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { isSupabaseConfigured } from '../../lib/env'
-import { checkAdminMembership, getCurrentSession, signInAdmin, signOutAdmin, subscribeToAuth } from '../../services/authService'
+import { checkAdminMembership, getCurrentSession, signInAdmin, signOutAdmin, subscribeToAuth, subscribeToOwnMembership } from '../../services/authService'
 
 interface AdminProfile {
   userId: string
@@ -30,12 +30,12 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
 
-  const loadSession = useCallback(async (nextSession?: Session | null) => {
+  const loadSession = useCallback(async (nextSession?: Session | null, silent = false) => {
     if (!isSupabaseConfigured) {
       setLoading(false)
       return
     }
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const activeSession = nextSession === undefined ? await getCurrentSession() : nextSession
       setSession(activeSession)
@@ -50,8 +50,14 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         displayName: membership.display_name || activeSession.user.email?.split('@')[0] || 'Administrator',
         role: membership.role,
       } : null)
+    } catch (error) {
+      console.error('Administrator session validation failed.', error)
+      if (!silent) {
+        setSession(null)
+        setProfile(null)
+      }
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 
@@ -64,6 +70,23 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     })
     return () => { window.clearTimeout(initialLoad); subscription.unsubscribe() }
   }, [loadSession])
+
+  useEffect(() => {
+    const userId = session?.user.id
+    if (!isSupabaseConfigured || !userId) return undefined
+    const recheckAccess = () => { void loadSession(undefined, true) }
+    const unsubscribeMembership = subscribeToOwnMembership(userId, recheckAccess)
+    const interval = window.setInterval(recheckAccess, 60_000)
+    const handleVisibility = () => { if (!document.hidden) recheckAccess() }
+    window.addEventListener('focus', recheckAccess)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      unsubscribeMembership()
+      window.clearInterval(interval)
+      window.removeEventListener('focus', recheckAccess)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [loadSession, session?.user.id])
 
   const value = useMemo<AdminAuthValue>(() => ({
     configured: isSupabaseConfigured,
@@ -82,7 +105,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       setSession(null)
       setProfile(null)
     },
-    refresh: () => loadSession(),
+    refresh: () => loadSession(undefined, true),
   }), [loadSession, loading, profile, session])
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>

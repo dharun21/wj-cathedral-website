@@ -64,7 +64,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
   const publicPhone = settings?.phone || churchInfo.phone
   const displayName = settings?.display_name || 'WJ Cathedral'
   const youtubeUrl = settings?.youtube_url || youtubeChannelUrl
-  const instagramUrl = settings?.instagram_url
+  const instagramUrl = settings?.instagram_url || churchInfo.instagramUrl
   const ministriesActive = currentPage === 'prayer-helpline' || currentPage === 'church' || currentPage === 'events' || currentPage === 'media' || currentPage === 'gallery' || (currentPage === 'home' && ministryItems.some((item) => item.id === activeSection))
   const translate = (key: string) => t(key as Parameters<typeof t>[0])
   const isMinistryChildActive = (childId: string) => (
@@ -232,25 +232,15 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
             >
               <YoutubeIcon />
             </a>
-            {instagramUrl ? (
-              <a
-                href={instagramUrl}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={t('header.instagram')}
-                title={t('header.instagram')}
-              >
-                <InstagramIcon />
-              </a>
-            ) : (
-              <span
-                className="is-pending"
-                aria-label={t('header.instagramPending')}
-                title={t('header.instagramPending')}
-              >
-                <InstagramIcon />
-              </span>
-            )}
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('header.instagram')}
+              title={t('header.instagram')}
+            >
+              <InstagramIcon />
+            </a>
           </div>
           <LanguageSwitcher />
           <a className="header-call" href={`tel:${publicPhone}`} aria-label={`${t('common.callChurch')} ${publicPhone}`}>

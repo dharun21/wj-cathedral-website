@@ -3,6 +3,7 @@
 | Table | Purpose |
 |---|---|
 | `admin_memberships` | Explicit administrator authorization; passwords remain in Supabase Auth |
+| `content_review_requests` | Editor submissions, owner decisions and the rolling 30-day review history |
 | `site_settings` | Public identity/contact singleton and prayer availability confirmation |
 | `page_content` | Bilingual copy keyed by page and translation key |
 | `hero_slides` | Ordered Home, Academics and Community Care slides |
@@ -15,6 +16,10 @@
 All content uses UUIDs, timestamps, constraints, indexes, display order and publication state where applicable. Bilingual values are explicit columns.
 
 Authorization comes from `admin_memberships` and `auth.uid()`. Exactly two roles exist. Owners have full content and approval access. Editors can create/update drafts and move them to `pending_review`; they cannot publish, approve, archive, delete, change settings or approve media. Submitted records become read-only for editors until the owner acts. PostgreSQL RLS enforces these rules even when someone bypasses the interface.
+
+The owner-facing Approval Queue combines pending records from every editable content module and opens the original record for review. The queue is a workflow convenience only; owner-only publication remains enforced by each table's RLS policies.
+
+Database triggers create a review request whenever an editor moves content to `pending_review` or uploads pending media. An owner decision resolves that request as approved, returned or rejected. Owners can read all active review activity; editors can read only their own. Resolved entries are hidden after 30 days by RLS and are physically removed opportunistically by the trigger, avoiding a paid scheduling dependency. Realtime updates keep both workflow screens synchronized.
 
 The first owner is provisioned manually. An active owner can use the `manage-editor` Edge Function to create only editor accounts. Removing access sets `admin_memberships.is_active` to false, so the Auth identity remains but all membership-based RLS checks fail. Restoring reactivates the same identity. Permanent deletion uses Supabase Auth administration and cascades to the membership row. A transaction-level advisory lock and database trigger enforce a maximum of two active editors, independent of the browser UI.
 

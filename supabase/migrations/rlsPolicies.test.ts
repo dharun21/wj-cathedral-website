@@ -14,6 +14,10 @@ const editorAccessPath = fileURLToPath(new URL('./202611070022_owner_managed_edi
 const editorAccessSql = readFileSync(editorAccessPath, 'utf8').toLowerCase()
 const editorFunctionPath = fileURLToPath(new URL('../functions/manage-editor/index.ts', import.meta.url))
 const editorFunction = readFileSync(editorFunctionPath, 'utf8')
+const membershipRealtimePath = fileURLToPath(new URL('./202611070031_admin_membership_realtime.sql', import.meta.url))
+const membershipRealtimeSql = readFileSync(membershipRealtimePath, 'utf8').toLowerCase()
+const reviewHistoryPath = fileURLToPath(new URL('./202611070032_content_review_history.sql', import.meta.url))
+const reviewHistorySql = readFileSync(reviewHistoryPath, 'utf8').toLowerCase()
 const exposedTables = ['admin_memberships', 'site_settings', 'page_content', 'media_assets', 'hero_slides', 'gallery_albums', 'gallery_images', 'announcements', 'events', 'videos', 'worship_services', 'ministries']
 
 describe('RLS migration safeguards', () => {
@@ -84,5 +88,22 @@ describe('RLS migration safeguards', () => {
     expect(editorFunction).toContain('serviceClient.auth.admin.deleteUser')
     expect(editorFunction).toContain("role: 'editor'")
     expect(editorFunction).not.toContain('VITE_SUPABASE_SERVICE_ROLE_KEY')
+  })
+
+  it('publishes only membership changes needed for immediate access revocation', () => {
+    expect(membershipRealtimeSql).toContain('alter publication supabase_realtime add table public.admin_memberships')
+    expect(membershipRealtimeSql).not.toContain('service_role')
+  })
+
+  it('tracks editor submissions with owner/editor RLS and 30-day history', () => {
+    expect(reviewHistorySql).toContain('alter table public.content_review_requests enable row level security')
+    expect(reviewHistorySql).toContain('owners read review activity')
+    expect(reviewHistorySql).toContain('editors read own review activity')
+    expect(reviewHistorySql).toContain('submitted_by = auth.uid()')
+    expect(reviewHistorySql).toContain("interval '30 days'")
+    expect(reviewHistorySql).toContain('track_content_review_request')
+    expect(reviewHistorySql).toContain("member_role = 'editor'")
+    expect(reviewHistorySql).toContain("resolution = 'pending'")
+    expect(reviewHistorySql).toContain('alter publication supabase_realtime add table public.content_review_requests')
   })
 })

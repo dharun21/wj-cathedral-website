@@ -3,13 +3,14 @@ begin;
 -- Client-supplied contact details remain draft until the church approves them for public use.
 insert into public.site_settings (
   id, singleton_key, display_name, short_name, phone, address_en, address_ta, maps_url,
-  youtube_url, footer_en, footer_ta, status
+  instagram_url, youtube_url, footer_en, footer_ta, status
 ) values (
   '70000000-0000-4000-8000-000000000001', 'default', 'Worship to Jesus Cathedral', 'WJ Cathedral',
   '+919788056467',
   'Near Telephone Exchange, Sothakudi Road, Nannilam, Tamil Nadu',
   'தொலைபேசி நிலையம் அருகில், சோத்தக்குடி சாலை, நன்னிலம், தமிழ்நாடு',
   'https://maps.app.goo.gl/Dc9ohp6aNdBD265K9?g_st=ic',
+  'https://www.instagram.com/wj_cathedral_nnm/',
   'https://www.youtube.com/@wjcathedralnannilam1376',
   'A local Christian worship community in Nannilam, Tamil Nadu.',
   'தமிழ்நாட்டின் நன்னிலத்தில் அமைந்துள்ள உள்ளூர் கிறிஸ்தவ ஆராதனைச் சமூகம்.',

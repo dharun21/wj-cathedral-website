@@ -2,6 +2,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type ContentStatus = 'draft' | 'pending_review' | 'published' | 'archived'
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type AdmissionApplicationStatus = 'new' | 'reviewing' | 'contacted' | 'closed'
+export type ReviewResolution = 'pending' | 'approved' | 'returned' | 'rejected'
 
 export interface AdminMembershipRow {
   user_id: string
@@ -273,6 +274,20 @@ export interface DailyBibleVerseRow {
   updated_by: string | null
 }
 
+export interface ContentReviewRequestRow {
+  id: string
+  table_name: 'page_content' | 'hero_slides' | 'gallery_albums' | 'gallery_images' | 'announcements' | 'events' | 'videos' | 'worship_services' | 'ministries' | 'daily_bible_verses' | 'media_assets'
+  record_id: string
+  title_snapshot: string
+  submitted_by: string | null
+  submitted_by_name: string
+  submitted_by_email: string
+  submitted_at: string
+  resolution: ReviewResolution
+  resolved_at: string | null
+  resolved_by: string | null
+}
+
 type TableDefinition<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row
   Insert: Insert
@@ -297,6 +312,7 @@ export interface Database {
       ministries: TableDefinition<MinistryRow>
       admission_applications: TableDefinition<AdmissionApplicationRow>
       daily_bible_verses: TableDefinition<DailyBibleVerseRow>
+      content_review_requests: TableDefinition<ContentReviewRequestRow>
     }
     Views: Record<string, never>
     Functions: {

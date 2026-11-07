@@ -1,11 +1,14 @@
-import { ArrowRight, BookOpenCheck, CalendarDays, Clock3, GraduationCap, HeartHandshake, ImagePlus, MapPin, Phone, ShieldAlert, Sparkles, UserRound, UsersRound } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, CalendarDays, ChevronLeft, ChevronRight, Clock3, GraduationCap, HeartHandshake, ImagePlus, MapPin, Phone, ShieldAlert, Sparkles, UserRound, UsersRound, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AcademicHeroCarousel } from '../components/academics/AcademicHeroCarousel'
 import { AdmissionForm } from '../components/academics/AdmissionForm'
 import { Reveal } from '../components/common/Reveal'
 import { SectionHeading } from '../components/common/SectionHeading'
 import { academicCollege, academicCourses, academicFaculty, academicPillars } from '../data/academics'
+import { graduationGalleryItems } from '../data/gallery'
 import { useLanguage } from '../context/LanguageContext'
-import { usePublishedMinistries } from '../hooks/usePublishedContent'
+import { usePublishedGallery, usePublishedMinistries } from '../hooks/usePublishedContent'
 
 const pillarIcons = {
   scripture: BookOpenCheck,
@@ -16,7 +19,14 @@ const pillarIcons = {
 
 export function AcademicsPage() {
   const { t, localize } = useLanguage()
+  const [activeGraduationPhoto, setActiveGraduationPhoto] = useState<number | null>(null)
   const managedFaculty = usePublishedMinistries('academics').data ?? []
+  const managedGallery = usePublishedGallery(graduationGalleryItems).data
+  const graduationPhotos = useMemo(
+    () => managedGallery.filter((item) => item.category.en === 'Graduation'),
+    [managedGallery],
+  )
+  const activePhoto = activeGraduationPhoto === null ? null : graduationPhotos[activeGraduationPhoto]
   const faculty = academicFaculty.map((member) => {
     const managed = managedFaculty.find((entry) => entry.slug === member.id)
     return {
@@ -31,6 +41,21 @@ export function AcademicsPage() {
       imageUrl: managed?.image_url || member.imageUrl,
     }
   })
+
+  useEffect(() => {
+    if (activeGraduationPhoto === null || graduationPhotos.length === 0) return undefined
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActiveGraduationPhoto(null)
+      if (event.key === 'ArrowLeft') setActiveGraduationPhoto((activeGraduationPhoto - 1 + graduationPhotos.length) % graduationPhotos.length)
+      if (event.key === 'ArrowRight') setActiveGraduationPhoto((activeGraduationPhoto + 1) % graduationPhotos.length)
+    }
+    document.body.classList.add('lightbox-open')
+    window.addEventListener('keydown', handleKey)
+    return () => {
+      document.body.classList.remove('lightbox-open')
+      window.removeEventListener('keydown', handleKey)
+    }
+  }, [activeGraduationPhoto, graduationPhotos.length])
 
   return (
     <main id="main-content" className="academics-page" tabIndex={-1}>
@@ -139,15 +164,34 @@ export function AcademicsPage() {
         <div className="container">
           <SectionHeading eyebrow={t('academics.graduation.eyebrow')} title={t('academics.graduation.title')} description={t('academics.graduation.intro')} />
           <div className="academic-graduation__grid">
-            {[1, 2, 3].map((number, index) => (
-              <Reveal className="academic-graduation__placeholder" key={number} delay={index * 0.06}>
-                <div aria-hidden="true"><span /><ImagePlus size={35} /></div>
-                <p><strong>{t('academics.graduation.photo')} {String(number).padStart(2, '0')}</strong><small>{t('academics.graduation.pending')}</small></p>
+            {graduationPhotos.map((photo, index) => (
+              <Reveal className="academic-graduation__photo" key={photo.id} delay={(index % 3) * 0.05}>
+                <button type="button" onClick={() => setActiveGraduationPhoto(index)} aria-label={`${t('academics.graduation.photo')} ${index + 1}`}>
+                  <img src={photo.src} alt={localize(photo.alt)} loading="lazy" />
+                  <span><GraduationCap size={17} aria-hidden="true" /><strong>{t('academics.graduation.photo')} {String(index + 1).padStart(2, '0')}</strong></span>
+                </button>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
+      {activePhoto && createPortal(
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={t('academics.graduation.title')}>
+          <button className="lightbox__backdrop" type="button" onClick={() => setActiveGraduationPhoto(null)} aria-label={t('a11y.closeDialog')} />
+          <div className="lightbox__panel">
+            <button className="lightbox__close" type="button" onClick={() => setActiveGraduationPhoto(null)} aria-label={t('a11y.closeDialog')}><X aria-hidden="true" /></button>
+            <img src={activePhoto.src} alt={localize(activePhoto.alt)} />
+            {graduationPhotos.length > 1 && (
+              <>
+                <button className="lightbox__prev" type="button" onClick={() => setActiveGraduationPhoto(((activeGraduationPhoto ?? 0) - 1 + graduationPhotos.length) % graduationPhotos.length)} aria-label={t('a11y.previousImage')}><ChevronLeft aria-hidden="true" /></button>
+                <button className="lightbox__next" type="button" onClick={() => setActiveGraduationPhoto(((activeGraduationPhoto ?? 0) + 1) % graduationPhotos.length)} aria-label={t('a11y.nextImage')}><ChevronRight aria-hidden="true" /></button>
+              </>
+            )}
+            <div className="lightbox__caption"><span>{t('academics.graduation.title')}</span><strong>{String((activeGraduationPhoto ?? 0) + 1).padStart(2, '0')} / {String(graduationPhotos.length).padStart(2, '0')}</strong></div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </main>
   )
 }

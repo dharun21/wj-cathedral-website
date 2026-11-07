@@ -43,3 +43,17 @@ export async function checkAdminMembership(user: User) {
 export function subscribeToAuth(callback: (event: AuthChangeEvent, session: Session | null) => void) {
   return requireSupabase().auth.onAuthStateChange(callback).data.subscription
 }
+
+export function subscribeToOwnMembership(userId: string, callback: () => void) {
+  const client = requireSupabase()
+  const channel = client
+    .channel(`admin-membership-${userId}`)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'admin_memberships',
+      filter: `user_id=eq.${userId}`,
+    }, callback)
+    .subscribe()
+  return () => { void client.removeChannel(channel) }
+}

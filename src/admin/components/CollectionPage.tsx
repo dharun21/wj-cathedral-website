@@ -3,7 +3,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from '@dnd-kit/utilities'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Eye, GripVertical, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { deleteAdminRecord, listAdminRecords, reorderAdminRecords, saveAdminRecord } from '../../services/contentService'
 import type { ContentStatus } from '../../types/database'
 import { useNotification } from '../context/NotificationContext'
@@ -120,7 +120,10 @@ export function CollectionPage({ definition }: { definition: AdminModuleDefiniti
   const { notify } = useNotification()
   const { isOwner } = useAdminAuth()
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('all')
+  const routeParameters = useMemo(() => new URLSearchParams(window.location.hash.split('?')[1] ?? ''), [])
+  const requestedStatus = routeParameters.get('status')
+  const [status, setStatus] = useState(['draft', 'pending_review', 'published', 'archived'].includes(requestedStatus ?? '') ? requestedStatus! : 'all')
+  const requestedRecordId = useRef(routeParameters.get('open'))
   const [editor, setEditor] = useState<AdminRecord | null>(null)
   const [deleting, setDeleting] = useState<AdminRecord | null>(null)
   const queryKey = ['admin', definition.table]
@@ -130,7 +133,7 @@ export function CollectionPage({ definition }: { definition: AdminModuleDefiniti
       const normalized = definition.beforeSave ? definition.beforeSave(record) : record
       return saveAdminRecord(definition.table, preparePayload({ ...normalized, status: targetStatus }), record.id)
     },
-    onSuccess: (_data, variables) => { void queryClient.invalidateQueries({ queryKey }); setEditor(null); notify(variables.targetStatus === 'pending_review' ? 'Sent to the owner for approval.' : `${definition.singular[0]?.toUpperCase()}${definition.singular.slice(1)} saved successfully.`) },
+    onSuccess: (_data, variables) => { void queryClient.invalidateQueries({ queryKey }); void queryClient.invalidateQueries({ queryKey: ['admin', 'review-activity'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'pending-approvals'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-counts'] }); setEditor(null); notify(variables.targetStatus === 'pending_review' ? 'Sent to the owner for approval.' : `${definition.singular[0]?.toUpperCase()}${definition.singular.slice(1)} saved successfully.`) },
     onError: (error) => notify(error instanceof Error ? error.message : 'The content could not be saved.', 'error'),
   })
   const deleteMutation = useMutation({
@@ -145,6 +148,17 @@ export function CollectionPage({ definition }: { definition: AdminModuleDefiniti
   })
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }))
   const records = useMemo(() => recordsQuery.data ?? [], [recordsQuery.data])
+  useEffect(() => {
+    const recordId = requestedRecordId.current
+    if (!recordId || records.length === 0) return
+    const requestedRecord = records.find((record) => String(record.id) === recordId)
+    requestedRecordId.current = null
+    if (requestedRecord) setEditor({ ...requestedRecord })
+    const cleaned = new URLSearchParams(window.location.hash.split('?')[1] ?? '')
+    cleaned.delete('open')
+    const base = window.location.hash.split('?')[0]
+    window.history.replaceState(null, '', `${window.location.pathname}${base}${cleaned.size ? `?${cleaned}` : ''}`)
+  }, [records])
   const filtered = useMemo(() => records.filter((record) => {
     const haystack = Object.values(record).filter((value) => typeof value === 'string').join(' ').toLowerCase()
     return (!search || haystack.includes(search.toLowerCase())) && (status === 'all' || record.status === status)

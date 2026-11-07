@@ -8,10 +8,12 @@ Open `/#/admin` and sign in with an account provisioned by the project owner.
 2. Complete approved English and Tamil fields.
 3. Preview and verify facts, dates, spelling, contact details and image consent.
 4. Editors choose **Save Draft** or **Send for Approval**. Submitted records are locked from further editor changes.
-5. The owner reviews pending content and chooses **Approve & Publish**.
+5. The owner opens **Workflow → Attention Required**, reviews pending content and chooses **Approve & Publish**.
 6. Confirm the public page after the next data fetch.
 
 Drafts, pending approvals and archived records are hidden from public visitors by database policy.
+
+Editors can open **Workflow → Pending Approval** to see every item they have submitted but the owner has not yet approved. Once the owner approves, returns or rejects a submission, it moves into Recent History automatically. Resolved history remains visible for 30 days and then disappears; pending submissions remain until a decision is made.
 
 ## Images
 
@@ -60,4 +62,6 @@ Only the manually provisioned owner can open **Administration → Team & Access*
 5. **Delete user permanently** removes the Supabase Auth user and cascades to the membership record. It cannot be undone.
 
 At most two editors can be active at once. The screen displays the current capacity, and the PostgreSQL trigger enforces the same limit even if a request bypasses the interface. Owners cannot create, remove or delete another owner from this screen. Passwords are handled by Supabase Auth and are never stored in the website tables.
+
+Membership changes are sent to the signed-in admin application through Supabase Realtime. A revoked editor is moved to the restricted-access screen without needing to refresh; database RLS blocks their access independently even if the browser is offline or the notification is delayed.
 
