@@ -58,6 +58,13 @@ Complete this before any public launch.
 - [ ] Provide confirmed dates, venues, eligibility and registration details for Church Planting and Leaders’ Seminars.
 - [ ] Confirm the approved name, scope, locations and current activities of Gospel Ministries.
 
+## Daily Bible verses
+
+- [ ] Approve the English and Tamil wording of every verse before publication.
+- [ ] Record the Bible translation/version and confirm permission for website display.
+- [ ] Review special-date scheduling for Christmas, Easter and other church dates.
+- [ ] Keep at least seven approved unscheduled verses published for a useful rotation.
+
 ## Academics and admissions
 
 - [ ] Confirm the official college name and approved Tamil rendering.
@@ -65,7 +72,13 @@ Complete this before any public launch.
 - [ ] Provide the approved course names, syllabus, duration, schedule, assessments and certification details.
 - [ ] Provide admission eligibility, required documents, application dates and fees.
 - [ ] Provide the official admissions email, phone number and form-submission process.
+- [ ] Approve the online admission privacy notice, applicant-data retention period and owner responsible for deleting old enquiries.
 - [ ] Provide approved faculty and leadership details.
+- [x] Approved portrait supplied for Pr. P. Ceehan Paul Thuthiraj.
+- [x] Approved portrait supplied for Bro. Aaron Jebaraj.
+- [x] Approved portrait supplied for Pr. A. George Edward.
+- [x] Approved portrait supplied for Pr. A. John Wilmet.
+- [x] Approved portrait supplied for Rev. Pr. A. Paulraj.
 - [ ] Supply authorised graduation photographs, captions, dates and consent confirmation.
 - [ ] Approve the proposed academic framework currently used as placeholder content.
 
@@ -77,6 +90,16 @@ Complete this before any public launch.
 - [ ] Provide the confirmed locations, class levels, schedules and safeguarding process for free neighbourhood tuition.
 - [ ] Confirm the student-kit contents, eligibility and distribution schedule.
 - [ ] Supply authorised photographs and consent details for Community Care activities.
+
+## Giving and payment details
+
+- [x] Official account-holder name, bank name and branch supplied for public display.
+- [x] Bank account number and IFSC code supplied and approved by the client.
+- [x] Church-approved GPay number and UPI ID supplied.
+- [x] Official GPay QR image and recipient name supplied for public display.
+- [ ] Confirm who may receive giving-related calls and issue receipts.
+- [ ] Approve the English and Tamil giving note, intended fund purposes and public-display consent.
+- [ ] Owner must enable “Owner-verified giving details” in Admin Settings only after completing every verification above.
 
 ## Launch metadata
 

@@ -3,6 +3,7 @@ import { Reveal } from '../components/common/Reveal'
 import { SectionHeading } from '../components/common/SectionHeading'
 import { useLanguage } from '../context/LanguageContext'
 import { churchInfo } from '../data/churchInfo'
+import { usePublishedSiteSettings } from '../hooks/usePublishedContent'
 
 const prayerNeeds = [
   { id: 'family', titleKey: 'prayerPage.family.title', bodyKey: 'prayerPage.family.body', icon: UsersRound },
@@ -13,6 +14,9 @@ const prayerNeeds = [
 
 export function PrayerHelplinePage() {
   const { t, localize } = useLanguage()
+  const settings = usePublishedSiteSettings().data
+  const confirmed247 = settings?.prayer_247_confirmed === true
+  const phone = settings?.phone || churchInfo.phone
   const translate = (key: string) => t(key as Parameters<typeof t>[0])
 
   return (
@@ -21,17 +25,17 @@ export function PrayerHelplinePage() {
         <div className="prayer-support-hero__glow" aria-hidden="true"><span /><span /><span /></div>
         <div className="container prayer-support-hero__layout">
           <Reveal className="prayer-support-hero__copy">
-            <p className="prayer-support-hero__eyebrow"><HeartHandshake size={19} aria-hidden="true" /> {t('prayerPage.eyebrow')}</p>
+            <p className="prayer-support-hero__eyebrow"><HeartHandshake size={19} aria-hidden="true" /> {confirmed247 ? t('prayerPage.eyebrow') : localize({ en: 'Prayer support', ta: 'ஜெப உதவி' })}</p>
             <h1>{t('prayerPage.title')}</h1>
             <p>{t('prayerPage.intro')}</p>
-            <span className="prayer-support-hero__availability"><Sparkles size={16} aria-hidden="true" /> {t('prayerPage.availability')}</span>
+            <span className="prayer-support-hero__availability"><Sparkles size={16} aria-hidden="true" /> {confirmed247 ? t('prayerPage.availability') : localize({ en: 'Contact the church for prayer support', ta: 'ஜெப உதவிக்காக திருச்சபையைத் தொடர்புகொள்ளுங்கள்' })}</span>
           </Reveal>
 
           <Reveal className="prayer-contact-card" delay={0.08}>
             <div className="prayer-contact-card__icon"><Phone size={30} aria-hidden="true" /></div>
             <small>{t('prayerPage.contactLabel')}</small>
-            <a className="prayer-contact-card__number" href={`tel:${churchInfo.phone}`}>{churchInfo.phoneDisplay}</a>
-            <a className="button button--gold" href={`tel:${churchInfo.phone}`}><Phone size={18} aria-hidden="true" /> {t('prayerPage.callNow')}</a>
+            <a className="prayer-contact-card__number" href={`tel:${phone}`}>{phone}</a>
+            <a className="button button--gold" href={`tel:${phone}`}><Phone size={18} aria-hidden="true" /> {t('prayerPage.callNow')}</a>
             <div className="prayer-contact-card__location">
               <MapPin size={19} aria-hidden="true" />
               <p><small>{t('prayerPage.addressLabel')}</small><span>{localize(churchInfo.address)}</span></p>
@@ -59,7 +63,7 @@ export function PrayerHelplinePage() {
           </div>
           <Reveal className="prayer-needs__cta">
             <div><h3>{t('prayerPage.ctaTitle')}</h3><p>{t('prayerPage.ctaBody')}</p></div>
-            <a className="button button--navy" href={`tel:${churchInfo.phone}`}><Phone size={18} aria-hidden="true" /> {t('prayerPage.callNow')}</a>
+            <a className="button button--navy" href={`tel:${phone}`}><Phone size={18} aria-hidden="true" /> {t('prayerPage.callNow')}</a>
           </Reveal>
         </div>
       </section>

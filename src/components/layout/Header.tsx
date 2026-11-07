@@ -13,10 +13,12 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { churchInfo, headerNavItems } from '../../data/churchInfo'
+import { youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
 import { useActiveSection } from '../../hooks/useActiveSection'
 import { LanguageSwitcher } from '../common/LanguageSwitcher'
 import { LogoMark } from '../common/LogoMark'
+import { usePublishedSiteSettings } from '../../hooks/usePublishedContent'
 
 const ministryItems = headerNavItems[2].children
 const sectionIds = headerNavItems.flatMap((item) => (
@@ -31,7 +33,26 @@ const ministryIcons = {
   prayer: HeartHandshake,
 } as const
 
-export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'academics' | 'prayer-helpline' | 'community-care' | 'church' }) {
+function YoutubeIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="2" y="5.5" width="20" height="13" rx="4" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M10 9v6l5-3-5-3Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function InstagramIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17.4" cy="6.7" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about' | 'events' | 'media' | 'gallery' | 'academics' | 'prayer-helpline' | 'community-care' | 'church' | 'give' }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [ministriesOpen, setMinistriesOpen] = useState(false)
   const [mobileMinistriesOpen, setMobileMinistriesOpen] = useState(false)
@@ -39,20 +60,35 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'acade
   const { t } = useLanguage()
   const activeSection = useActiveSection(sectionIds)
   const reduceMotion = useReducedMotion()
-  const ministriesActive = currentPage === 'prayer-helpline' || currentPage === 'church' || (currentPage === 'home' && ministryItems.some((item) => item.id === activeSection))
+  const settings = usePublishedSiteSettings().data
+  const publicPhone = settings?.phone || churchInfo.phone
+  const displayName = settings?.display_name || 'WJ Cathedral'
+  const youtubeUrl = settings?.youtube_url || youtubeChannelUrl
+  const instagramUrl = settings?.instagram_url
+  const ministriesActive = currentPage === 'prayer-helpline' || currentPage === 'church' || currentPage === 'events' || currentPage === 'media' || currentPage === 'gallery' || (currentPage === 'home' && ministryItems.some((item) => item.id === activeSection))
   const translate = (key: string) => t(key as Parameters<typeof t>[0])
   const isMinistryChildActive = (childId: string) => (
     childId === 'prayer-helpline'
       ? currentPage === 'prayer-helpline'
       : childId === 'church'
         ? currentPage === 'church'
+        : childId === 'events'
+          ? currentPage === 'events'
+        : childId === 'sermons'
+          ? currentPage === 'media'
+        : childId === 'gallery'
+          ? currentPage === 'gallery'
         : currentPage === 'home' && activeSection === childId
   )
   const isTopLevelActive = (itemId: string) => (
-    itemId === 'academics'
+    itemId === 'about'
+      ? currentPage === 'about'
+      : itemId === 'academics'
       ? currentPage === 'academics'
       : itemId === 'community-care'
         ? currentPage === 'community-care'
+      : itemId === 'give'
+        ? currentPage === 'give'
         : currentPage === 'home' && activeSection === itemId
   )
 
@@ -92,7 +128,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'acade
         <a className="brand" href="#home" aria-label={`${churchInfo.shortName} home`} onClick={closeMenu}>
           <LogoMark />
           <span className="brand__text">
-            <strong>WJ Cathedral</strong>
+            <strong>{displayName}</strong>
             <small>Nannilam</small>
           </span>
         </a>
@@ -176,7 +212,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'acade
               <a
                 key={item.id}
                 href={item.href}
-                className={`desktop-nav__link ${isTopLevelActive(item.id) ? 'is-active' : ''}`}
+                className={`desktop-nav__link ${item.id === 'give' ? 'desktop-nav__link--give' : ''} ${isTopLevelActive(item.id) ? 'is-active' : ''}`}
                 onClick={closeMenu}
               >
                 {translate(item.labelKey)}
@@ -186,8 +222,38 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'acade
         </nav>
 
         <div className="header-actions">
+          <div className="header-social" aria-label={t('header.socialLinks')}>
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('header.youtube')}
+              title={t('header.youtube')}
+            >
+              <YoutubeIcon />
+            </a>
+            {instagramUrl ? (
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={t('header.instagram')}
+                title={t('header.instagram')}
+              >
+                <InstagramIcon />
+              </a>
+            ) : (
+              <span
+                className="is-pending"
+                aria-label={t('header.instagramPending')}
+                title={t('header.instagramPending')}
+              >
+                <InstagramIcon />
+              </span>
+            )}
+          </div>
           <LanguageSwitcher />
-          <a className="header-call" href={`tel:${churchInfo.phone}`} aria-label={`${t('common.callChurch')} ${churchInfo.phoneDisplay}`}>
+          <a className="header-call" href={`tel:${publicPhone}`} aria-label={`${t('common.callChurch')} ${publicPhone}`}>
             <Phone size={17} aria-hidden="true" />
             <span>{t('common.callChurch')}</span>
           </a>
@@ -259,7 +325,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'acade
                 }
 
                 return (
-                  <a key={item.id} href={item.href} onClick={closeMenu} className={`mobile-nav__link ${isTopLevelActive(item.id) ? 'is-active' : ''}`}>
+                  <a key={item.id} href={item.href} onClick={closeMenu} className={`mobile-nav__link ${item.id === 'give' ? 'mobile-nav__link--give' : ''} ${isTopLevelActive(item.id) ? 'is-active' : ''}`}>
                     {translate(item.labelKey)}
                   </a>
                 )
@@ -267,9 +333,9 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'acade
             </nav>
             <div className="mobile-menu__footer">
               <LanguageSwitcher mobile />
-              <a href={`tel:${churchInfo.phone}`} onClick={closeMenu}>
+              <a href={`tel:${publicPhone}`} onClick={closeMenu}>
                 <Phone size={19} aria-hidden="true" />
-                {churchInfo.phoneDisplay}
+                {publicPhone}
               </a>
             </div>
           </motion.div>

@@ -1,16 +1,53 @@
-import { FileText, Printer, ShieldCheck } from 'lucide-react'
-import type { FormEvent } from 'react'
+import { CheckCircle2, FileText, LoaderCircle, Printer, Send, ShieldCheck } from 'lucide-react'
+import { useState, type FormEvent, type MouseEvent } from 'react'
 import { academicInterestOptions } from '../../data/academics'
 import { useLanguage } from '../../context/LanguageContext'
+import { isSupabaseConfigured } from '../../lib/env'
+import { submitAdmissionApplication } from '../../services/admissionService'
 import { Reveal } from '../common/Reveal'
 import { SectionHeading } from '../common/SectionHeading'
 
 export function AdmissionForm() {
-  const { t, localize } = useLanguage()
+  const { t, localize, language } = useLanguage()
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!event.currentTarget.reportValidity()) return
+    const form = event.currentTarget
+    if (!form.reportValidity() || submitting || !isSupabaseConfigured) return
+    const values = new FormData(form)
+    const consent = values.get('consent') === 'on'
+    if (!consent) return
+    setSubmitting(true)
+    setSubmitted(false)
+    setError('')
+    try {
+      await submitAdmissionApplication({
+        fullName: String(values.get('fullName') ?? ''),
+        phone: String(values.get('phone') ?? ''),
+        email: String(values.get('email') ?? ''),
+        city: String(values.get('city') ?? ''),
+        studyInterest: String(values.get('studyInterest') ?? '') as 'bachelor-theology' | 'certificate-theology' | 'diploma-music' | 'other',
+        experience: String(values.get('experience') ?? ''),
+        statement: String(values.get('statement') ?? ''),
+        language,
+        consent: true,
+        website: String(values.get('website') ?? ''),
+      })
+      form.reset()
+      setSubmitted(true)
+    } catch {
+      setError(t('academics.admission.submitError'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handlePrint = (event: MouseEvent<HTMLButtonElement>) => {
+    const form = event.currentTarget.form
+    if (!form?.reportValidity()) return
     window.print()
   }
 
@@ -28,7 +65,11 @@ export function AdmissionForm() {
 
         <Reveal className="academic-form-card" delay={0.08}>
           <div className="academic-form-card__heading"><span><FileText size={23} aria-hidden="true" /></span><strong>{t('academics.admission.eyebrow')}</strong></div>
+          {submitted && <div className="academic-form__feedback academic-form__feedback--success" role="status"><CheckCircle2 size={22} /><div><strong>{t('academics.admission.successTitle')}</strong><p>{t('academics.admission.successBody')}</p></div></div>}
+          {error && <div className="academic-form__feedback academic-form__feedback--error" role="alert"><div><strong>{t('academics.admission.submitErrorTitle')}</strong><p>{error}</p></div></div>}
+          {!isSupabaseConfigured && <div className="academic-form__feedback academic-form__feedback--notice" role="status"><ShieldCheck size={21} /><div><strong>{t('academics.admission.onlineUnavailableTitle')}</strong><p>{t('academics.admission.onlineUnavailable')}</p></div></div>}
           <form className="academic-form" onSubmit={handleSubmit}>
+            <label className="academic-form__website" aria-hidden="true">Website<input type="text" name="website" tabIndex={-1} autoComplete="off" /></label>
             <div className="academic-form__grid">
               <label>
                 <span>{t('academics.admission.fullName')} <b aria-hidden="true">*</b></span>
@@ -66,7 +107,10 @@ export function AdmissionForm() {
               <input type="checkbox" name="consent" required />
               <span>{t('academics.admission.consent')}</span>
             </label>
-            <button className="button button--navy academic-form__submit" type="submit"><Printer size={18} aria-hidden="true" /> {t('academics.admission.print')}</button>
+            <div className="academic-form__actions">
+              <button className="button button--gold academic-form__submit" type="submit" disabled={submitting || !isSupabaseConfigured}>{submitting ? <LoaderCircle className="academic-form__spinner" size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />} {t(submitting ? 'academics.admission.submitting' : 'academics.admission.submit')}</button>
+              <button className="button button--outline-light academic-form__print" type="button" onClick={handlePrint}><Printer size={18} aria-hidden="true" /> {t('academics.admission.print')}</button>
+            </div>
           </form>
         </Reveal>
       </div>

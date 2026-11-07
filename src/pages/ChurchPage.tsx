@@ -4,6 +4,7 @@ import { SectionHeading } from '../components/common/SectionHeading'
 import { useLanguage } from '../context/LanguageContext'
 import { churchInfo } from '../data/churchInfo'
 import { equippingMinistries, generationMinistries, type ChurchMinistryIcon } from '../data/churchMinistries'
+import { usePublishedMinistries } from '../hooks/usePublishedContent'
 
 const ministryIcons: Record<ChurchMinistryIcon, typeof Church> = {
   children: UsersRound,
@@ -14,10 +15,16 @@ const ministryIcons: Record<ChurchMinistryIcon, typeof Church> = {
   gospel: BookOpenText,
 }
 
-const allMinistries = [...generationMinistries, ...equippingMinistries]
-
 export function ChurchPage() {
-  const { t, localize } = useLanguage()
+  const { t, localize, language } = useLanguage()
+  const managedRows = usePublishedMinistries('church').data ?? []
+  const applyManaged = <T extends (typeof generationMinistries)[number] | (typeof equippingMinistries)[number]>(item: T): T => {
+    const managed = managedRows.find((row) => row.slug === item.id)
+    return managed ? { ...item, title: { en: managed.title_en, ta: managed.title_ta }, eyebrow: { en: managed.eyebrow_en || item.eyebrow.en, ta: managed.eyebrow_ta || item.eyebrow.ta }, description: { en: managed.description_en, ta: managed.description_ta } } : item
+  }
+  const generationContent = generationMinistries.map(applyManaged)
+  const equippingContent = equippingMinistries.map(applyManaged)
+  const allMinistries = [...generationContent, ...equippingContent]
 
   return (
     <main id="main-content" className="church-page" tabIndex={-1}>
@@ -26,7 +33,9 @@ export function ChurchPage() {
         <div className="container church-hero__layout">
           <Reveal className="church-hero__copy">
             <p className="church-hero__eyebrow"><Church size={18} aria-hidden="true" /> {t('churchPage.hero.eyebrow')}</p>
-            <h1>{t('churchPage.hero.title')}</h1>
+            <h1>{language === 'en'
+              ? <><span>Forming disciples.</span><span>Strengthening families.</span><span>Equipping</span><span>the Church.</span></>
+              : t('churchPage.hero.title')}</h1>
             <p>{t('churchPage.hero.intro')}</p>
             <div className="church-hero__actions">
               <a className="button button--gold" href="#church-generations">{t('churchPage.hero.explore')} <ArrowDown size={18} aria-hidden="true" /></a>
@@ -60,7 +69,7 @@ export function ChurchPage() {
 
           <div className="ministry-journey">
             <span className="ministry-journey__line" aria-hidden="true" />
-            {generationMinistries.map((ministry, index) => {
+            {generationContent.map((ministry, index) => {
               const Icon = ministryIcons[ministry.icon]
               return (
                 <Reveal className={`ministry-journey__item ${index % 2 ? 'is-reversed' : ''}`} key={ministry.id}>
@@ -85,7 +94,7 @@ export function ChurchPage() {
         <div className="container">
           <SectionHeading eyebrow={t('churchPage.equipping.eyebrow')} title={t('churchPage.equipping.title')} description={t('churchPage.equipping.intro')} />
           <div className="church-equipping__grid">
-            {equippingMinistries.map((ministry, index) => {
+            {equippingContent.map((ministry, index) => {
               const Icon = ministryIcons[ministry.icon]
               return (
                 <Reveal className="equipping-panel" key={ministry.id} delay={index * 0.06}>

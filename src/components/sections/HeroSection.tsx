@@ -1,9 +1,13 @@
 import useEmblaCarousel from 'embla-carousel-react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, ImageIcon, Pause, Play } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { heroSlides } from '../../data/heroSlides'
 import { useLanguage } from '../../context/LanguageContext'
+import { useDailyBibleVerse, usePublishedHeroSlides } from '../../hooks/usePublishedContent'
+import type { HeroSlide } from '../../types/content'
+
+const retiredPrayerSlideIds = new Set(['prayer', 'daily-verse', '10000000-0000-4000-8000-000000000003'])
 
 export function HeroSection() {
   const { localize, t, language } = useLanguage()
@@ -12,6 +16,32 @@ export function HeroSection() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [autoplay, setAutoplay] = useState(!reducedMotion)
   const hoverPause = useRef(false)
+  const publishedSlides = usePublishedHeroSlides('home', heroSlides)
+  const dailyVerse = useDailyBibleVerse()
+  const slides = useMemo(() => {
+    const row = dailyVerse.data
+    const fallback = heroSlides.find((slide) => slide.id === 'daily-verse')!
+    const verseSlide: HeroSlide = row ? {
+      id: `daily-verse-${row.id}`,
+      eyebrow: { en: 'Today’s Scripture', ta: 'இன்றைய வேதவசனம்' },
+      title: { en: `“${row.verse_en}”`, ta: `“${row.verse_ta}”` },
+      description: {
+        en: [row.reference_en, row.translation_en].filter(Boolean).join(' · '),
+        ta: [row.reference_ta, row.translation_ta].filter(Boolean).join(' · '),
+      },
+      image: row.background_image_url || './hero/daily-bible-verse.jpg',
+      imageAlt: {
+        en: 'An open Bible illuminated against a deep blue background accompanying today’s approved verse',
+        ta: 'இன்றைய அங்கீகரிக்கப்பட்ட வேதவசனத்துடன் ஆழ்ந்த நீலப் பின்னணியில் ஒளிரும் திறந்த வேதாகமம்',
+      },
+      cta: { href: '#prayer-helpline', label: { en: 'Prayer support', ta: 'ஜெப உதவி' } },
+      mediaStatus: 'approved-client-supplied',
+      variant: 'daily-verse',
+    } : fallback
+    const staticSlides = publishedSlides.data.filter((slide) => !retiredPrayerSlideIds.has(slide.id))
+    staticSlides.splice(Math.min(2, staticSlides.length), 0, verseSlide)
+    return staticSlides
+  }, [dailyVerse.data, publishedSlides.data])
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -35,7 +65,7 @@ export function HeroSection() {
     return () => window.clearInterval(timer)
   }, [emblaApi, autoplay, reducedMotion])
 
-  const activeSlide = heroSlides[selectedIndex] ?? heroSlides[0]
+  const activeSlide = slides[selectedIndex] ?? slides[0]
 
   return (
     <section
@@ -54,8 +84,8 @@ export function HeroSection() {
     >
       <div className="hero__viewport" ref={emblaRef}>
         <div className="hero__container">
-          {heroSlides.map((slide, index) => (
-            <article className="hero-slide" key={slide.id} aria-hidden={selectedIndex !== index}>
+          {slides.map((slide, index) => (
+            <article className={`hero-slide${slide.variant === 'daily-verse' ? ' hero-slide--daily-verse' : ''}${slide.variant === 'daily-verse' && localize(slide.title).length > 180 ? ' is-long-verse' : ''}`} key={slide.id} aria-hidden={selectedIndex !== index}>
               <img className="hero-slide__image" src={slide.image} alt={localize(slide.imageAlt)} fetchPriority={index === 0 ? 'high' : 'auto'} />
               <div className="hero-slide__overlay" aria-hidden="true" />
               <div className="container hero-slide__content">
@@ -76,7 +106,7 @@ export function HeroSection() {
                         <a className="button button--glass" href={slide.secondaryCta.href}>{localize(slide.secondaryCta.label)} <ArrowUpRight size={17} aria-hidden="true" /></a>
                       )}
                     </div>
-                    <span className="hero-slide__media-note"><ImageIcon size={14} aria-hidden="true" /> {t('hero.photoPending')}</span>
+                    {slide.variant !== 'daily-verse' && slide.mediaStatus === 'placeholder-awaiting-approved-photo' && <span className="hero-slide__media-note"><ImageIcon size={14} aria-hidden="true" /> {t('hero.photoPending')}</span>}
                   </motion.div>
                 )}
               </div>
@@ -91,7 +121,7 @@ export function HeroSection() {
           <button type="button" onClick={() => emblaApi?.scrollNext()} aria-label={t('a11y.nextSlide')}><ArrowRight aria-hidden="true" /></button>
         </div>
         <div className="hero__dots" aria-label={t('a11y.slideSelection')}>
-          {heroSlides.map((slide, index) => (
+          {slides.map((slide, index) => (
             <button
               type="button"
               key={slide.id}
@@ -107,7 +137,7 @@ export function HeroSection() {
             {autoplay ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
           </button>
         )}
-        <p className="hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{heroSlides.length}</span></p>
+        <p className="hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{slides.length}</span></p>
       </div>
       {activeSlide && <span className="sr-only" aria-live="polite">{localize(activeSlide.title)}</span>}
     </section>

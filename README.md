@@ -1,71 +1,54 @@
-# WJ Cathedral website
+# WJ Cathedral website and CMS
 
-A production-oriented, local-only bilingual website for Worship to Jesus Cathedral, Nannilam. This repository implements Package A: a static React frontend with no database, authentication, admin panel, private API, or paid service.
+A bilingual React website and Supabase-backed content management system for Worship to Jesus Cathedral, Nannilam. The public design remains available with local fallback content; once Supabase is configured, published database records become the source of truth and ordinary content updates require no code change or redeployment.
 
-## Run locally
+## Local development
 
-Requirements: Node.js 20 or newer and npm.
+Requirements: Node.js 20+ and npm.
 
 ```bash
 npm install
+copy .env.example .env.local
 npm run dev
 ```
 
-Open the local URL printed by Vite (normally `http://localhost:5173`).
+Public website: `http://localhost:5173/`  
+Admin panel: `http://localhost:5173/#/admin`
 
-Quality checks:
+Before adding Supabase values, the public site deliberately uses approved local fallback content and the admin route displays a setup screen.
+
+## Quality commands
 
 ```bash
 npm run typecheck
 npm run lint
+npm run test
 npm run build
 npm run preview
 ```
 
-## Technology
+## Architecture
 
-- React 19 + Vite
-- TypeScript in strict mode
-- Tailwind CSS 4 (Vite integration) plus a purpose-built CSS design system
-- Motion for React for restrained section and menu animation
-- Embla Carousel for touch and keyboard-friendly hero behavior
-- Lucide React icons
+- React 19, Vite 8 and strict TypeScript
+- Existing CSS/Tailwind design system, Motion, Embla and Lucide
+- Supabase PostgreSQL, Auth, Data API and Storage
+- TanStack Query, React Hook Form and Zod
+- Hash routes with route-level lazy loading, including a separate admin bundle
+- SQL migrations in `supabase/migrations`
+- Typed public services in `src/services` and hooks in `src/hooks`
 
-## Content architecture
+Static files in `src/data` are retained as reviewed local fallbacks. Database content overrides them only when Supabase is configured and records are published. Draft content is never returned by public RLS policies.
 
-All church content is kept outside UI components so a future CMS can replace the local modules without rebuilding the design:
+## Documentation
 
-- `src/data/churchInfo.ts` — name, address, phone, map link and navigation
-- `src/data/services.ts` — recurring worship and prayer times
-- `src/data/events.ts` — confirmed event state
-- `src/data/sermons.ts` — selected public YouTube videos
-- `src/data/heroSlides.ts` — hero copy and media references
-- `src/data/gallery.ts` — approved gallery media and alt text
-- `src/data/ministries.ts` — verified church activities
-- `src/locales/en.ts` and `src/locales/ta.ts` — interface translations
+- [SUPABASE_SETUP.md](SUPABASE_SETUP.md) — project creation, migrations and first administrator
+- [ADMIN_GUIDE.md](ADMIN_GUIDE.md) — publishing workflow
+- [DATABASE.md](DATABASE.md) — schema, security and content-source policy
+- [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) — database/media export and restoration
+- [OPERATIONS.md](OPERATIONS.md) — costs, service limits and upgrade thresholds
+- [CONTENT_CHECKLIST.md](CONTENT_CHECKLIST.md) — remaining church approvals
+- [DEPLOYMENT.md](DEPLOYMENT.md) — future deployment checklist
 
-## Update banners and approved photos
+## Security boundary
 
-1. Add optimized `.avif` or `.webp` images to `public/banners` or a new `public/gallery` folder.
-2. Keep each hero image around 1920×1080 and preferably below 300 KB.
-3. Update the `image` field in `src/data/heroSlides.ts`.
-4. Update `imageAlt` in both English and Tamil.
-5. For gallery photos, add an entry in `src/data/gallery.ts` and set `approved: true` only after church approval.
-6. Remove the `mediaStatus`/pending label only after all visible hero media is approved.
-
-## Update events
-
-The current site deliberately shows a no-confirmed-events state. Add a typed `events` array to `src/data/events.ts`, then render it in `EventsSection.tsx`. Every event should contain a confirmed title, date, time, location, bilingual description and source/approval note. Never add example dates to the public interface.
-
-## Localization
-
-English is the first-visit default. Tamil selection is stored in `localStorage` under `wj-cathedral-language`; the page `<html lang>` value updates with the selection. Interface text belongs in the locale files. Dynamic church content stores English and Tamil together through `LocalizedText`.
-
-## Media and factual safety
-
-The abstract hero/gallery visuals are clearly marked placeholders. They do not represent the building or congregation. Replace them only with church-owned or explicitly licensed WJ Cathedral photography. The two YouTube IDs were supplied in the project brief. See `RESEARCH.md` and `CONTENT_CHECKLIST.md` before any public launch.
-
-## Package B path
-
-The UI consumes arrays and objects with stable TypeScript shapes. A future CMS adapter can fetch the same shapes and pass them to these components. Recommended later options are a hosted headless CMS with role-based access, media approval and preview—not a custom admin panel unless the client’s workflow requires one.
-
+Only `VITE_SUPABASE_URL` and the public anon key belong in the browser environment. Never add a service-role key, administrator password or database password to this repository. Administrator authority comes from protected `admin_memberships` rows and PostgreSQL RLS—not hidden UI controls or user-editable metadata.

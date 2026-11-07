@@ -4,15 +4,17 @@ import { services } from '../../data/services'
 import { useLanguage } from '../../context/LanguageContext'
 import { Reveal } from '../common/Reveal'
 import { SectionHeading } from '../common/SectionHeading'
+import { usePublishedWorship } from '../../hooks/usePublishedContent'
 
 export function WorshipSection() {
   const { t, localize } = useLanguage()
+  const published = usePublishedWorship(services)
   return (
     <section id="worship" className="section section--navy">
       <div className="container">
         <SectionHeading eyebrow={t('worship.eyebrow')} title={t('worship.title')} description={t('worship.intro')} />
         <div className="service-grid">
-          {services.map((service, index) => {
+          {published.data.map((service, index) => {
             const Icon = service.icon === 'sun' ? SunMedium : MoonStar
             return (
               <Reveal className="service-card" key={service.id} delay={index * 0.08}>

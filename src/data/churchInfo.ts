@@ -43,5 +43,6 @@ export const headerNavItems = [
   },
   { id: 'academics', href: '#academics', labelKey: 'nav.academics' },
   { id: 'community-care', href: '#community-care', labelKey: 'nav.communityCare' },
+  { id: 'give', href: '#give', labelKey: 'nav.give' },
 ] as const
 

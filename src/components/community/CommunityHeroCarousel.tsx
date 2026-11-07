@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { communityHeroSlides } from '../../data/communityCare'
+import { usePublishedHeroRows } from '../../hooks/usePublishedContent'
 
 const heroIcons = {
   tree: TreePine,
@@ -18,6 +19,11 @@ export function CommunityHeroCarousel() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [autoplay, setAutoplay] = useState(!reduceMotion)
   const paused = useRef(false)
+  const managed = usePublishedHeroRows('community').data ?? []
+  const slides = managed.length ? managed.map((row, index) => {
+    const frame = communityHeroSlides[index % communityHeroSlides.length]!
+    return { ...frame, eyebrow: { en: row.eyebrow_en, ta: row.eyebrow_ta }, title: { en: row.title_en, ta: row.title_ta }, description: { en: row.description_en, ta: row.description_ta }, ctaLabel: { en: row.cta_label_en, ta: row.cta_label_ta }, ctaHref: row.cta_href as `#${string}` }
+  }) : communityHeroSlides
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -58,7 +64,7 @@ export function CommunityHeroCarousel() {
     >
       <div className="community-hero__viewport" ref={emblaRef}>
         <div className="community-hero__container">
-          {communityHeroSlides.map((slide, index) => {
+          {slides.map((slide, index) => {
             const Icon = heroIcons[slide.icon]
             return (
               <article className={`community-hero__slide community-hero__slide--${slide.id}`} key={slide.id} aria-hidden={selectedIndex !== index}>
@@ -96,7 +102,7 @@ export function CommunityHeroCarousel() {
           <button type="button" onClick={() => emblaApi?.scrollNext()} aria-label={t('community.nextSlide')}><ArrowRight aria-hidden="true" /></button>
         </div>
         <div className="community-hero__dots">
-          {communityHeroSlides.map((slide, index) => (
+          {slides.map((slide, index) => (
             <button
               type="button"
               key={slide.id}
@@ -112,7 +118,7 @@ export function CommunityHeroCarousel() {
             {autoplay ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
           </button>
         )}
-        <p className="community-hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{communityHeroSlides.length}</span></p>
+        <p className="community-hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{slides.length}</span></p>
       </div>
     </section>
   )

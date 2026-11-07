@@ -5,6 +5,7 @@ import { SectionHeading } from '../components/common/SectionHeading'
 import { useLanguage } from '../context/LanguageContext'
 import { churchInfo } from '../data/churchInfo'
 import { compassionProgrammes, educationProgrammes, healthProgrammes, type CommunityCareIcon, type CommunityProgramme } from '../data/communityCare'
+import { usePublishedMinistries } from '../hooks/usePublishedContent'
 
 const programmeIcons: Record<CommunityCareIcon, typeof TreePine> = {
   tree: TreePine,
@@ -34,6 +35,11 @@ function ProgrammeCard({ programme, index, variant = 'light' }: { programme: Com
 
 export function CommunityCarePage() {
   const { t } = useLanguage()
+  const managedRows = usePublishedMinistries('community').data ?? []
+  const managed = (items: CommunityProgramme[]) => items.map((item) => { const row = managedRows.find((entry) => entry.slug === item.id); return row ? { ...item, title: { en: row.title_en, ta: row.title_ta }, description: { en: row.description_en, ta: row.description_ta } } : item })
+  const compassionContent = managed(compassionProgrammes)
+  const healthContent = managed(healthProgrammes)
+  const educationContent = managed(educationProgrammes)
 
   return (
     <main id="main-content" className="community-care-page" tabIndex={-1}>
@@ -63,7 +69,7 @@ export function CommunityCarePage() {
         <div className="container">
           <SectionHeading eyebrow={t('community.compassion.eyebrow')} title={t('community.compassion.title')} description={t('community.compassion.intro')} />
           <div className="care-programmes__grid care-programmes__grid--two">
-            {compassionProgrammes.map((programme, index) => <ProgrammeCard key={programme.id} programme={programme} index={index} />)}
+            {compassionContent.map((programme, index) => <ProgrammeCard key={programme.id} programme={programme} index={index} />)}
           </div>
         </div>
       </section>
@@ -72,7 +78,7 @@ export function CommunityCarePage() {
         <div className="container">
           <SectionHeading eyebrow={t('community.health.eyebrow')} title={t('community.health.title')} description={t('community.health.intro')} />
           <div className="care-programmes__grid care-programmes__grid--two">
-            {healthProgrammes.map((programme, index) => <ProgrammeCard key={programme.id} programme={programme} index={index} variant="dark" />)}
+            {healthContent.map((programme, index) => <ProgrammeCard key={programme.id} programme={programme} index={index} variant="dark" />)}
           </div>
           <p className="care-health__note"><ShieldCheck size={18} aria-hidden="true" /> {t('community.health.note')}</p>
         </div>
@@ -82,7 +88,7 @@ export function CommunityCarePage() {
         <div className="container">
           <SectionHeading eyebrow={t('community.education.eyebrow')} title={t('community.education.title')} description={t('community.education.intro')} />
           <div className="care-programmes__grid care-programmes__grid--two">
-            {educationProgrammes.map((programme, index) => <ProgrammeCard key={programme.id} programme={programme} index={index} />)}
+            {educationContent.map((programme, index) => <ProgrammeCard key={programme.id} programme={programme} index={index} />)}
           </div>
           <Reveal className="care-contact-cta">
             <div><HandHeart size={27} aria-hidden="true" /><span><strong>{t('community.cta.title')}</strong><small>{t('community.cta.body')}</small></span></div>

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import en, { type TranslationKey } from '../locales/en'
 import ta from '../locales/ta'
 import type { Language, LocalizedText } from '../types/content'
+import { usePublishedTranslations } from '../hooks/usePublishedContent'
 
 const dictionaries = { en, ta }
 const STORAGE_KEY = 'wj-cathedral-language'
@@ -27,6 +28,7 @@ function getInitialLanguage(): Language {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(getInitialLanguage)
+  const { translations } = usePublishedTranslations()
 
   useEffect(() => {
     document.documentElement.lang = language
@@ -43,10 +45,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       language,
       setLanguage,
       toggleLanguage: () => setLanguage((current) => (current === 'en' ? 'ta' : 'en')),
-      t: (key) => dictionaries[language][key],
+      t: (key) => translations[key]?.[language] || dictionaries[language][key],
       localize: (text) => text[language],
     }),
-    [language],
+    [language, translations],
   )
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

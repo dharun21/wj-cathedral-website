@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-labelledby="title description">
+  <title id="title">WJ Bible College admissions artwork</title>
+  <desc id="description">A restrained navy and gold illustration of an open book, cross and academic arch.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#061722"/>
+      <stop offset="0.58" stop-color="#0d3048"/>
+      <stop offset="1" stop-color="#58452f"/>
+    </linearGradient>
+    <radialGradient id="light" cx="75%" cy="43%" r="45%">
+      <stop offset="0" stop-color="#e8c783" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#e8c783" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#background)"/>
+  <rect width="1920" height="1080" fill="url(#light)"/>
+  <g fill="none" stroke="#e8c783" opacity=".14">
+    <circle cx="1450" cy="470" r="330"/>
+    <circle cx="1450" cy="470" r="245"/>
+    <circle cx="1450" cy="470" r="160" stroke-dasharray="8 14"/>
+    <path d="M0 885C430 760 710 820 1015 950s585 115 905-18"/>
+  </g>
+  <g transform="translate(1255 250)" fill="none" stroke="#e8c783" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M196 45v215M115 126h162" stroke-width="22" opacity=".8"/>
+    <path d="M12 390c117-35 208-20 263 43 55-63 146-78 263-43v210c-117-34-208-18-263 47-55-65-146-81-263-47z" stroke-width="9" opacity=".72"/>
+    <path d="M275 433v214M48 438c91-17 163-5 215 37M502 438c-91-17-163-5-215 37" stroke-width="5" opacity=".52"/>
+  </g>
+  <g fill="#fff" opacity=".025">
+    <path d="M0 0h700L0 700z"/>
+    <path d="M1920 1080h-580l580-580z"/>
+  </g>
+</svg>

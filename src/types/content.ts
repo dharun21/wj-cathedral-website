@@ -20,6 +20,7 @@ export interface HeroSlide {
   cta: { href: `#${string}`; label: LocalizedText }
   secondaryCta?: { href: `#${string}`; label: LocalizedText }
   mediaStatus: 'approved-client-supplied' | 'placeholder-awaiting-approved-photo'
+  variant?: 'standard' | 'daily-verse'
 }
 
 export interface Service {

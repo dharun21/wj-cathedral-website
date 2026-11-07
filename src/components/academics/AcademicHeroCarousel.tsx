@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { academicHeroSlides } from '../../data/academics'
 import { useLanguage } from '../../context/LanguageContext'
+import { usePublishedHeroRows } from '../../hooks/usePublishedContent'
 
 const slideIcons = {
   admissions: BookOpenText,
@@ -18,6 +19,11 @@ export function AcademicHeroCarousel() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [autoplay, setAutoplay] = useState(!reduceMotion)
   const paused = useRef(false)
+  const managed = usePublishedHeroRows('academics').data ?? []
+  const slides = managed.length ? managed.map((row, index) => {
+    const frame = academicHeroSlides[index % academicHeroSlides.length]!
+    return { ...frame, eyebrow: { en: row.eyebrow_en, ta: row.eyebrow_ta }, title: { en: row.title_en, ta: row.title_ta }, description: { en: row.description_en, ta: row.description_ta }, ctaLabel: { en: row.cta_label_en, ta: row.cta_label_ta }, ctaHref: row.cta_href as `#${string}` }
+  }) : academicHeroSlides
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -58,7 +64,7 @@ export function AcademicHeroCarousel() {
     >
       <div className="academic-hero__viewport" ref={emblaRef}>
         <div className="academic-hero__container">
-          {academicHeroSlides.map((slide, index) => {
+          {slides.map((slide, index) => {
             const Icon = slideIcons[slide.id]
             return (
               <article className={`academic-hero__slide academic-hero__slide--${slide.id}`} key={slide.id} aria-hidden={selectedIndex !== index}>
@@ -96,7 +102,7 @@ export function AcademicHeroCarousel() {
           <button type="button" onClick={() => emblaApi?.scrollNext()} aria-label={t('academics.nextSlide')}><ArrowRight aria-hidden="true" /></button>
         </div>
         <div className="academic-hero__dots">
-          {academicHeroSlides.map((slide, index) => (
+          {slides.map((slide, index) => (
             <button
               type="button"
               key={slide.id}
@@ -112,7 +118,7 @@ export function AcademicHeroCarousel() {
             {autoplay ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
           </button>
         )}
-        <p className="academic-hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{academicHeroSlides.length}</span></p>
+        <p className="academic-hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{slides.length}</span></p>
       </div>
     </section>
   )

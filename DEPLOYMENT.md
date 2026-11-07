@@ -1,6 +1,6 @@
 # Deployment — postponed
 
-This phase is intentionally local-only. No Git repository was initialized, no GitHub account was connected, no workflow was added and nothing was deployed.
+No public deployment, merge to `main`, force-push, domain purchase or hosting change is part of this phase. Development remains on the existing `development` branch. A database-backed preview requires the owner’s Supabase project and public environment values.
 
 ## Local production preview
 

@@ -4,6 +4,7 @@ import { sermons, youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
 import { Reveal } from '../common/Reveal'
 import { SectionHeading } from '../common/SectionHeading'
+import { usePublishedVideos } from '../../hooks/usePublishedContent'
 
 function VideoCard({ videoId, title, description }: { videoId: string; title: string; description: string }) {
   const [loaded, setLoaded] = useState(false)
@@ -38,12 +39,13 @@ function VideoCard({ videoId, title, description }: { videoId: string; title: st
 
 export function SermonsSection() {
   const { t, localize } = useLanguage()
+  const published = usePublishedVideos(sermons)
   return (
     <section id="sermons" className="section section--ivory sermons-section">
       <div className="container">
         <SectionHeading eyebrow={t('sermons.eyebrow')} title={t('sermons.title')} description={t('sermons.intro')} />
         <div className="video-grid">
-          {sermons.map((sermon, index) => (
+          {published.data.map((sermon, index) => (
             <Reveal key={sermon.id} delay={index * 0.08}>
               <VideoCard videoId={sermon.videoId} title={localize(sermon.title)} description={localize(sermon.description)} />
             </Reveal>

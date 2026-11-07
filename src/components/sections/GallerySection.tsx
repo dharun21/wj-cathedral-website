@@ -7,6 +7,8 @@ import { useLanguage } from '../../context/LanguageContext'
 import type { GalleryItem } from '../../types/content'
 import { Reveal } from '../common/Reveal'
 import { SectionHeading } from '../common/SectionHeading'
+import { usePublishedGallery } from '../../hooks/usePublishedContent'
+import { isSupabaseConfigured } from '../../lib/env'
 
 type GalleryStatus = 'approved' | 'pending' | 'prayer' | 'vbs'
 
@@ -64,6 +66,8 @@ function Lightbox({ items, index, status, onClose, onChange }: ActiveGallery & {
 export function GallerySection() {
   const { t, localize } = useLanguage()
   const [activeGallery, setActiveGallery] = useState<ActiveGallery | null>(null)
+  const published = usePublishedGallery(galleryItems)
+  const featuredItems = isSupabaseConfigured ? published.data.slice(0, 3) : galleryItems
   const closeLightbox = useCallback(() => setActiveGallery(null), [])
   const changeLightbox = useCallback((index: number) => {
     setActiveGallery((current) => current ? { ...current, index } : null)
@@ -77,14 +81,14 @@ export function GallerySection() {
       <div className="container">
         <SectionHeading eyebrow={t('gallery.eyebrow')} title={t('gallery.title')} description={t('gallery.intro')} />
         <div className="gallery-grid">
-          {galleryItems.map((item, index) => (
+          {featuredItems.map((item, index) => (
             <Reveal key={item.id} className={`gallery-item gallery-item--${index + 1}`} delay={index * 0.06}>
               <button
                 type="button"
                 onClick={() => {
-                  if (item.id === 'vbs') {
+                  if (!isSupabaseConfigured && item.id === 'vbs') {
                     openGallery(vacationBibleSchoolItems, 0, 'vbs')
-                  } else if (item.id === 'prayer') {
+                  } else if (!isSupabaseConfigured && item.id === 'prayer') {
                     openGallery(prayerGalleryItems, 2, 'prayer')
                   } else {
                     openGallery([item], 0, item.approved ? 'approved' : 'pending')

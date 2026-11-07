@@ -14,12 +14,12 @@ export const academicHeroSlides: AcademicHeroSlide[] = [
     id: 'admissions',
     eyebrow: { en: 'Admissions', ta: 'சேர்க்கை' },
     title: {
-      en: 'Begin a journey of biblical learning and faithful service',
-      ta: 'வேதாகமக் கற்றலும் உண்மையுள்ள ஊழியமும் நிறைந்த பயணத்தைத் தொடங்குங்கள்',
+      en: '2027 admissions are now open',
+      ta: '2027 ஆம் ஆண்டுக்கான சேர்க்கை தொடங்கியுள்ளது',
     },
     description: {
-      en: 'Explore a church-rooted learning pathway designed to deepen biblical understanding, spiritual maturity and practical ministry service.',
-      ta: 'வேதாகமப் புரிதல், ஆவிக்குரிய முதிர்ச்சி மற்றும் நடைமுறை ஊழியப் பணியை ஆழப்படுத்தும் திருச்சபை சார்ந்த கற்றல் பாதையை அறிந்துகொள்ளுங்கள்.',
+      en: 'Applications are being accepted now. Classes begin in January 2027 at Worship To Jesus Bible Institute & College, Nannilam.',
+      ta: 'விண்ணப்பங்கள் தற்போது ஏற்றுக்கொள்ளப்படுகின்றன. Worship To Jesus Bible Institute & College, நன்னிலத்தில் வகுப்புகள் ஜனவரி 2027-ல் தொடங்குகின்றன.',
     },
     ctaLabel: { en: 'View admission form', ta: 'சேர்க்கைப் படிவத்தைப் பாருங்கள்' },
     ctaHref: '#academics-admission',
@@ -51,6 +51,89 @@ export const academicHeroSlides: AcademicHeroSlide[] = [
     },
     ctaLabel: { en: 'View graduation gallery', ta: 'பட்டமளிப்புப் படத்தொகுப்பைப் பாருங்கள்' },
     ctaHref: '#academics-graduation',
+  },
+]
+
+export const academicCollege = {
+  name: 'Worship To Jesus Bible Institute & College',
+  affiliation: 'National Theological Association (NTA)',
+  established: '2017',
+  founder: 'Rev. Pr. A. Paulraj',
+  principal: 'Pr. A. George Edward',
+  address: {
+    en: 'Worship to Jesus Church, Near Telephone Exchange, Nannilam 610105, Thiruvarur District, Tamil Nadu.',
+    ta: 'Worship to Jesus Church, தொலைபேசி நிலையம் அருகில், நன்னிலம் 610105, திருவாரூர் மாவட்டம், தமிழ்நாடு.',
+  },
+  phones: [
+    { display: '9750308877', href: 'tel:+919750308877' },
+    { display: '9788056467', href: 'tel:+919788056467' },
+  ],
+} as const
+
+export const academicCourses = [
+  {
+    id: 'bachelor-theology',
+    shortName: 'B.Th',
+    title: { en: 'Bachelor of Theology', ta: 'இறையியல் இளங்கலை' },
+    duration: { en: '3 years', ta: '3 ஆண்டுகள்' },
+  },
+  {
+    id: 'certificate-theology',
+    shortName: 'C.Th',
+    title: { en: 'Certificate of Theology', ta: 'இறையியல் சான்றிதழ்' },
+    duration: { en: '1 year', ta: '1 ஆண்டு' },
+  },
+  {
+    id: 'diploma-music',
+    shortName: 'Diploma',
+    title: { en: 'Diploma in Music', ta: 'இசைப் பட்டயப் படிப்பு' },
+    duration: { en: '1 year', ta: '1 ஆண்டு' },
+  },
+] as const
+
+export interface AcademicFacultyMember {
+  id: string
+  name: string
+  role: LocalizedText
+  qualification: string | null
+  imageUrl: string | null
+}
+
+export const academicFaculty: AcademicFacultyMember[] = [
+  {
+    id: 'faculty-a-paulraj',
+    name: 'Rev. Pr. A. Paulraj',
+    role: { en: 'Founder & Teacher', ta: 'நிறுவனர் மற்றும் ஆசிரியர்' },
+    qualification: null,
+    imageUrl: './academics/faculty/paulraj.jpg',
+  },
+  {
+    id: 'faculty-a-george-edward',
+    name: 'Pr. A. George Edward',
+    role: { en: 'Principal & Teacher', ta: 'முதல்வர் மற்றும் ஆசிரியர்' },
+    qualification: 'M.Th',
+    imageUrl: './academics/faculty/george-edward.jpg',
+  },
+  {
+    id: 'faculty-a-john-wilmet',
+    name: 'Pr. A. John Wilmet',
+    role: { en: 'Teacher', ta: 'ஆசிரியர்' },
+    qualification: 'M.Div',
+    imageUrl: './academics/faculty/john-wilmet.jpg',
+  },
+  {
+    id: 'faculty-p-ceehan-paul-thuthiraj',
+    name: 'Pr. P. Ceehan Paul Thuthiraj',
+    role: { en: 'Teacher', ta: 'ஆசிரியர்' },
+    qualification: 'M.Th',
+    imageUrl: './academics/faculty/ceehan-paul-thuthiraj.jpg',
+  },
+  {
+    id: 'faculty-aaron-jebaraj',
+    name: 'Bro. Aaron Jebaraj',
+    role: { en: 'Teacher', ta: 'ஆசிரியர்' },
+    qualification: 'M.Div',
+    imageUrl: './academics/faculty/aaron-jebaraj.jpg',
   },
 ]
 
@@ -147,10 +230,9 @@ export const academicModules = [
 ] as const
 
 export const academicInterestOptions = [
-  { value: 'biblical-studies', label: { en: 'Biblical studies', ta: 'வேதாகமக் கல்வி' } },
-  { value: 'ministry-formation', label: { en: 'Ministry formation', ta: 'ஊழிய உருவாக்கம்' } },
-  { value: 'worship-service', label: { en: 'Worship and church service', ta: 'ஆராதனை மற்றும் திருச்சபைப் பணி' } },
-  { value: 'pastoral-care', label: { en: 'Pastoral care and leadership', ta: 'மேய்ப்புப் பராமரிப்பு மற்றும் தலைமைத்துவம்' } },
+  { value: 'bachelor-theology', label: { en: 'B.Th — Bachelor of Theology', ta: 'B.Th — இறையியல் இளங்கலை' } },
+  { value: 'certificate-theology', label: { en: 'C.Th — Certificate of Theology', ta: 'C.Th — இறையியல் சான்றிதழ்' } },
+  { value: 'diploma-music', label: { en: 'Diploma in Music', ta: 'இசைப் பட்டயப் படிப்பு' } },
   { value: 'other', label: { en: 'Other area of interest', ta: 'வேறு ஆர்வப் பகுதி' } },
 ] as const
 

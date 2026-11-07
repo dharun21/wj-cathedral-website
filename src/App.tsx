@@ -9,10 +9,17 @@ const AcademicsPage = lazy(() => import('./pages/AcademicsPage').then((module) =
 const ChurchPage = lazy(() => import('./pages/ChurchPage').then((module) => ({ default: module.ChurchPage })))
 const CommunityCarePage = lazy(() => import('./pages/CommunityCarePage').then((module) => ({ default: module.CommunityCarePage })))
 const PrayerHelplinePage = lazy(() => import('./pages/PrayerHelplinePage').then((module) => ({ default: module.PrayerHelplinePage })))
+const AboutUsPage = lazy(() => import('./pages/AboutUsPage').then((module) => ({ default: module.AboutUsPage })))
+const EventsPage = lazy(() => import('./pages/EventsPage').then((module) => ({ default: module.EventsPage })))
+const MediaPage = lazy(() => import('./pages/MediaPage').then((module) => ({ default: module.MediaPage })))
+const GalleryPage = lazy(() => import('./pages/GalleryPage').then((module) => ({ default: module.GalleryPage })))
+const GivePage = lazy(() => import('./pages/GivePage').then((module) => ({ default: module.GivePage })))
+const AdminApp = lazy(() => import('./admin/AdminApp').then((module) => ({ default: module.AdminApp })))
 
 function App() {
   const { t } = useLanguage()
   const [hash, setHash] = useState(() => window.location.hash || '#home')
+  const isAdmin = hash.startsWith('#/admin')
   const currentPage = hash.startsWith('#academics')
     ? 'academics'
     : hash.startsWith('#church')
@@ -21,6 +28,16 @@ function App() {
       ? 'community-care'
     : hash.startsWith('#prayer-helpline')
       ? 'prayer-helpline'
+    : hash.startsWith('#about')
+      ? 'about'
+    : hash.startsWith('#events')
+      ? 'events'
+    : hash.startsWith('#media') || hash.startsWith('#sermons')
+      ? 'media'
+    : hash.startsWith('#gallery')
+      ? 'gallery'
+    : hash.startsWith('#give')
+      ? 'give'
       : 'home'
 
   useEffect(() => {
@@ -30,13 +47,16 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (isAdmin) return undefined
     const frame = window.requestAnimationFrame(() => {
       const target = document.querySelector(hash)
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       else window.scrollTo({ top: 0, behavior: 'smooth' })
     })
     return () => window.cancelAnimationFrame(frame)
-  }, [currentPage, hash])
+  }, [currentPage, hash, isAdmin])
+
+  if (isAdmin) return <Suspense fallback={<main className="route-loading"><span>Loading administration…</span></main>}><AdminApp hash={hash} /></Suspense>
 
   return (
     <>
@@ -60,6 +80,16 @@ function App() {
             ? <CommunityCarePage />
           : currentPage === 'prayer-helpline'
             ? <PrayerHelplinePage />
+          : currentPage === 'about'
+            ? <AboutUsPage />
+          : currentPage === 'events'
+            ? <EventsPage />
+          : currentPage === 'media'
+            ? <MediaPage />
+          : currentPage === 'gallery'
+            ? <GalleryPage />
+          : currentPage === 'give'
+            ? <GivePage />
             : <HomePage />}
       </Suspense>
       <Footer />
