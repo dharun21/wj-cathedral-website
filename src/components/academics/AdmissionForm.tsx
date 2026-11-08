@@ -65,9 +65,6 @@ export function AdmissionForm() {
 
         <Reveal className="academic-form-card" delay={0.08}>
           <div className="academic-form-card__heading"><span><FileText size={23} aria-hidden="true" /></span><strong>{t('academics.admission.eyebrow')}</strong></div>
-          {submitted && <div className="academic-form__feedback academic-form__feedback--success" role="status"><CheckCircle2 size={22} /><div><strong>{t('academics.admission.successTitle')}</strong><p>{t('academics.admission.successBody')}</p></div></div>}
-          {error && <div className="academic-form__feedback academic-form__feedback--error" role="alert"><div><strong>{t('academics.admission.submitErrorTitle')}</strong><p>{error}</p></div></div>}
-          {!isSupabaseConfigured && <div className="academic-form__feedback academic-form__feedback--notice" role="status"><ShieldCheck size={21} /><div><strong>{t('academics.admission.onlineUnavailableTitle')}</strong><p>{t('academics.admission.onlineUnavailable')}</p></div></div>}
           <form className="academic-form" onSubmit={handleSubmit}>
             <label className="academic-form__website" aria-hidden="true">Website<input type="text" name="website" tabIndex={-1} autoComplete="off" /></label>
             <div className="academic-form__grid">
@@ -111,6 +108,9 @@ export function AdmissionForm() {
               <button className="button button--gold academic-form__submit" type="submit" disabled={submitting || !isSupabaseConfigured}>{submitting ? <LoaderCircle className="academic-form__spinner" size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />} {t(submitting ? 'academics.admission.submitting' : 'academics.admission.submit')}</button>
               <button className="button button--outline-light academic-form__print" type="button" onClick={handlePrint}><Printer size={18} aria-hidden="true" /> {t('academics.admission.print')}</button>
             </div>
+            {submitted && <div className="academic-form__feedback academic-form__feedback--success academic-form__feedback--after-submit" role="status"><CheckCircle2 size={22} /><div><strong>{t('academics.admission.successTitle')}</strong><p>{t('academics.admission.successBody')}</p></div></div>}
+            {error && <div className="academic-form__feedback academic-form__feedback--error academic-form__feedback--after-submit" role="alert"><div><strong>{t('academics.admission.submitErrorTitle')}</strong><p>{error}</p></div></div>}
+            {!isSupabaseConfigured && <div className="academic-form__feedback academic-form__feedback--notice academic-form__feedback--after-submit" role="status"><ShieldCheck size={21} /><div><strong>{t('academics.admission.onlineUnavailableTitle')}</strong><p>{t('academics.admission.onlineUnavailable')}</p></div></div>}
           </form>
         </Reveal>
       </div>

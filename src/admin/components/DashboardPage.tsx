@@ -25,8 +25,12 @@ export function DashboardPage() {
     queryKey: ['admin', 'recent-content'],
     queryFn: async () => {
       const tables: CmsTableName[] = ['announcements', 'events', 'hero_slides', 'videos', 'gallery_images']
-      const groups = await Promise.all(tables.map(async (table) => (await listAdminRecords<Record<string, unknown>>(table, { orderBy: 'updated_at', ascending: false, limit: 3 })).map((row) => ({ ...row, table }))))
-      return (groups.flat() as Array<Record<string, unknown> & { table: CmsTableName }>).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 6)
+      const [groups, albums] = await Promise.all([
+        Promise.all(tables.map(async (table) => (await listAdminRecords<Record<string, unknown>>(table, { orderBy: 'updated_at', ascending: false, limit: 3 })).map((row) => ({ ...row, table })))),
+        listAdminRecords<Record<string, unknown>>('gallery_albums'),
+      ])
+      const albumScopes = new Map(albums.map((album) => [String(album.id), album.page_scope]))
+      return (groups.flat() as Array<Record<string, unknown> & { table: CmsTableName }>).map((item) => item.table === 'gallery_images' ? { ...item, page_scope: albumScopes.get(String(item.album_id)) } : item).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 6)
     },
   })
   const navigate = (route: string) => { window.location.hash = `#/admin/${route}` }
@@ -35,7 +39,7 @@ export function DashboardPage() {
     <div className="admin-stat-grid">{cards.map(([key, label, Icon]) => <article key={key}><span><Icon /></span><div><strong>{counts.isLoading ? '—' : counts.data?.[key] ?? 0}</strong><p>{label}</p></div></article>)}</div>
     <div className="admin-dashboard-grid">
       <section className="admin-panel"><header><div><p>Start here</p><h2>Quick actions</h2></div></header><div className="admin-quick-actions">{actions.map(([route, label]) => <button key={route} onClick={() => navigate(route)}><Plus size={18} /><span>{label}</span></button>)}</div></section>
-      <section className="admin-panel"><header><div><p>Latest changes</p><h2>Recently updated</h2></div></header>{recent.isLoading ? <div className="admin-record-skeletons"><i /><i /><i /></div> : recent.data?.length ? <div className="admin-recent-list">{recent.data.map((item, index) => <button key={`${item.table}-${String(item.id)}-${index}`} onClick={() => navigate(item.table === 'hero_slides' ? 'slides' : item.table === 'gallery_images' ? 'gallery-images' : item.table)}><span>{String(item.title_en ?? item.caption_en ?? item.name_en ?? 'Content item')}</span><small>{item.table.replaceAll('_', ' ')} · {item.status === 'published' ? 'Published' : item.status === 'pending_review' ? 'Pending approval' : 'Draft'}</small></button>)}</div> : <p className="admin-panel-empty">No content changes yet.</p>}</section>
+      <section className="admin-panel"><header><div><p>Latest changes</p><h2>Recently updated</h2></div></header>{recent.isLoading ? <div className="admin-record-skeletons"><i /><i /><i /></div> : recent.data?.length ? <div className="admin-recent-list">{recent.data.map((item, index) => <button key={`${item.table}-${String(item.id)}-${index}`} onClick={() => navigate(item.table === 'hero_slides' && item.scope === 'academics' ? 'academic-carousel' : item.table === 'hero_slides' ? 'slides' : item.table === 'gallery_images' && item.page_scope === 'academics' ? 'academic-gallery' : item.table === 'gallery_images' ? 'gallery-images' : item.table === 'ministries' && item.group_key === 'academics' ? 'academics' : item.table)}><span>{String(item.title_en ?? item.caption_en ?? item.name_en ?? 'Content item')}</span><small>{item.table === 'hero_slides' && item.scope === 'academics' ? 'academics carousel' : item.table === 'gallery_images' && item.page_scope === 'academics' ? 'academics graduation' : item.table === 'ministries' && item.group_key === 'academics' ? 'academics faculty' : item.table.replaceAll('_', ' ')} · {item.status === 'published' ? 'Published' : item.status === 'pending_review' ? 'Pending approval' : 'Draft'}</small></button>)}</div> : <p className="admin-panel-empty">No content changes yet.</p>}</section>
     </div>
   </section>
 }

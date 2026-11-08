@@ -83,6 +83,8 @@ export interface MediaAssetRow {
 export interface HeroSlideRow {
   id: string
   scope: 'home' | 'academics' | 'community'
+  slide_kind: 'default' | 'custom'
+  default_key: 'admissions' | 'licence' | 'graduation' | null
   eyebrow_en: string
   eyebrow_ta: string
   title_en: string
@@ -107,9 +109,44 @@ export interface HeroSlideRow {
   updated_by: string | null
 }
 
+export interface AcademicSettingsRow {
+  id: string
+  singleton_key: string
+  college_name: string
+  affiliation: string
+  established: string
+  founder: string
+  principal: string
+  address_en: string
+  address_ta: string
+  phone_primary: string
+  phone_secondary: string | null
+  admissions_open: boolean
+  status: ContentStatus
+  created_at: string
+  updated_at: string
+  updated_by: string | null
+}
+
+export interface AcademicCourseRow {
+  id: string
+  slug: string
+  short_name: string
+  title_en: string
+  title_ta: string
+  duration_en: string
+  duration_ta: string
+  status: ContentStatus
+  display_order: number
+  created_at: string
+  updated_at: string
+  updated_by: string | null
+}
+
 export interface GalleryAlbumRow {
   id: string
   slug: string
+  page_scope: 'gallery' | 'academics'
   title_en: string
   title_ta: string
   description_en: string | null
@@ -306,7 +343,7 @@ export interface DailyBibleVerseRow {
 
 export interface ContentReviewRequestRow {
   id: string
-  table_name: 'page_content' | 'hero_slides' | 'gallery_albums' | 'gallery_images' | 'announcements' | 'events' | 'videos' | 'worship_services' | 'ministries' | 'daily_bible_verses' | 'media_assets' | 'audio_albums' | 'audio_tracks'
+  table_name: 'page_content' | 'hero_slides' | 'gallery_albums' | 'gallery_images' | 'announcements' | 'events' | 'videos' | 'worship_services' | 'ministries' | 'daily_bible_verses' | 'media_assets' | 'audio_albums' | 'audio_tracks' | 'academic_settings' | 'academic_courses'
   record_id: string
   title_snapshot: string
   submitted_by: string | null
@@ -333,6 +370,8 @@ export interface Database {
       page_content: TableDefinition<PageContentRow>
       media_assets: TableDefinition<MediaAssetRow>
       hero_slides: TableDefinition<HeroSlideRow>
+      academic_settings: TableDefinition<AcademicSettingsRow>
+      academic_courses: TableDefinition<AcademicCourseRow>
       gallery_albums: TableDefinition<GalleryAlbumRow>
       gallery_images: TableDefinition<GalleryImageRow>
       announcements: TableDefinition<AnnouncementRow>

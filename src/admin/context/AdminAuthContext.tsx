@@ -66,7 +66,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     const initialLoad = window.setTimeout(() => void loadSession(), 0)
     const subscription = subscribeToAuth((event, nextSession) => {
       if (event === 'PASSWORD_RECOVERY') window.location.hash = '#/admin/reset-password'
-      void loadSession(nextSession)
+      if (event === 'TOKEN_REFRESHED') {
+        setSession(nextSession)
+        return
+      }
+      void loadSession(nextSession, true)
     })
     return () => { window.clearTimeout(initialLoad); subscription.unsubscribe() }
   }, [loadSession])

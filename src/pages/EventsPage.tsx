@@ -12,16 +12,28 @@ export function EventsPage() {
   const gatheringsQuery = usePublishedWorship(recurringGatherings)
   const [now] = useState(() => Date.now())
   const events = eventsQuery.data ?? []
-  const upcoming = events.filter((event) => new Date(event.starts_at).getTime() >= now)
-  const past = events.filter((event) => new Date(event.starts_at).getTime() < now).reverse()
+  const currentAndUpcoming = events.filter((event) => {
+    const startsAt = new Date(event.starts_at).getTime()
+    const endsAt = event.ends_at ? new Date(event.ends_at).getTime() : startsAt
+    return startsAt >= now || endsAt >= now
+  })
+  const past = events.filter((event) => {
+    const startsAt = new Date(event.starts_at).getTime()
+    const endsAt = event.ends_at ? new Date(event.ends_at).getTime() : startsAt
+    return endsAt < now
+  }).reverse()
 
   const format = (value: string) => new Intl.DateTimeFormat(language === 'ta' ? 'ta-IN' : 'en-IN', {
     dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Kolkata',
   }).format(new Date(value))
 
-  const eventCard = (event: typeof events[number]) => (
-    <article className="event-page-card" key={event.id}>
-      <span>{event.category}</span>
+  const eventCard = (event: typeof events[number]) => {
+    const startsAt = new Date(event.starts_at).getTime()
+    const endsAt = event.ends_at ? new Date(event.ends_at).getTime() : startsAt
+    const isHappeningNow = startsAt <= now && endsAt >= now
+
+    return <article className="event-page-card" key={event.id}>
+      <span>{isHappeningNow ? localize({ en: 'Happening now', ta: 'இப்போது நடைபெறுகிறது' }) : event.category}</span>
       <h2>{language === 'ta' ? event.title_ta : event.title_en}</h2>
       <p>{language === 'ta' ? event.description_ta : event.description_en}</p>
       <dl>
@@ -30,7 +42,7 @@ export function EventsPage() {
         {event.ends_at && <div><Clock3 /><dt>{format(event.ends_at)}</dt></div>}
       </dl>
     </article>
-  )
+  }
 
   return (
     <main id="main-content" tabIndex={-1} className="inner-page events-page">
@@ -81,8 +93,8 @@ export function EventsPage() {
 
       <section className="section section--sand">
         <div className="container">
-          <div className="page-section-heading"><p className="eyebrow">{localize({ en: 'Calendar', ta: 'நிகழ்ச்சி நிரல்' })}</p><h2>{localize({ en: 'Upcoming Events', ta: 'வரவிருக்கும் நிகழ்வுகள்' })}</h2></div>
-          {eventsQuery.isLoading ? <div className="public-loading">{localize({ en: 'Loading events…', ta: 'நிகழ்வுகள் ஏற்றப்படுகின்றன…' })}</div> : upcoming.length ? <div className="event-page-grid">{upcoming.map(eventCard)}</div> : <div className="public-empty"><CalendarDays /><h2>{localize({ en: 'No confirmed dated events yet', ta: 'தேதியுடன் உறுதிப்படுத்தப்பட்ட நிகழ்வுகள் இன்னும் இல்லை' })}</h2><p>{localize({ en: 'New approved events will appear here after publication.', ta: 'புதிய அங்கீகரிக்கப்பட்ட நிகழ்வுகள் வெளியிடப்பட்டதும் இங்கே தோன்றும்.' })}</p></div>}
+          <div className="page-section-heading"><p className="eyebrow">{localize({ en: 'Calendar', ta: 'நிகழ்ச்சி நிரல்' })}</p><h2>{localize({ en: 'Current & Upcoming Events', ta: 'தற்போதைய மற்றும் வரவிருக்கும் நிகழ்வுகள்' })}</h2></div>
+          {eventsQuery.isLoading ? <div className="public-loading">{localize({ en: 'Loading events…', ta: 'நிகழ்வுகள் ஏற்றப்படுகின்றன…' })}</div> : currentAndUpcoming.length ? <div className="event-page-grid">{currentAndUpcoming.map(eventCard)}</div> : <div className="public-empty"><CalendarDays /><h2>{localize({ en: 'No current or upcoming dated events yet', ta: 'தற்போதைய அல்லது வரவிருக்கும் தேதியிட்ட நிகழ்வுகள் இன்னும் இல்லை' })}</h2><p>{localize({ en: 'New approved events will appear here after publication.', ta: 'புதிய அங்கீகரிக்கப்பட்ட நிகழ்வுகள் வெளியிடப்பட்டதும் இங்கே தோன்றும்.' })}</p></div>}
           {past.length > 0 && <><div className="page-section-heading page-section-heading--spaced"><h2>{localize({ en: 'Past Events', ta: 'கடந்த நிகழ்வுகள்' })}</h2></div><div className="event-page-grid">{past.map(eventCard)}</div></>}
         </div>
       </section>

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { academicHeroSlides } from '../../data/academics'
 import { useLanguage } from '../../context/LanguageContext'
 import { usePublishedHeroRows } from '../../hooks/usePublishedContent'
+import type { LocalizedText } from '../../types/content'
 
 const slideIcons = {
   admissions: BookOpenText,
@@ -12,7 +13,18 @@ const slideIcons = {
   graduation: GraduationCap,
 } as const
 
-export function AcademicHeroCarousel() {
+interface AcademicCarouselSlide {
+  id: string
+  frame: keyof typeof slideIcons | 'custom'
+  eyebrow: LocalizedText
+  title: LocalizedText
+  description: LocalizedText
+  ctaLabel?: LocalizedText
+  ctaHref?: `#${string}`
+  imageUrl?: string | null
+}
+
+export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen?: boolean }) {
   const { t, localize, language } = useLanguage()
   const reduceMotion = useReducedMotion()
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: reduceMotion ? 0 : 28 })
@@ -20,10 +32,29 @@ export function AcademicHeroCarousel() {
   const [autoplay, setAutoplay] = useState(!reduceMotion)
   const paused = useRef(false)
   const managed = usePublishedHeroRows('academics').data ?? []
-  const slides = managed.length ? managed.map((row, index) => {
-    const frame = academicHeroSlides[index % academicHeroSlides.length]!
-    return { ...frame, eyebrow: { en: row.eyebrow_en, ta: row.eyebrow_ta }, title: { en: row.title_en, ta: row.title_ta }, description: { en: row.description_en, ta: row.description_ta }, ctaLabel: { en: row.cta_label_en, ta: row.cta_label_ta }, ctaHref: row.cta_href as `#${string}` }
-  }) : academicHeroSlides
+  const slides: AcademicCarouselSlide[] = (managed.length ? managed.map((row): AcademicCarouselSlide => {
+    const builtIn = row.slide_kind === 'default' && row.default_key
+      ? academicHeroSlides.find((slide) => slide.id === row.default_key)
+      : undefined
+    if (builtIn) return {
+      id: row.id,
+      frame: builtIn.id,
+      eyebrow: builtIn.eyebrow,
+      title: { en: row.title_en, ta: row.title_ta },
+      description: { en: row.description_en, ta: row.description_ta },
+      ctaLabel: builtIn.ctaLabel,
+      ctaHref: builtIn.ctaHref,
+    }
+    return {
+      id: row.id,
+      frame: 'custom',
+      eyebrow: { en: 'WJ Academics', ta: 'WJ கல்வி' },
+      title: { en: row.title_en, ta: row.title_ta },
+      description: { en: row.description_en, ta: row.description_ta },
+      imageUrl: row.image_url,
+    }
+  }) : academicHeroSlides.map((slide) => ({ ...slide, frame: slide.id })))
+    .filter((slide) => admissionsOpen || slide.frame !== 'admissions')
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -65,9 +96,12 @@ export function AcademicHeroCarousel() {
       <div className="academic-hero__viewport" ref={emblaRef}>
         <div className="academic-hero__container">
           {slides.map((slide, index) => {
-            const Icon = slideIcons[slide.id]
+            const Icon = slide.frame === 'custom' ? GraduationCap : slideIcons[slide.frame]
+            const customBackground = slide.frame === 'custom' && slide.imageUrl
+              ? { backgroundImage: `linear-gradient(90deg, rgba(5, 21, 33, .9), rgba(5, 21, 33, .45)), url("${slide.imageUrl.replaceAll('"', '%22')}")` }
+              : undefined
             return (
-              <article className={`academic-hero__slide academic-hero__slide--${slide.id}`} key={slide.id} aria-hidden={selectedIndex !== index}>
+              <article className={`academic-hero__slide academic-hero__slide--${slide.frame}`} style={customBackground} key={slide.id} aria-hidden={selectedIndex !== index}>
                 <div className="academic-hero__pattern" aria-hidden="true"><span /><span /><span /></div>
                 <div className="container academic-hero__content">
                   {selectedIndex === index && (
@@ -81,7 +115,7 @@ export function AcademicHeroCarousel() {
                       <p className="academic-hero__eyebrow"><Icon size={18} aria-hidden="true" /> {localize(slide.eyebrow)}</p>
                       <h1>{localize(slide.title)}</h1>
                       <p className="academic-hero__description">{localize(slide.description)}</p>
-                      <a className="button button--gold" href={slide.ctaHref}>{localize(slide.ctaLabel)} <ArrowUpRight size={18} aria-hidden="true" /></a>
+                      {slide.ctaHref && slide.ctaLabel && <a className="button button--gold" href={slide.ctaHref}>{localize(slide.ctaLabel)} <ArrowUpRight size={18} aria-hidden="true" /></a>}
                     </motion.div>
                   )}
                   <div className="academic-hero__emblem" aria-hidden="true">

@@ -67,7 +67,9 @@ export function GallerySection() {
   const { t, localize } = useLanguage()
   const [activeGallery, setActiveGallery] = useState<ActiveGallery | null>(null)
   const published = usePublishedGallery(galleryItems)
-  const featuredItems = isSupabaseConfigured ? published.data.slice(0, 3) : galleryItems
+  const featuredItems = isSupabaseConfigured
+    ? [...new Map(published.data.map((item) => [item.category.en, item])).values()].slice(0, 3)
+    : galleryItems
   const closeLightbox = useCallback(() => setActiveGallery(null), [])
   const changeLightbox = useCallback((index: number) => {
     setActiveGallery((current) => current ? { ...current, index } : null)
@@ -80,7 +82,7 @@ export function GallerySection() {
     <section id="gallery" className="section section--sand gallery-section">
       <div className="container">
         <SectionHeading eyebrow={t('gallery.eyebrow')} title={t('gallery.title')} description={t('gallery.intro')} />
-        <div className="gallery-grid">
+        <div className={`gallery-grid gallery-grid--${featuredItems.length}`}>
           {featuredItems.map((item, index) => (
             <Reveal key={item.id} className={`gallery-item gallery-item--${index + 1}`} delay={index * 0.06}>
               <button
@@ -91,7 +93,8 @@ export function GallerySection() {
                   } else if (!isSupabaseConfigured && item.id === 'prayer') {
                     openGallery(prayerGalleryItems, 2, 'prayer')
                   } else {
-                    openGallery([item], 0, item.approved ? 'approved' : 'pending')
+                    const albumItems = published.data.filter((candidate) => candidate.category.en === item.category.en)
+                    openGallery(albumItems.length ? albumItems : [item], 0, item.approved ? 'approved' : 'pending')
                   }
                 }}
                 aria-label={`${t('gallery.open')}: ${localize(item.category)}`}

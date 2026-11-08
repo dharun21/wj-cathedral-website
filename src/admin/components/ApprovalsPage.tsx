@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { ArrowRight, CheckCircle2, Clock3, RotateCcw, ShieldCheck, XCircle } from 'lucide-react'
-import { listPendingApprovalRecords, listPendingMediaApprovalRecords } from '../../services/contentService'
+import { listAdminRecords, listPendingApprovalRecords, listPendingMediaApprovalRecords } from '../../services/contentService'
 import type { CmsTableName, ContentReviewRequestRow } from '../../types/database'
 import { useReviewActivity } from '../hooks/useReviewActivity'
 
@@ -14,9 +14,9 @@ const approvalModules = [
   { table: 'audio_albums', route: 'audio-albums', label: 'Audio Albums' },
   { table: 'audio_tracks', route: 'audio-library', label: 'Audio Tracks' },
   { table: 'ministries', route: 'ministries', label: 'Ministries' },
-  { table: 'page_content', route: 'page-content', label: 'Page Copy' },
   { table: 'gallery_albums', route: 'albums', label: 'Gallery Albums' },
   { table: 'gallery_images', route: 'gallery-images', label: 'Gallery Photos' },
+  { table: 'academic_courses', route: 'academic-courses', label: 'Academic Courses' },
 ] as const satisfies ReadonlyArray<{ table: CmsTableName; route: string; label: string }>
 
 interface ApprovalItem extends Record<string, unknown> {
@@ -44,22 +44,29 @@ export function ApprovalsPage() {
   const approvals = useQuery({
     queryKey: ['admin', 'pending-approvals'],
     queryFn: async () => {
+      const galleryAlbums = await listAdminRecords<Record<string, unknown>>('gallery_albums')
+      const academicAlbumIds = new Set(galleryAlbums.filter((album) => album.page_scope === 'academics').map((album) => String(album.id)))
       const groups = await Promise.all(approvalModules.map(async (module) => {
         const rows = await listPendingApprovalRecords<Record<string, unknown>>(module.table)
-        return rows.map((row) => ({
-          ...row,
-          id: String(row.id),
-          table: module.table,
-          route: module.route,
-          moduleLabel: module.label,
-        }))
+        return rows.map((row) => {
+          const academicFaculty = module.table === 'ministries' && row.group_key === 'academics'
+          const academicPhoto = module.table === 'gallery_images' && academicAlbumIds.has(String(row.album_id))
+          const academicSlide = module.table === 'hero_slides' && row.scope === 'academics'
+          return {
+            ...row,
+            id: String(row.id),
+            table: module.table,
+            route: academicFaculty ? 'academics' : academicPhoto ? 'academic-gallery' : academicSlide ? 'academic-carousel' : module.route,
+            moduleLabel: academicFaculty ? 'Academics Faculty Photos' : academicPhoto ? 'Academics Graduation Photos' : academicSlide ? 'Academics Carousel' : module.label,
+          }
+        })
       }))
       const media = (await listPendingMediaApprovalRecords<Record<string, unknown>>()).map((row) => ({
         ...row,
         id: String(row.id),
         table: 'media_assets' as const,
         route: String(row.mime_type ?? '').startsWith('audio/') ? 'audio-library' : 'media-library',
-        moduleLabel: String(row.mime_type ?? '').startsWith('audio/') ? 'Audio Uploads' : 'Media Library',
+        moduleLabel: String(row.mime_type ?? '').startsWith('audio/') ? 'Audio Uploads' : 'Upload Library',
         updated_at: row.created_at,
       }))
       return ([...groups.flat(), ...media] as ApprovalItem[]).sort((a, b) => String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? '')))
@@ -75,7 +82,7 @@ export function ApprovalsPage() {
     window.location.hash = `#/admin/${item.route}?${parameters}`
   }
 
-  const recentDecisions = (reviewActivity.data ?? []).filter((item) => item.resolution !== 'pending')
+  const recentDecisions = (reviewActivity.data ?? []).filter((item) => item.table_name !== 'page_content' && item.resolution !== 'pending')
   const requestFor = (item: ApprovalItem) => (reviewActivity.data ?? []).find((request) => request.table_name === item.table && request.record_id === item.id && request.resolution === 'pending')
   const decisionIcon = (request: ContentReviewRequestRow) => request.resolution === 'approved' ? CheckCircle2 : request.resolution === 'returned' ? RotateCcw : XCircle
   const decisionLabel = (request: ContentReviewRequestRow) => request.resolution === 'approved' ? 'Approved & published' : request.resolution === 'returned' ? 'Returned to draft' : 'Not approved'
@@ -91,6 +98,6 @@ export function ApprovalsPage() {
         <button type="button" className="admin-primary-button" onClick={() => review(item)}>Review submission <ArrowRight size={16} /></button>
       </article> })}</div>
       : <div className="admin-empty-state"><CheckCircle2 /><h2>All caught up</h2><p>There are no editor submissions waiting for owner approval.</p></div>}
-    <section className="admin-review-section"><header><div><p>Last 30 days</p><h2>Recent Decisions</h2></div><span>{recentDecisions.length}</span></header>{recentDecisions.length ? <div className="admin-submission-list">{recentDecisions.map((request) => { const Icon = decisionIcon(request); return <article className="admin-submission-card" key={request.id}><span className={`admin-submission-card__status is-${request.resolution}`}><Icon size={16} /> {decisionLabel(request)}</span><div className="admin-submission-card__copy"><small>{approvalModules.find((module) => module.table === request.table_name)?.label ?? (request.table_name === 'media_assets' ? 'Media Library' : request.table_name.replaceAll('_', ' '))}</small><h2>{request.title_snapshot}</h2><p>Submitted by {request.submitted_by_name} · {formatSubmitted(request.submitted_at)}</p><p>Decision {formatSubmitted(request.resolved_at)}</p></div></article> })}</div> : <div className="admin-empty-state admin-empty-state--compact"><Clock3 /><h2>No recent decisions</h2><p>Approval decisions will remain here for 30 days.</p></div>}</section>
+    <section className="admin-review-section"><header><div><p>Last 30 days</p><h2>Recent Decisions</h2></div><span>{recentDecisions.length}</span></header>{recentDecisions.length ? <div className="admin-submission-list">{recentDecisions.map((request) => { const Icon = decisionIcon(request); return <article className="admin-submission-card" key={request.id}><span className={`admin-submission-card__status is-${request.resolution}`}><Icon size={16} /> {decisionLabel(request)}</span><div className="admin-submission-card__copy"><small>{approvalModules.find((module) => module.table === request.table_name)?.label ?? (request.table_name === 'media_assets' ? 'Upload Library' : request.table_name.replaceAll('_', ' '))}</small><h2>{request.title_snapshot}</h2><p>Submitted by {request.submitted_by_name} · {formatSubmitted(request.submitted_at)}</p><p>Decision {formatSubmitted(request.resolved_at)}</p></div></article> })}</div> : <div className="admin-empty-state admin-empty-state--compact"><Clock3 /><h2>No recent decisions</h2><p>Approval decisions will remain here for 30 days.</p></div>}</section>
   </section>
 }

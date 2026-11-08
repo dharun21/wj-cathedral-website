@@ -32,6 +32,12 @@ export interface AdminModuleDefinition {
   table: CmsTableName
   orderBy: string
   orderable?: boolean
+  filters?: Readonly<Record<string, string>>
+  excludeFilters?: Readonly<Record<string, string>>
+  allowCreate?: boolean
+  allowDelete?: boolean
+  presentation?: 'list' | 'photo-grid'
+  albumScope?: 'gallery' | 'academics'
   fields: readonly AdminField[]
   titleField: string
   subtitleField?: string

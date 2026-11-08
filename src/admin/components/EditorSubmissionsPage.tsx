@@ -1,8 +1,9 @@
 import { ArrowRight, CheckCircle2, Clock3, FileClock, RotateCcw, Send, XCircle } from 'lucide-react'
+import { listAdminRecords } from '../../services/contentService'
 import type { ContentReviewRequestRow, ReviewResolution } from '../../types/database'
 import { useReviewActivity } from '../hooks/useReviewActivity'
 
-const reviewModules: Record<ContentReviewRequestRow['table_name'], { label: string; route: string }> = {
+const reviewModules: Partial<Record<ContentReviewRequestRow['table_name'], { label: string; route: string }>> = {
   hero_slides: { label: 'Carousel Slides', route: 'slides' },
   daily_bible_verses: { label: 'Daily Bible Verses', route: 'verses' },
   announcements: { label: 'Announcements', route: 'announcements' },
@@ -12,10 +13,10 @@ const reviewModules: Record<ContentReviewRequestRow['table_name'], { label: stri
   audio_albums: { label: 'Audio Albums', route: 'audio-albums' },
   audio_tracks: { label: 'Audio Tracks', route: 'audio-library' },
   ministries: { label: 'Ministries', route: 'ministries' },
-  page_content: { label: 'Page Copy', route: 'page-content' },
   gallery_albums: { label: 'Gallery Albums', route: 'albums' },
   gallery_images: { label: 'Gallery Photos', route: 'gallery-images' },
-  media_assets: { label: 'Media Library', route: 'media-library' },
+  academic_courses: { label: 'Academic Courses', route: 'academic-courses' },
+  media_assets: { label: 'Upload Library', route: 'media-library' },
 }
 
 const resolutionDetails: Record<ReviewResolution, { label: string; className: string; Icon: typeof Clock3 }> = {
@@ -36,23 +37,42 @@ function formatIndiaDate(value: string | null) {
 
 function SubmissionCard({ request }: { request: ContentReviewRequestRow }) {
   const module = reviewModules[request.table_name]
+  if (!module) return null
   const status = resolutionDetails[request.resolution]
   const StatusIcon = status.Icon
-  const continueEditing = () => {
+  const continueEditing = async () => {
+    let route = module.route
+    if (request.table_name === 'hero_slides') {
+      const records = await listAdminRecords<Record<string, unknown>>('hero_slides')
+      if (records.find((record) => String(record.id) === request.record_id)?.scope === 'academics') route = 'academic-carousel'
+    }
+    if (request.table_name === 'ministries') {
+      const records = await listAdminRecords<Record<string, unknown>>('ministries')
+      if (records.find((record) => String(record.id) === request.record_id)?.group_key === 'academics') route = 'academics'
+    }
+    if (request.table_name === 'gallery_images') {
+      const [photos, albums] = await Promise.all([
+        listAdminRecords<Record<string, unknown>>('gallery_images'),
+        listAdminRecords<Record<string, unknown>>('gallery_albums'),
+      ])
+      const photo = photos.find((record) => String(record.id) === request.record_id)
+      if (albums.find((album) => String(album.id) === String(photo?.album_id))?.page_scope === 'academics') route = 'academic-gallery'
+    }
     const parameters = new URLSearchParams({ status: 'draft', open: request.record_id })
-    window.location.hash = `#/admin/${module.route}?${parameters}`
+    window.location.hash = `#/admin/${route}?${parameters}`
   }
   return <article className="admin-submission-card">
     <span className={`admin-submission-card__status ${status.className}`}><StatusIcon size={16} /> {status.label}</span>
     <div className="admin-submission-card__copy"><small>{module.label}</small><h2>{request.title_snapshot}</h2><p><Send size={13} /> Sent {formatIndiaDate(request.submitted_at)}</p>{request.resolved_at && <p><FileClock size={13} /> Decision {formatIndiaDate(request.resolved_at)}</p>}</div>
-    {request.resolution === 'returned' && request.table_name !== 'media_assets' && <button type="button" className="admin-secondary-button" onClick={continueEditing}>Continue editing <ArrowRight size={15} /></button>}
+    {request.resolution === 'returned' && request.table_name !== 'media_assets' && <button type="button" className="admin-secondary-button" onClick={() => void continueEditing()}>Continue editing <ArrowRight size={15} /></button>}
   </article>
 }
 
 export function EditorSubmissionsPage() {
   const activity = useReviewActivity()
-  const pending = (activity.data ?? []).filter((item) => item.resolution === 'pending')
-  const history = (activity.data ?? []).filter((item) => item.resolution !== 'pending')
+  const visibleActivity = (activity.data ?? []).filter((item) => Boolean(reviewModules[item.table_name]))
+  const pending = visibleActivity.filter((item) => item.resolution === 'pending')
+  const history = visibleActivity.filter((item) => item.resolution !== 'pending')
 
   return <section className="admin-module-page">
     <div className="admin-page-heading"><div><p>Editor workflow</p><h1>Pending Approval</h1><span>Track everything you have sent to the owner for review.</span></div><div className="admin-approval-count"><strong>{pending.length}</strong><small>waiting for owner</small></div></div>

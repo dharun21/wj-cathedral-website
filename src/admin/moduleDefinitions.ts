@@ -18,6 +18,18 @@ const bilingualDescriptionFields = [
   { name: 'description_ta', label: 'Tamil description', tamilLabel: 'தமிழ் விளக்கம்', type: 'textarea', requiredForPublish: true, fullWidth: true },
 ] as const
 
+const galleryPhotoFields = [
+  { name: 'album_id', label: 'Gallery album', type: 'select', requiredForPublish: true, options: [] },
+  { name: 'image_url', label: 'Approved image URL', type: 'text', requiredForPublish: true, fullWidth: true },
+  { name: 'caption_en', label: 'English caption', type: 'text', requiredForPublish: true },
+  { name: 'caption_ta', label: 'Tamil caption', tamilLabel: 'தமிழ் விளக்கவரி', type: 'text', requiredForPublish: true },
+  { name: 'alt_en', label: 'English alt text', type: 'textarea', requiredForPublish: true, fullWidth: true },
+  { name: 'alt_ta', label: 'Tamil alt text', tamilLabel: 'தமிழ் மாற்று உரை', type: 'textarea', requiredForPublish: true, fullWidth: true },
+  { name: 'featured', label: 'Featured photo', type: 'boolean' },
+  { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
+  { name: 'display_order', label: 'Display order', type: 'number' },
+] as const
+
 function normalizeVideo(record: AdminRecord) {
   const url = String(record.youtube_url ?? '')
   const videoId = extractYouTubeId(url)
@@ -45,11 +57,11 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     ],
   },
   slides: {
-    key: 'slides', title: 'Carousel Slides', singular: 'slide', table: 'hero_slides', orderBy: 'display_order', orderable: true,
-    description: 'Manage homepage, academics and Community Care carousel slides.', titleField: 'title_en', subtitleField: 'scope',
+    key: 'slides', title: 'Carousel Slides', singular: 'slide', table: 'hero_slides', orderBy: 'display_order', orderable: true, excludeFilters: { scope: 'academics' },
+    description: 'Manage homepage and Community Care carousel slides. Academics has its own protected carousel editor.', titleField: 'title_en', subtitleField: 'scope',
     defaults: { scope: 'home', status: 'draft', enabled: true, display_order: 0, eyebrow_en: '', eyebrow_ta: '', title_en: '', title_ta: '', description_en: '', description_ta: '', image_url: '', image_alt_en: '', image_alt_ta: '', cta_label_en: '', cta_label_ta: '', cta_href: '#home', secondary_cta_label_en: '', secondary_cta_label_ta: '', secondary_cta_href: '' },
     fields: [
-      { name: 'scope', label: 'Carousel', type: 'select', requiredForPublish: true, options: [{ value: 'home', label: 'Homepage' }, { value: 'academics', label: 'Academics' }, { value: 'community', label: 'Community Care' }] },
+      { name: 'scope', label: 'Carousel', type: 'select', requiredForPublish: true, options: [{ value: 'home', label: 'Homepage' }, { value: 'community', label: 'Community Care' }] },
       { name: 'eyebrow_en', label: 'English short label', type: 'text', requiredForPublish: true },
       { name: 'eyebrow_ta', label: 'Tamil short label', tamilLabel: 'தமிழ் குறுந்தலைப்பு', type: 'text', requiredForPublish: true },
       ...bilingualTitleFields, ...bilingualDescriptionFields,
@@ -146,39 +158,39 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     ],
   },
   ministries: {
-    key: 'ministries', title: 'Ministries, Faculty & Programmes', singular: 'content item', table: 'ministries', orderBy: 'display_order', orderable: true,
-    description: 'Manage Church ministries, Community Care programmes, academic faculty and homepage highlights.', titleField: 'title_en', subtitleField: 'group_key',
+    key: 'ministries', title: 'Ministry Photos', singular: 'ministry photo', table: 'ministries', orderBy: 'display_order', excludeFilters: { group_key: 'academics' }, allowCreate: false, allowDelete: false,
+    description: 'Replace the approved image used for each Church ministry.', titleField: 'title_en', subtitleField: 'eyebrow_en',
     defaults: { slug: '', group_key: 'church', title_en: '', title_ta: '', eyebrow_en: '', eyebrow_ta: '', description_en: '', description_ta: '', image_url: '', icon_key: '', featured: false, status: 'draft', display_order: 0, metadata: {} },
     fields: [
-      { name: 'slug', label: 'Internal identifier', type: 'text', requiredForPublish: true, help: 'Lowercase letters and hyphens only.' },
-      { name: 'group_key', label: 'Page group', type: 'select', options: [{ value: 'church', label: 'Church' }, { value: 'community', label: 'Community Care' }, { value: 'academics', label: 'Academics' }, { value: 'homepage', label: 'Homepage' }] },
-      { name: 'eyebrow_en', label: 'English short label', type: 'text' },
-      { name: 'eyebrow_ta', label: 'Tamil short label', type: 'text' },
-      ...bilingualTitleFields, ...bilingualDescriptionFields,
-      { name: 'image_url', label: 'Approved ministry image', type: 'text', fullWidth: true },
-      { name: 'icon_key', label: 'Approved icon key', type: 'text' },
-      { name: 'featured', label: 'Featured ministry', type: 'boolean' },
-      { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
+      { name: 'image_url', label: 'Approved ministry image', type: 'text', requiredForPublish: true, fullWidth: true, help: 'Choose a replacement from the approved Upload Library.' },
     ],
   },
-  'page-content': {
-    key: 'page-content', title: 'Page Copy', singular: 'content block', table: 'page_content', orderBy: 'page_key',
-    description: 'Edit approved English and Tamil headings and descriptions without changing page layouts.', titleField: 'content_key', subtitleField: 'page_key',
-    defaults: { page_key: 'home', content_key: '', content_en: '', content_ta: '', status: 'draft', display_order: 0, metadata: {} },
+  academics: {
+    key: 'academics', title: 'Academics Faculty Photos', singular: 'faculty photo', table: 'ministries', orderBy: 'display_order', filters: { group_key: 'academics' }, allowCreate: false, allowDelete: false,
+    description: 'Manage faculty portraits separately from Church ministry images.', titleField: 'title_en', subtitleField: 'eyebrow_en',
+    defaults: { slug: '', group_key: 'academics', title_en: '', title_ta: '', eyebrow_en: '', eyebrow_ta: '', description_en: '', description_ta: '', image_url: '', icon_key: '', featured: false, status: 'draft', display_order: 0, metadata: {} },
     fields: [
-      { name: 'page_key', label: 'Page', type: 'select', options: [{ value: 'home', label: 'Homepage' }, { value: 'about', label: 'About Us' }, { value: 'church', label: 'Church' }, { value: 'prayer', label: 'Prayer Helpline' }, { value: 'academics', label: 'Academics' }, { value: 'community', label: 'Community Care' }] },
-      { name: 'content_key', label: 'Translation key', type: 'text', requiredForPublish: true, help: 'Existing approved key, for example about.title.' },
-      { name: 'content_en', label: 'English content', type: 'textarea', requiredForPublish: true, fullWidth: true },
-      { name: 'content_ta', label: 'Tamil content', tamilLabel: 'தமிழ் உள்ளடக்கம்', type: 'textarea', requiredForPublish: true, fullWidth: true },
+      { name: 'image_url', label: 'Approved faculty portrait', type: 'text', requiredForPublish: true, fullWidth: true, help: 'Choose a replacement portrait from the approved Upload Library.' },
+    ],
+  },
+  'academic-courses': {
+    key: 'academic-courses', title: 'Academic Courses', singular: 'course', table: 'academic_courses', orderBy: 'display_order', orderable: true,
+    description: 'Manage the courses and durations shown on the Academics page.', titleField: 'title_en', subtitleField: 'short_name',
+    defaults: { slug: '', short_name: '', title_en: '', title_ta: '', duration_en: '', duration_ta: '', status: 'draft', display_order: 0 },
+    fields: [
+      { name: 'slug', label: 'Course identifier', type: 'text', requiredForPublish: true, placeholder: 'example: bachelor-theology', help: 'Lowercase letters, numbers and hyphens only.' },
+      { name: 'short_name', label: 'Short name', type: 'text', requiredForPublish: true, placeholder: 'Example: B.Th' },
+      ...bilingualTitleFields,
+      { name: 'duration_en', label: 'Duration — English', type: 'text', requiredForPublish: true, placeholder: 'Example: 3 years' },
+      { name: 'duration_ta', label: 'Duration — Tamil', tamilLabel: 'கால அளவு — தமிழ்', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: 3 ஆண்டுகள்' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
       { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   albums: {
-    key: 'albums', title: 'Gallery Albums', singular: 'album', table: 'gallery_albums', orderBy: 'display_order', orderable: true,
-    description: 'Organize approved photographs into public categories.', titleField: 'title_en', subtitleField: 'slug',
-    defaults: { slug: '', title_en: '', title_ta: '', description_en: '', description_ta: '', status: 'draft', display_order: 0 },
+    key: 'albums', title: 'Gallery Page Albums', singular: 'album', table: 'gallery_albums', orderBy: 'display_order', orderable: true, filters: { page_scope: 'gallery' },
+    description: 'Create albums only for the public Gallery page.', titleField: 'title_en', subtitleField: 'slug',
+    defaults: { slug: '', page_scope: 'gallery', title_en: '', title_ta: '', description_en: '', description_ta: '', status: 'draft', display_order: 0 },
     fields: [
       { name: 'slug', label: 'Album identifier', type: 'text', requiredForPublish: true }, ...bilingualTitleFields, ...bilingualDescriptionFields,
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
@@ -186,19 +198,15 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     ],
   },
   'gallery-images': {
-    key: 'gallery-images', title: 'Gallery Photos', singular: 'photo', table: 'gallery_images', orderBy: 'display_order', orderable: true,
-    description: 'Publish approved images with bilingual captions and meaningful alt text.', titleField: 'caption_en', subtitleField: 'status',
+    key: 'gallery-images', title: 'Gallery Page Photos', singular: 'photo', table: 'gallery_images', orderBy: 'display_order', orderable: true, presentation: 'photo-grid', albumScope: 'gallery',
+    description: 'Photos shown on the public Gallery page, organised under its albums.', titleField: 'caption_en', subtitleField: 'status',
     defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', featured: false, status: 'draft', display_order: 0 },
-    fields: [
-      { name: 'album_id', label: 'Album ID', type: 'text', requiredForPublish: true, help: 'Copy the album ID from Gallery Albums.' },
-      { name: 'image_url', label: 'Approved image URL', type: 'text', requiredForPublish: true, fullWidth: true },
-      { name: 'caption_en', label: 'English caption', type: 'text', requiredForPublish: true },
-      { name: 'caption_ta', label: 'Tamil caption', tamilLabel: 'தமிழ் விளக்கவரி', type: 'text', requiredForPublish: true },
-      { name: 'alt_en', label: 'English alt text', type: 'textarea', requiredForPublish: true, fullWidth: true },
-      { name: 'alt_ta', label: 'Tamil alt text', tamilLabel: 'தமிழ் மாற்று உரை', type: 'textarea', requiredForPublish: true, fullWidth: true },
-      { name: 'featured', label: 'Featured photo', type: 'boolean' },
-      { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
-    ],
+    fields: galleryPhotoFields,
+  },
+  'academic-gallery': {
+    key: 'academic-gallery', title: 'Graduation Photos', singular: 'graduation photo', table: 'gallery_images', orderBy: 'display_order', orderable: true, presentation: 'photo-grid', albumScope: 'academics',
+    description: 'Photos shown only in the Academics graduation section. Albums cannot be created here.', titleField: 'caption_en', subtitleField: 'status',
+    defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', featured: false, status: 'draft', display_order: 0 },
+    fields: galleryPhotoFields,
   },
 }

@@ -36,8 +36,10 @@ export function AdminLogin() {
           <label><span>Password</span><div><KeyRound size={17} /><input type="password" autoComplete="current-password" {...form.register('password')} /></div><small>{form.formState.errors.password?.message}</small></label>
           <button type="submit" className="admin-primary-button" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'Signing in…' : 'Sign in securely'}</button>
         </form>
-        <button type="button" className="admin-text-button" onClick={() => { window.location.hash = '#/admin/forgot-password' }}>Forgot password?</button>
-        <a className="admin-back-link" href="#home"><ArrowLeft size={16} /> Return to website</a>
+        <div className="admin-auth-actions">
+          <button type="button" className="admin-text-button" onClick={() => { window.location.hash = '#/admin/forgot-password' }}>Forgot password?</button>
+          <a className="admin-back-link" href="#home"><ArrowLeft size={16} /> Return to website</a>
+        </div>
       </section>
     </main>
   )

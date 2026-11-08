@@ -8,7 +8,7 @@ import { SectionHeading } from '../components/common/SectionHeading'
 import { academicCollege, academicCourses, academicFaculty, academicPillars } from '../data/academics'
 import { graduationGalleryItems } from '../data/gallery'
 import { useLanguage } from '../context/LanguageContext'
-import { usePublishedGallery, usePublishedMinistries } from '../hooks/usePublishedContent'
+import { usePublishedAcademicCourses, usePublishedAcademicSettings, usePublishedGallery, usePublishedMinistries } from '../hooks/usePublishedContent'
 
 const pillarIcons = {
   scripture: BookOpenCheck,
@@ -21,7 +21,25 @@ export function AcademicsPage() {
   const { t, localize } = useLanguage()
   const [activeGraduationPhoto, setActiveGraduationPhoto] = useState<number | null>(null)
   const managedFaculty = usePublishedMinistries('academics').data ?? []
-  const managedGallery = usePublishedGallery(graduationGalleryItems).data
+  const managedSettings = usePublishedAcademicSettings().data
+  const managedCourses = usePublishedAcademicCourses().data ?? []
+  const managedGallery = usePublishedGallery(graduationGalleryItems, 'academics').data
+  const college = managedSettings ? {
+    name: managedSettings.college_name,
+    affiliation: managedSettings.affiliation,
+    established: managedSettings.established,
+    founder: managedSettings.founder,
+    principal: managedSettings.principal,
+    address: { en: managedSettings.address_en, ta: managedSettings.address_ta },
+    phones: [managedSettings.phone_primary, managedSettings.phone_secondary].filter((phone): phone is string => Boolean(phone)).map((phone) => ({ display: phone, href: `tel:+91${phone.replace(/\D/g, '').slice(-10)}` })),
+  } : academicCollege
+  const courses = managedCourses.length ? managedCourses.map((course) => ({
+    id: course.slug,
+    shortName: course.short_name,
+    title: { en: course.title_en, ta: course.title_ta },
+    duration: { en: course.duration_en, ta: course.duration_ta },
+  })) : academicCourses
+  const admissionsOpen = managedSettings?.admissions_open ?? true
   const graduationPhotos = useMemo(
     () => managedGallery.filter((item) => item.category.en === 'Graduation'),
     [managedGallery],
@@ -59,7 +77,7 @@ export function AcademicsPage() {
 
   return (
     <main id="main-content" className="academics-page" tabIndex={-1}>
-      <AcademicHeroCarousel />
+      <AcademicHeroCarousel admissionsOpen={admissionsOpen} />
 
       <section id="academics-about" className="section section--ivory academic-about">
         <div className="container">
@@ -76,27 +94,27 @@ export function AcademicsPage() {
           <div className="academic-institute-grid">
             <Reveal className="academic-institute-card">
               <p className="academic-institute-card__eyebrow">{t('academics.institute.eyebrow')}</p>
-              <h3>{academicCollege.name}</h3>
+              <h3>{college.name}</h3>
               <div className="academic-institute-facts">
-                <div><span>{t('academics.institute.affiliation')}</span><strong>{academicCollege.affiliation}</strong></div>
-                <div><span>{t('academics.institute.since')}</span><strong>{academicCollege.established}</strong></div>
-                <div><span>{t('academics.institute.founder')}</span><strong>{academicCollege.founder}</strong></div>
-                <div><span>{t('academics.institute.principal')}</span><strong>{academicCollege.principal}</strong></div>
+                <div><span>{t('academics.institute.affiliation')}</span><strong>{college.affiliation}</strong></div>
+                <div><span>{t('academics.institute.since')}</span><strong>{college.established}</strong></div>
+                <div><span>{t('academics.institute.founder')}</span><strong>{college.founder}</strong></div>
+                <div><span>{t('academics.institute.principal')}</span><strong>{college.principal}</strong></div>
               </div>
-              <address><MapPin size={19} aria-hidden="true" /><span>{localize(academicCollege.address)}</span></address>
+              <address><MapPin size={19} aria-hidden="true" /><span>{localize(college.address)}</span></address>
               <div className="academic-institute-phones">
                 <Phone size={18} aria-hidden="true" />
-                <span>{academicCollege.phones.map((phone, index) => <span key={phone.href}>{index > 0 && <i aria-hidden="true">/</i>}<a href={phone.href}>{phone.display}</a></span>)}</span>
+                <span>{college.phones.map((phone, index) => <span key={phone.href}>{index > 0 && <i aria-hidden="true">/</i>}<a href={phone.href}>{phone.display}</a></span>)}</span>
               </div>
             </Reveal>
 
-            <Reveal className="academic-admissions-callout" delay={0.08}>
+            {admissionsOpen && <Reveal className="academic-admissions-callout" delay={0.08}>
               <span><CalendarDays size={27} aria-hidden="true" /></span>
               <p>{t('academics.admissions2027.eyebrow')}</p>
               <h3>{t('academics.admissions2027.title')}</h3>
               <strong>{t('academics.admissions2027.start')}</strong>
               <a className="button button--navy" href="#academics-admission">{t('academics.admissions2027.cta')} <ArrowRight size={17} aria-hidden="true" /></a>
-            </Reveal>
+            </Reveal>}
           </div>
 
           <div className="academic-pillars">
@@ -123,7 +141,7 @@ export function AcademicsPage() {
         <div className="container">
           <SectionHeading eyebrow={t('academics.syllabus.eyebrow')} title={t('academics.syllabus.title')} description={t('academics.syllabus.intro')} />
           <div className="academic-courses">
-            {academicCourses.map((course, index) => (
+            {courses.map((course, index) => (
               <Reveal className="academic-course" key={course.id} delay={index * 0.06}>
                 <div className="academic-course__top"><span><GraduationCap size={26} aria-hidden="true" /></span><small>{course.shortName}</small></div>
                 <h3>{localize(course.title)}</h3>
@@ -157,7 +175,7 @@ export function AcademicsPage() {
         </div>
       </section>
 
-      <AdmissionForm />
+      {admissionsOpen && <AdmissionForm />}
 
       <section id="academics-graduation" className="section section--ivory academic-graduation">
         <div className="container">

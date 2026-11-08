@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import { AdminLogin, ForgotPassword, ResetPassword, SupabaseSetupRequired, UnauthorizedAdmin } from './components/AdminAuthScreens'
 import { AdminGuidePage } from './components/AdminGuidePage'
+import { AcademicCarouselPage } from './components/AcademicCarouselPage'
+import { AcademicSettingsPage } from './components/AcademicSettingsPage'
 import { AdmissionsPage } from './components/AdmissionsPage'
 import { AudioLibraryPage } from './components/AudioLibraryPage'
 import { ApprovalsPage } from './components/ApprovalsPage'
@@ -24,7 +26,7 @@ function AdminRouter({ hash }: { hash: string }) {
   if (auth.loading) return <main className="admin-loading"><span>Checking secure session…</span></main>
   if (!auth.user) return <AdminLogin />
   if (!auth.authorized) return <UnauthorizedAdmin />
-  const content = route === 'dashboard' ? <DashboardPage /> : route === 'media-library' ? <MediaLibraryPage /> : route === 'audio-library' ? <AudioLibraryPage /> : route === 'submissions' ? (!auth.isOwner ? <EditorSubmissionsPage /> : <DashboardPage />) : route === 'approvals' ? (auth.isOwner ? <ApprovalsPage /> : <DashboardPage />) : route === 'admissions' ? (auth.isOwner ? <AdmissionsPage /> : <DashboardPage />) : route === 'team-access' ? (auth.isOwner ? <TeamAccessPage /> : <DashboardPage />) : route === 'settings' && auth.isOwner ? <SettingsPage /> : route === 'guide' ? <AdminGuidePage /> : moduleDefinitions[route] ? <CollectionPage key={route} definition={moduleDefinitions[route]} /> : <DashboardPage />
+  const content = route === 'dashboard' ? <DashboardPage /> : route === 'media-library' ? <MediaLibraryPage /> : route === 'audio-library' ? <AudioLibraryPage /> : route === 'academic-carousel' ? <AcademicCarouselPage /> : route === 'academic-settings' ? (auth.isOwner ? <AcademicSettingsPage /> : <DashboardPage />) : route === 'submissions' ? (!auth.isOwner ? <EditorSubmissionsPage /> : <DashboardPage />) : route === 'approvals' ? (auth.isOwner ? <ApprovalsPage /> : <DashboardPage />) : route === 'admissions' ? (auth.isOwner ? <AdmissionsPage /> : <DashboardPage />) : route === 'team-access' ? (auth.isOwner ? <TeamAccessPage /> : <DashboardPage />) : route === 'settings' && auth.isOwner ? <SettingsPage /> : route === 'guide' ? <AdminGuidePage /> : moduleDefinitions[route] ? <CollectionPage key={route} definition={moduleDefinitions[route]} /> : <DashboardPage />
   return <AdminLayout route={route}><Suspense fallback={<main className="admin-loading"><span>Loading…</span></main>}>{content}</Suspense></AdminLayout>
 }
 

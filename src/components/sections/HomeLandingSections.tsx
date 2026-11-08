@@ -22,7 +22,7 @@ import { churchInfo } from '../../data/churchInfo'
 import { generationMinistries } from '../../data/churchMinistries'
 import { recurringGatherings } from '../../data/recurringGatherings'
 import { useLanguage } from '../../context/LanguageContext'
-import { usePublishedMinistries, usePublishedSiteSettings, usePublishedWorship } from '../../hooks/usePublishedContent'
+import { usePublishedAcademicCourses, usePublishedAcademicSettings, usePublishedMinistries, usePublishedSiteSettings, usePublishedWorship } from '../../hooks/usePublishedContent'
 import { Reveal } from '../common/Reveal'
 import { SectionHeading } from '../common/SectionHeading'
 
@@ -166,21 +166,27 @@ export function HomePrayerSupport() {
 
 export function HomeAcademicsFeature() {
   const { localize } = useLanguage()
+  const managedSettings = usePublishedAcademicSettings().data
+  const managedCourses = usePublishedAcademicCourses().data ?? []
+  const courses = managedCourses.length ? managedCourses.map((course) => ({ id: course.slug, shortName: course.short_name, title: { en: course.title_en, ta: course.title_ta }, duration: { en: course.duration_en, ta: course.duration_ta } })) : academicCourses
+  const collegeName = managedSettings?.college_name ?? academicCollege.name
+  const affiliation = managedSettings?.affiliation ?? academicCollege.affiliation
+  const admissionsOpen = managedSettings?.admissions_open ?? true
   return (
     <section className="section home-academics">
       <div className="container home-academics__layout">
         <Reveal className="home-academics__copy">
-          <p className="home-kicker"><GraduationCap size={17} />{localize({ en: 'Bible college · Admissions 2027', ta: 'வேதாகமக் கல்லூரி · 2027 சேர்க்கை' })}</p>
+          <p className="home-kicker"><GraduationCap size={17} />{localize(admissionsOpen ? { en: 'Bible college · Admissions 2027', ta: 'வேதாகமக் கல்லூரி · 2027 சேர்க்கை' } : { en: 'Bible college', ta: 'வேதாகமக் கல்லூரி' })}</p>
           <h2>{localize({ en: 'Prepared in God’s Word. Equipped for faithful service.', ta: 'தேவ வார்த்தையில் ஆயத்தம். உண்மையுள்ள ஊழியத்திற்கு பயிற்சி.' })}</h2>
-          <p>{localize({ en: `${academicCollege.name} welcomes applications for classes beginning in January 2027.`, ta: `${academicCollege.name} ஜனவரி 2027-ல் தொடங்கும் வகுப்புகளுக்கான விண்ணப்பங்களை வரவேற்கிறது.` })}</p>
+          <p>{localize(admissionsOpen ? { en: `${collegeName} welcomes applications for classes beginning in January 2027.`, ta: `${collegeName} ஜனவரி 2027-ல் தொடங்கும் வகுப்புகளுக்கான விண்ணப்பங்களை வரவேற்கிறது.` } : { en: `${collegeName} provides church-rooted theological and ministry education.`, ta: `${collegeName} திருச்சபை சார்ந்த இறையியல் மற்றும் ஊழியக் கல்வியை வழங்குகிறது.` })}</p>
           <div className="home-course-list">
-            {academicCourses.map((course) => <span key={course.id}><b>{course.shortName}</b><small>{localize(course.title)} · {localize(course.duration)}</small></span>)}
+            {courses.map((course) => <span key={course.id}><b>{course.shortName}</b><small>{localize(course.title)} · {localize(course.duration)}</small></span>)}
           </div>
-          <div className="home-actions"><a className="button button--navy" href="#academics-admission">{localize({ en: 'Apply for admission', ta: 'சேர்க்கைக்கு விண்ணப்பிக்கவும்' })} <ArrowRight size={17} /></a><a className="text-link" href="#academics">{localize({ en: 'Explore the college', ta: 'கல்லூரியை அறியுங்கள்' })} <ArrowUpRight size={16} /></a></div>
+          <div className="home-actions">{admissionsOpen && <a className="button button--navy" href="#academics-admission">{localize({ en: 'Apply for admission', ta: 'சேர்க்கைக்கு விண்ணப்பிக்கவும்' })} <ArrowRight size={17} /></a>}<a className="text-link" href="#academics">{localize({ en: 'Explore the college', ta: 'கல்லூரியை அறியுங்கள்' })} <ArrowUpRight size={16} /></a></div>
         </Reveal>
         <Reveal className="home-academics__media" delay={0.08}>
           <img src="./home/academics-graduates.jpg" alt={localize({ en: 'Graduates of Worship To Jesus Bible Institute & College', ta: 'Worship To Jesus Bible Institute & College பட்டதாரிகள்' })} loading="lazy" />
-          <div><School size={23} /><span><small>{localize({ en: 'Affiliated by', ta: 'இணைப்பு' })}</small><strong>National Theological Association (NTA)</strong></span></div>
+          <div><School size={23} /><span><small>{localize({ en: 'Affiliated by', ta: 'இணைப்பு' })}</small><strong>{affiliation}</strong></span></div>
         </Reveal>
       </div>
     </section>

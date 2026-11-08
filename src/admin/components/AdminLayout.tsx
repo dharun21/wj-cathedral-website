@@ -1,4 +1,4 @@
-import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, FileText, GalleryHorizontalEnd, Headphones, Images, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
+import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, GalleryHorizontalEnd, GraduationCap, Headphones, Images, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { LogoMark } from '../../components/common/LogoMark'
 import { useAdminAuth } from '../context/AdminAuthContext'
@@ -9,8 +9,10 @@ interface AdminNavigationSection { group: string; items: AdminNavigationItem[] }
 const navigation: AdminNavigationSection[] = [
   { group: 'Overview', items: [{ path: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
   { group: 'Homepage', items: [{ path: 'slides', label: 'Carousel Slides', icon: PanelsTopLeft }, { path: 'verses', label: 'Daily Bible Verses', icon: BookHeart }, { path: 'announcements', label: 'Announcements', icon: BellRing }, { path: 'services', label: 'Worship Times', icon: Clock3 }] },
-  { group: 'Church Content', items: [{ path: 'events', label: 'Events', icon: CalendarDays }, { path: 'videos', label: 'YouTube Videos & Live', icon: CirclePlay }, { path: 'audio-albums', label: 'Audio Albums', icon: Headphones }, { path: 'audio-library', label: 'Audio Uploads', icon: Headphones }, { path: 'ministries', label: 'Ministries', icon: Church }, { path: 'page-content', label: 'Page Copy', icon: FileText }] },
-  { group: 'Photos', items: [{ path: 'media-library', label: 'Media Library', icon: Images }, { path: 'albums', label: 'Gallery Albums', icon: GalleryHorizontalEnd }, { path: 'gallery-images', label: 'Gallery Photos', icon: Images }] },
+  { group: 'Church Content', items: [{ path: 'events', label: 'Events', icon: CalendarDays }, { path: 'videos', label: 'YouTube Videos & Live', icon: CirclePlay }, { path: 'audio-albums', label: 'Audio Albums', icon: Headphones }, { path: 'audio-library', label: 'Audio Uploads', icon: Headphones }, { path: 'ministries', label: 'Ministries', icon: Church }] },
+  { group: 'Academics', items: [{ path: 'academic-settings', label: 'College Details', icon: GraduationCap, ownerOnly: true }, { path: 'academic-carousel', label: 'Admission Carousel', icon: PanelsTopLeft }, { path: 'academic-courses', label: 'Courses', icon: BookOpenCheck }, { path: 'academics', label: 'Faculty Photos', icon: GraduationCap }, { path: 'academic-gallery', label: 'Graduation Photos', icon: Images }] },
+  { group: 'Gallery Page', items: [{ path: 'albums', label: 'Albums', icon: GalleryHorizontalEnd }, { path: 'gallery-images', label: 'Photos', icon: Images }] },
+  { group: 'Uploads', items: [{ path: 'media-library', label: 'Upload Library', icon: Images }] },
   { group: 'Workflow', items: [{ path: 'submissions', label: 'Pending Approval', icon: FileClock, editorOnly: true }, { path: 'approvals', label: 'Attention Required', icon: ShieldCheck, ownerOnly: true }] },
   { group: 'Administration', items: [{ path: 'admissions', label: 'Admission Applications', icon: UserRoundCheck, ownerOnly: true }, { path: 'team-access', label: 'Team & Access', icon: UserCog, ownerOnly: true }] },
   { group: 'Configuration', items: [{ path: 'settings', label: 'Website Settings', icon: Settings, ownerOnly: true }, { path: 'guide', label: 'Admin Guide', icon: BookOpenCheck }] },

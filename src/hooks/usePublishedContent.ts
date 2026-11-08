@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { isSupabaseConfigured } from '../lib/env'
 import {
   fetchPublishedAnnouncements,
+  fetchPublishedAcademicCourses,
+  fetchPublishedAcademicSettings,
   fetchPublishedAudioLibrary,
   fetchPublishedEvents,
   fetchDailyBibleVerse,
@@ -74,6 +76,24 @@ export function usePublishedHeroRows(scope: HeroSlideRow['scope']) {
   return useQuery({
     queryKey: ['public', 'hero-slides', scope],
     queryFn: () => fetchPublishedHeroSlides(scope),
+    enabled: isSupabaseConfigured,
+    ...publicQueryOptions,
+  })
+}
+
+export function usePublishedAcademicSettings() {
+  return useQuery({
+    queryKey: ['public', 'academic-settings'],
+    queryFn: fetchPublishedAcademicSettings,
+    enabled: isSupabaseConfigured,
+    ...publicQueryOptions,
+  })
+}
+
+export function usePublishedAcademicCourses() {
+  return useQuery({
+    queryKey: ['public', 'academic-courses'],
+    queryFn: fetchPublishedAcademicCourses,
     enabled: isSupabaseConfigured,
     ...publicQueryOptions,
   })
@@ -158,10 +178,10 @@ export function usePublishedAudioLibrary() {
   })
 }
 
-export function usePublishedGallery(fallback: GalleryItem[]) {
+export function usePublishedGallery(fallback: GalleryItem[], pageScope: 'gallery' | 'academics' = 'gallery') {
   const query = useQuery({
-    queryKey: ['public', 'gallery'],
-    queryFn: fetchPublishedGallery,
+    queryKey: ['public', 'gallery', pageScope],
+    queryFn: () => fetchPublishedGallery(pageScope),
     enabled: isSupabaseConfigured,
     select: ({ albums, images }): GalleryItem[] => {
       const albumMap = new Map(albums.map((album) => [album.id, localized(album.title_en, album.title_ta)]))
