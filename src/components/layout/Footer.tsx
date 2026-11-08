@@ -1,62 +1,111 @@
-import { ArrowUpRight, MapPin, Phone, SquarePlay } from 'lucide-react'
-import { churchInfo, navItems } from '../../data/churchInfo'
-import { sermons, youtubeChannelUrl } from '../../data/sermons'
+import { ArrowRight, ArrowUpRight, CalendarDays, MapPin, Navigation, Phone, SquarePlay } from 'lucide-react'
+import { churchInfo } from '../../data/churchInfo'
+import { recurringGatherings } from '../../data/recurringGatherings'
+import { youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
 import { LogoMark } from '../common/LogoMark'
-import { usePublishedSiteSettings } from '../../hooks/usePublishedContent'
+import { usePublishedSiteSettings, usePublishedWorship } from '../../hooks/usePublishedContent'
 
 const currentYear = new Date().getFullYear()
+
+function InstagramIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.8" /><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" /><circle cx="17.4" cy="6.7" r="1" fill="currentColor" /></svg>
+}
+
+const exploreLinks = [
+  { href: '#about', label: { en: 'About us', ta: 'எங்களைப் பற்றி' } },
+  { href: '#church', label: { en: 'Church ministries', ta: 'திருச்சபை ஊழியங்கள்' } },
+  { href: '#events', label: { en: 'Events & gatherings', ta: 'நிகழ்வுகள் & கூடுகைகள்' } },
+  { href: '#sermons', label: { en: 'Media library', ta: 'ஊடகத் தொகுப்பு' } },
+  { href: '#gallery', label: { en: 'Church gallery', ta: 'திருச்சபை படத்தொகுப்பு' } },
+] as const
+
+const participateLinks = [
+  { href: '#academics', label: { en: 'Academics & admission', ta: 'கல்வி & சேர்க்கை' } },
+  { href: '#community-care', label: { en: 'Community care', ta: 'சமூக அக்கறை' } },
+  { href: '#prayer-helpline', label: { en: 'Prayer support', ta: 'ஜெப உதவி' } },
+  { href: '#give', label: { en: 'Give to the ministry', ta: 'ஊழியத்திற்கு காணிக்கை' } },
+  { href: '#contact', label: { en: 'Contact & directions', ta: 'தொடர்பு & வழிகாட்டல்' } },
+] as const
 
 export function Footer() {
   const { t, localize } = useLanguage()
   const settings = usePublishedSiteSettings().data
+  const gatherings = usePublishedWorship(recurringGatherings).data.slice(0, 3)
   const name = settings?.display_name || 'WJ Cathedral'
-  const phone = settings?.phone || churchInfo.phone
   const address = settings ? { en: settings.address_en || churchInfo.address.en, ta: settings.address_ta || churchInfo.address.ta } : churchInfo.address
   const mapsUrl = settings?.maps_url || churchInfo.mapsUrl
+  const youtubeUrl = settings?.youtube_url || youtubeChannelUrl
+  const instagramUrl = settings?.instagram_url || churchInfo.instagramUrl
+  const contacts = [
+    { ...churchInfo.contacts[0], phone: settings?.phone || churchInfo.contacts[0].phone },
+    churchInfo.contacts[1],
+  ]
+  const footerCopy = localize({
+    en: settings?.footer_en || 'A church family in Nannilam growing through worship, prayer, biblical formation and compassionate service.',
+    ta: settings?.footer_ta || 'ஆராதனை, ஜெபம், வேதாகம உருவாக்கம் மற்றும் இரக்கமுள்ள சேவையில் வளரும் நன்னிலம் திருச்சபைக் குடும்பம்.',
+  })
   return (
     <footer className="site-footer">
       <div className="footer-glow" aria-hidden="true" />
+
+      <div className="footer-invite-wrap">
+        <div className="container footer-invite">
+          <div>
+            <small>{localize({ en: 'There is a place for you here', ta: 'இங்கே உங்களுக்கும் ஓர் இடம் உண்டு' })}</small>
+            <h2>{localize({ en: 'Come worship with the WJ Cathedral family.', ta: 'WJ Cathedral குடும்பத்துடன் ஆராதிக்க வாருங்கள்.' })}</h2>
+          </div>
+          <div className="footer-invite__actions">
+            <a className="button button--gold" href={mapsUrl} target="_blank" rel="noreferrer"><Navigation size={18} /> {t('common.getDirections')}</a>
+            <a className="button button--outline-light" href="#prayer-helpline">{localize({ en: 'Request prayer', ta: 'ஜெப உதவி பெறுங்கள்' })} <ArrowRight size={17} /></a>
+          </div>
+        </div>
+      </div>
+
       <div className="container footer-grid">
         <div className="footer-brand">
           <div className="footer-brand__title">
             <LogoMark />
             <div><strong>{name}</strong><span>{localize(churchInfo.locationShort)}</span></div>
           </div>
-          <p>{t('about.body1')}</p>
-          <p className="footer-review-note">{t('footer.localReview')}</p>
+          <p>{footerCopy}</p>
+          <div className="footer-socials" aria-label={localize({ en: 'Official social channels', ta: 'அதிகாரப்பூர்வ சமூக வலைதளங்கள்' })}>
+            <a href={youtubeUrl} target="_blank" rel="noreferrer" aria-label={t('header.youtube')}><SquarePlay size={18} /> YouTube</a>
+            <a href={instagramUrl} target="_blank" rel="noreferrer" aria-label={t('header.instagram')}><InstagramIcon /> Instagram</a>
+          </div>
         </div>
-        <div>
-          <h3>{t('footer.quickLinks')}</h3>
+
+        <nav className="footer-links" aria-label={localize({ en: 'Explore', ta: 'ஆராயுங்கள்' })}>
+          <h3>{localize({ en: 'Explore', ta: 'ஆராயுங்கள்' })}</h3>
+          <ul>{exploreLinks.map((item) => <li key={item.href}><a href={item.href}>{localize(item.label)}</a></li>)}</ul>
+        </nav>
+
+        <nav className="footer-links" aria-label={localize({ en: 'Take part', ta: 'பங்கேற்கவும்' })}>
+          <h3>{localize({ en: 'Take part', ta: 'பங்கேற்கவும்' })}</h3>
+          <ul>{participateLinks.map((item) => <li key={item.href}><a href={item.href}>{localize(item.label)}</a></li>)}</ul>
+        </nav>
+
+        <div className="footer-gatherings">
+          <h3>{localize({ en: 'Gather with us', ta: 'எங்களுடன் கூடுங்கள்' })}</h3>
           <ul>
-            {navItems.slice(0, 6).map((item) => (
-              <li key={item.id}><a href={item.href}>{t(item.labelKey as Parameters<typeof t>[0])}</a></li>
+            {gatherings.map((gathering) => (
+              <li key={gathering.id}>
+                <CalendarDays size={18} aria-hidden="true" />
+                <span><strong>{localize(gathering.name)}</strong><small>{localize(gathering.day)} · {localize(gathering.time)}</small></span>
+              </li>
             ))}
           </ul>
-        </div>
-        <div>
-          <h3>{t('footer.visit')}</h3>
-          <address>
-            <a href={mapsUrl} target="_blank" rel="noreferrer">
-              <MapPin size={17} aria-hidden="true" />
-              <span>{localize(address)}</span>
-            </a>
-            <a href={`tel:${phone}`}>
-              <Phone size={17} aria-hidden="true" />
-              <span>{phone}</span>
-            </a>
-          </address>
-        </div>
-        <div>
-          <h3>{t('footer.follow')}</h3>
-          <a className="footer-youtube" href={settings?.youtube_url || youtubeChannelUrl || `https://www.youtube.com/watch?v=${sermons[0]?.videoId ?? ''}`} target="_blank" rel="noreferrer">
-            <SquarePlay size={19} aria-hidden="true" />
-            {t('footer.youtubeVideos')}
-            <ArrowUpRight size={15} aria-hidden="true" />
-          </a>
-          <p className="footer-muted">{t('footer.socialPending')}</p>
+          <a className="footer-schedule-link" href="#events">{localize({ en: 'View the full prayer schedule', ta: 'முழு ஜெப அட்டவணையைப் பாருங்கள்' })} <ArrowRight size={15} /></a>
         </div>
       </div>
+
+      <div className="container footer-contact-bar">
+        <a className="footer-address" href={mapsUrl} target="_blank" rel="noreferrer"><MapPin size={19} /><span><small>{t('contact.address')}</small><strong>{localize(address)}</strong></span></a>
+        <div className="footer-contacts">
+          {contacts.map((contact) => <a href={`tel:${contact.phone}`} key={contact.id}><Phone size={17} /><span><small>{contact.name}</small><strong>{contact.display}</strong></span></a>)}
+        </div>
+      </div>
+
       <div className="container footer-bottom">
         <p>© {currentYear} {name}. {t('footer.rights')}</p>
         <a href="#home">{t('a11y.backToTop')} <ArrowUpRight size={15} aria-hidden="true" /></a>

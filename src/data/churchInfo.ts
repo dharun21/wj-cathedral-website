@@ -10,6 +10,10 @@ export const churchInfo = {
   } satisfies LocalizedText,
   phone: '+919788056467',
   phoneDisplay: '+91 97880 56467',
+  contacts: [
+    { id: 'zeehan-paul', name: 'Zeehan Paul', phone: '+919788056467', display: '+91 97880 56467' },
+    { id: 'aaron-jebaraj', name: 'Aaron Jebaraj', phone: '+918870226801', display: '+91 88702 26801' },
+  ],
   mapsUrl: 'https://maps.app.goo.gl/Dc9ohp6aNdBD265K9?g_st=ic',
   instagramUrl: 'https://www.instagram.com/wj_cathedral_nnm/',
   verificationNote: {

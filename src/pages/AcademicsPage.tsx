@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpenCheck, CalendarDays, ChevronLeft, ChevronRight, Clock3, GraduationCap, HeartHandshake, ImagePlus, MapPin, Phone, ShieldAlert, Sparkles, UserRound, UsersRound, X } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, CalendarDays, ChevronLeft, ChevronRight, Clock3, GraduationCap, HeartHandshake, MapPin, Phone, ShieldAlert, Sparkles, UserRound, UsersRound, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AcademicHeroCarousel } from '../components/academics/AcademicHeroCarousel'
@@ -154,7 +154,6 @@ export function AcademicsPage() {
               </Reveal>
             ))}
           </div>
-          <Reveal className="academic-faculty__admin-note"><ImagePlus size={19} aria-hidden="true" /><p>{t('academics.faculty.photoNote')}</p></Reveal>
         </div>
       </section>
 

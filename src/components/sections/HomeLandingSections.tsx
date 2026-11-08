@@ -139,6 +139,10 @@ export function HomePrayerSupport() {
   const { localize } = useLanguage()
   const settings = usePublishedSiteSettings().data
   const phone = settings?.phone || churchInfo.phone
+  const contacts = [
+    { ...churchInfo.contacts[0], phone, display: phone === churchInfo.phone ? churchInfo.contacts[0].display : phone },
+    churchInfo.contacts[1],
+  ]
   const availability = settings?.prayer_247_confirmed
     ? { en: '24/7 prayer support', ta: '24/7 ஜெப உதவி' }
     : { en: 'Prayer support from the church', ta: 'திருச்சபையின் ஜெப உதவி' }
@@ -152,7 +156,7 @@ export function HomePrayerSupport() {
         </Reveal>
         <Reveal className="home-prayer-band__action" delay={0.08}>
           <small>{localize({ en: 'Prayer contact', ta: 'ஜெபத் தொடர்பு' })}</small>
-          <a href={`tel:${phone}`}>{churchInfo.phoneDisplay}</a>
+          <div className="home-prayer-band__phones">{contacts.map((contact) => <a href={`tel:${contact.phone}`} key={contact.id}><small>{contact.name}</small><strong>{contact.display}</strong></a>)}</div>
           <div><a className="button button--gold" href={`tel:${phone}`}><Phone size={18} />{localize({ en: 'Call for prayer', ta: 'ஜெபத்திற்கு அழைக்கவும்' })}</a><a className="button button--outline-light" href="#prayer-helpline">{localize({ en: 'Prayer support', ta: 'ஜெப உதவி' })}</a></div>
         </Reveal>
       </div>

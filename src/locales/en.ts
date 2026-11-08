@@ -184,7 +184,7 @@ const en = {
   'aboutPage.story.body1': 'WJ Cathedral’s story is carried through a local community gathering for worship, prayer, biblical learning and fellowship. It is a place where families and first-time visitors are welcomed to seek Jesus together.',
   'aboutPage.story.body2': 'That life now extends through ministries for children, young people and families, leadership formation, Gospel ministry, theological education and practical Community Care.',
   'aboutPage.story.note': 'One church community connecting worship, formation and compassionate service.',
-  'aboutPage.founder.eyebrow': 'Founding leadership',
+  'aboutPage.founder.eyebrow': 'Founder of Worship to Jeasus Ministries',
   'aboutPage.founder.name': 'Rev. Pr. A. Paulraj',
   'aboutPage.founder.role': 'Founder · WJ Cathedral',
   'aboutPage.founder.statement': 'A legacy of worship, biblical teaching and service.',

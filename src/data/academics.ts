@@ -61,8 +61,8 @@ export const academicCollege = {
   founder: 'Rev. Pr. A. Paulraj',
   principal: 'Pr. A. George Edward',
   address: {
-    en: 'Worship to Jesus Church, Near Telephone Exchange, Nannilam 610105, Thiruvarur District, Tamil Nadu.',
-    ta: 'Worship to Jesus Church, தொலைபேசி நிலையம் அருகில், நன்னிலம் 610105, திருவாரூர் மாவட்டம், தமிழ்நாடு.',
+    en: 'Worship to Jesus Cathedral, Near Telephone Exchange, Nannilam 610105, Thiruvarur District, Tamil Nadu.',
+    ta: 'Worship to Jesus Cathedral, தொலைபேசி நிலையம் அருகில், நன்னிலம் 610105, திருவாரூர் மாவட்டம், தமிழ்நாடு.',
   },
   phones: [
     { display: '9750308877', href: 'tel:+919750308877' },

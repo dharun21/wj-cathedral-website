@@ -11,6 +11,10 @@ export function ContactSection() {
   const primaryService = usePublishedWorship(services).data[0]
   const settings = usePublishedSiteSettings().data
   const phone = settings?.phone || churchInfo.phone
+  const contacts = [
+    { ...churchInfo.contacts[0], phone, display: phone === churchInfo.phone ? churchInfo.contacts[0].display : phone },
+    churchInfo.contacts[1],
+  ]
   const address = settings ? { en: settings.address_en || churchInfo.address.en, ta: settings.address_ta || churchInfo.address.ta } : churchInfo.address
   const mapsUrl = settings?.maps_url || churchInfo.mapsUrl
   return (
@@ -20,7 +24,7 @@ export function ContactSection() {
           <SectionHeading eyebrow={t('contact.eyebrow')} title={t('contact.title')} description={t('contact.intro')} />
           <div className="contact-details">
             <div><span><MapPin size={20} aria-hidden="true" /></span><p><small>{t('contact.address')}</small><strong>{localize(address)}</strong></p></div>
-            <div><span><Phone size={20} aria-hidden="true" /></span><p><small>{t('contact.phone')}</small><a href={`tel:${phone}`}>{phone}</a></p></div>
+            <div><span><Phone size={20} aria-hidden="true" /></span><p><small>{t('contact.phone')}</small>{contacts.map((contact) => <a href={`tel:${contact.phone}`} key={contact.id}>{contact.name} · {contact.display}</a>)}</p></div>
             {primaryService && <div><span><CalendarClock size={20} aria-hidden="true" /></span><p><small>{t('contact.timings')}</small><strong>{localize(primaryService.time)} · {localize(primaryService.day)}</strong></p></div>}
           </div>
           <div className="contact-actions">

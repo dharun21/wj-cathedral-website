@@ -17,6 +17,10 @@ export function PrayerHelplinePage() {
   const settings = usePublishedSiteSettings().data
   const confirmed247 = settings?.prayer_247_confirmed === true
   const phone = settings?.phone || churchInfo.phone
+  const contacts = [
+    { ...churchInfo.contacts[0], phone, display: phone === churchInfo.phone ? churchInfo.contacts[0].display : phone },
+    churchInfo.contacts[1],
+  ]
   const translate = (key: string) => t(key as Parameters<typeof t>[0])
 
   return (
@@ -34,7 +38,7 @@ export function PrayerHelplinePage() {
           <Reveal className="prayer-contact-card" delay={0.08}>
             <div className="prayer-contact-card__icon"><Phone size={30} aria-hidden="true" /></div>
             <small>{t('prayerPage.contactLabel')}</small>
-            <a className="prayer-contact-card__number" href={`tel:${phone}`}>{phone}</a>
+            <div className="prayer-contact-card__contacts">{contacts.map((contact) => <a href={`tel:${contact.phone}`} key={contact.id}><small>{contact.name}</small><strong>{contact.display}</strong></a>)}</div>
             <a className="button button--gold" href={`tel:${phone}`}><Phone size={18} aria-hidden="true" /> {t('prayerPage.callNow')}</a>
             <div className="prayer-contact-card__location">
               <MapPin size={19} aria-hidden="true" />
