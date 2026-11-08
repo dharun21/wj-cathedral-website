@@ -1,6 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { requireSupabase } from '../lib/supabase'
 import type {
+  AudioAlbumRow,
+  AudioTrackRow,
   AnnouncementRow,
   ContentReviewRequestRow,
   DailyBibleVerseRow,
@@ -15,6 +17,15 @@ import type {
   VideoRow,
   WorshipServiceRow,
 } from '../types/database'
+
+export interface PublishedAudioTrack extends AudioTrackRow {
+  audio_url: string
+  mime_type: string
+}
+
+export interface PublishedAudioAlbum extends AudioAlbumRow {
+  tracks: PublishedAudioTrack[]
+}
 
 function genericClient(): SupabaseClient {
   return requireSupabase() as unknown as SupabaseClient
@@ -85,6 +96,36 @@ export async function fetchPublishedVideos() {
     .order('display_order')
   throwIfError(error)
   return (data ?? []) as VideoRow[]
+}
+
+export async function fetchPublishedAudioLibrary(): Promise<PublishedAudioAlbum[]> {
+  const client = genericClient()
+  const [albumsResult, tracksResult] = await Promise.all([
+    client.from('audio_albums').select('*').eq('status', 'published').order('display_order'),
+    client.from('audio_tracks').select('*').eq('status', 'published').order('display_order'),
+  ])
+  throwIfError(albumsResult.error)
+  throwIfError(tracksResult.error)
+  const albums = (albumsResult.data ?? []) as AudioAlbumRow[]
+  const tracks = (tracksResult.data ?? []) as AudioTrackRow[]
+  const mediaIds = [...new Set(tracks.map((track) => track.media_asset_id))]
+  if (!mediaIds.length) return albums.map((album) => ({ ...album, tracks: [] }))
+  const { data: media, error } = await client
+    .from('media_assets')
+    .select('*')
+    .in('id', mediaIds)
+    .eq('approval_status', 'approved')
+  throwIfError(error)
+  const mediaById = new Map((media ?? []).map((asset) => [asset.id, asset]))
+  return albums.map((album) => ({
+    ...album,
+    tracks: tracks
+      .filter((track) => track.album_id === album.id)
+      .flatMap((track) => {
+        const asset = mediaById.get(track.media_asset_id)
+        return asset?.public_url ? [{ ...track, audio_url: asset.public_url, mime_type: asset.mime_type }] : []
+      }),
+  }))
 }
 
 export async function fetchPublishedWorshipServices() {
@@ -231,8 +272,8 @@ export async function fetchDashboardCounts() {
     count('hero_slides', { status: 'published', enabled: 'true' }),
     count('videos', { status: 'published' }),
     count('daily_bible_verses', { status: 'published', active: 'true' }),
-    Promise.all(['announcements', 'events', 'gallery_albums', 'gallery_images', 'hero_slides', 'videos', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'draft' }))),
-    Promise.all(['announcements', 'events', 'gallery_albums', 'gallery_images', 'hero_slides', 'videos', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'pending_review' }))),
+    Promise.all(['announcements', 'events', 'gallery_albums', 'gallery_images', 'hero_slides', 'videos', 'audio_albums', 'audio_tracks', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'draft' }))),
+    Promise.all(['announcements', 'events', 'gallery_albums', 'gallery_images', 'hero_slides', 'videos', 'audio_albums', 'audio_tracks', 'worship_services', 'ministries', 'page_content', 'daily_bible_verses'].map((table) => count(table as CmsTableName, { status: 'pending_review' }))),
     count('media_assets', { approval_status: 'pending' }),
   ])
   throwIfError(events.error)

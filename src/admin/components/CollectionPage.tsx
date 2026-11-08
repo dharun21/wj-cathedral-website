@@ -35,7 +35,7 @@ function preparePayload(record: AdminRecord) {
       payload[key] = value ? new Date(String(value)).toISOString() : null
       continue
     }
-    if (['registration_url', 'secondary_cta_label_en', 'secondary_cta_label_ta', 'secondary_cta_href', 'image_media_id', 'image_url', 'background_image_url', 'location_en', 'location_ta', 'contact', 'scheduled_date', 'translation_en', 'translation_ta'].includes(key) && value === '') {
+    if (['registration_url', 'secondary_cta_label_en', 'secondary_cta_label_ta', 'secondary_cta_href', 'image_media_id', 'image_url', 'background_image_url', 'cover_image_url', 'location_en', 'location_ta', 'contact', 'scheduled_date', 'translation_en', 'translation_ta'].includes(key) && value === '') {
       payload[key] = null
       continue
     }
@@ -103,14 +103,14 @@ function RecordEditor({ definition, initial, saving, owner, onSave, onClose }: {
               {field.type === 'textarea' ? <textarea rows={5} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)} />
                 : field.type === 'select' ? <select value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)}>{field.options?.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>
                 : field.type === 'boolean' ? <span className="admin-switch"><input type="checkbox" checked={record[field.name] === true} onChange={(event) => update(field.name, event.target.checked)} /><i /><b>{record[field.name] === true ? 'Yes' : 'No'}</b></span>
-                : <><input type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : field.type === 'date' ? 'date' : field.type === 'time' ? 'time' : field.type === 'url' ? 'url' : 'text'} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, field.type === 'number' ? Number(event.target.value) : event.target.value)} placeholder={field.placeholder} />{(field.name === 'image_url' || field.name === 'background_image_url') && <button type="button" className="admin-inline-action" onClick={() => setMediaField(field.name)}>Choose from Media Library</button>}</>}
+                : <><input type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : field.type === 'date' ? 'date' : field.type === 'time' ? 'time' : field.type === 'url' ? 'url' : 'text'} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, field.type === 'number' ? Number(event.target.value) : event.target.value)} placeholder={field.placeholder} />{(field.name === 'image_url' || field.name === 'background_image_url' || field.name === 'cover_image_url') && <button type="button" className="admin-inline-action" onClick={() => setMediaField(field.name)}>Choose from Media Library</button>}</>}
               {field.help && <em>{field.help}</em>}
             </label>)}
           </div>
         </div>
         <footer><button type="button" className="admin-secondary-button" onClick={() => setPreview((current) => !current)}><Eye size={17} /> {preview ? 'Hide preview' : 'Preview'}</button><span /><button type="button" className="admin-secondary-button" disabled={saving} onClick={() => submit('draft')}>Save Draft</button><button type="button" className="admin-primary-button" disabled={saving} onClick={() => submit(owner ? 'published' : 'pending_review')}>{saving ? 'Saving…' : owner ? initial.status === 'pending_review' ? 'Approve & Publish' : 'Publish' : 'Send for Approval'}</button></footer>
       </div>
-      {mediaField && <MediaPicker onClose={() => setMediaField(null)} onSelect={(asset) => { update(mediaField, asset.public_url ?? ''); update('image_media_id', asset.id); setMediaField(null) }} />}
+      {mediaField && <MediaPicker onClose={() => setMediaField(null)} onSelect={(asset) => { update(mediaField, asset.public_url ?? ''); if (mediaField !== 'cover_image_url') update('image_media_id', asset.id); setMediaField(null) }} />}
     </div>
   )
 }

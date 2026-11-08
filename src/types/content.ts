@@ -39,6 +39,7 @@ export interface Sermon {
   title: LocalizedText
   description: LocalizedText
   verification: VerificationStatus
+  mediaType?: 'video' | 'live-session'
 }
 
 export interface GalleryItem {

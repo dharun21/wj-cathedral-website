@@ -104,9 +104,21 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     fields: [
       { name: 'youtube_url', label: 'YouTube URL', type: 'url', requiredForPublish: true, fullWidth: true },
       ...bilingualTitleFields, ...bilingualDescriptionFields,
-      { name: 'category', label: 'Category', type: 'select', options: [{ value: 'sermon', label: 'Sermon' }, { value: 'service', label: 'Service' }, { value: 'worship', label: 'Worship' }, { value: 'song', label: 'Song' }, { value: 'testimony', label: 'Testimony' }] },
+      { name: 'category', label: 'Category', type: 'select', options: [{ value: 'sermon', label: 'Sermon' }, { value: 'service', label: 'Service' }, { value: 'worship', label: 'Worship' }, { value: 'song', label: 'Song' }, { value: 'testimony', label: 'Testimony' }, { value: 'live-session', label: 'Church live session' }] },
       { name: 'live_status', label: 'Video status', type: 'select', options: [{ value: 'recorded', label: 'Recorded' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'live_confirmed', label: 'Live — manually confirmed' }] },
       { name: 'featured', label: 'Featured video', type: 'boolean' },
+      { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
+      { name: 'display_order', label: 'Display order', type: 'number' },
+    ],
+  },
+  'audio-albums': {
+    key: 'audio-albums', title: 'Audio Albums', singular: 'audio album', table: 'audio_albums', orderBy: 'display_order', orderable: true,
+    description: 'Organise uploaded church audio messages into bilingual public albums.', titleField: 'title_en', subtitleField: 'status',
+    defaults: { title_en: '', title_ta: '', description_en: '', description_ta: '', cover_image_url: '', status: 'draft', display_order: 0 },
+    fields: [
+      ...bilingualTitleFields,
+      ...bilingualDescriptionFields,
+      { name: 'cover_image_url', label: 'Optional approved cover image', type: 'text', fullWidth: true, help: 'Choose an approved image or leave blank to use the WJ audio artwork.' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
       { name: 'display_order', label: 'Display order', type: 'number' },
     ],

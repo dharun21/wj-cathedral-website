@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, KeyRound, LockKeyhole, Mail, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, KeyRound, Mail, ShieldAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { LogoMark } from '../../components/common/LogoMark'
 import { requestPasswordReset, updateAdminPassword } from '../../services/authService'
 import { useAdminAuth } from '../context/AdminAuthContext'
 
@@ -25,7 +26,7 @@ export function AdminLogin() {
   return (
     <main className="admin-auth-page">
       <section className="admin-auth-card" aria-labelledby="admin-login-title">
-        <div className="admin-auth-mark"><LockKeyhole size={28} /></div>
+        <div className="admin-auth-brand"><LogoMark /></div>
         <p className="admin-auth-eyebrow">WJ Cathedral CMS</p>
         <h1 id="admin-login-title">Administrator sign in</h1>
         <p>Manage approved church content, events, photos and service information.</p>

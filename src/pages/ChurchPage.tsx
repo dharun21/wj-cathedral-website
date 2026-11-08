@@ -9,19 +9,19 @@ import { usePublishedGallery, usePublishedMinistries } from '../hooks/usePublish
 
 const youthMinistryPhotos = [
   {
-    src: '/church/youth-ministry/youth-ministry-01.jpg',
+    src: './church/youth-ministry/youth-ministry-01.jpg',
     alt: { en: 'Young men gathered for Youth Ministry at WJ Cathedral', ta: 'WJ Cathedral வாலிபர் ஊழியத்தில் ஒன்றுகூடிய இளைஞர்கள்' },
   },
   {
-    src: '/church/youth-ministry/youth-ministry-02.jpg',
+    src: './church/youth-ministry/youth-ministry-02.jpg',
     alt: { en: 'Young women and church leaders gathered at WJ Cathedral', ta: 'WJ Cathedral-ல் ஒன்றுகூடிய இளம் பெண்களும் திருச்சபைத் தலைவர்களும்' },
   },
   {
-    src: '/church/youth-ministry/youth-ministry-03.jpg',
+    src: './church/youth-ministry/youth-ministry-03.jpg',
     alt: { en: 'Youth Ministry group gathered with church leaders', ta: 'திருச்சபைத் தலைவர்களுடன் ஒன்றுகூடிய வாலிபர் ஊழியக் குழு' },
   },
   {
-    src: '/church/youth-ministry/youth-ministry-04.jpg',
+    src: './church/youth-ministry/youth-ministry-04.jpg',
     alt: { en: 'Young people gathered for a Youth Ministry sports activity', ta: 'வாலிபர் ஊழிய விளையாட்டு நிகழ்வில் ஒன்றுகூடிய இளைஞர்கள்' },
   },
 ] as const
@@ -175,12 +175,12 @@ export function ChurchPage() {
               const Icon = ministryIcons[ministry.icon]
               const managed = managedRows.find((row) => row.slug === ministry.id)
               const fallbackImages = ministry.id === 'children-ministry'
-                ? [{ src: '/church/children-ministry.jpg', alt: ministry.title }]
+                ? [{ src: './church/children-ministry.jpg', alt: ministry.title }]
                 : ministry.id === 'youth-ministry'
                   ? youthMinistryPhotos
                   : ministry.id === 'family-counselling'
                     ? [{
-                        src: '/church/family-counselling.jpg',
+                        src: './church/family-counselling.jpg',
                         alt: {
                           en: 'Church leaders and family ministry members gathered together',
                           ta: 'ஒன்றுகூடிய திருச்சபைத் தலைவர்களும் குடும்ப ஊழிய உறுப்பினர்களும்',
@@ -225,11 +225,11 @@ export function ChurchPage() {
               const Icon = ministryIcons[ministry.icon]
               const managed = managedRows.find((row) => row.slug === ministry.id)
               const fallbackImage = ministry.id === 'church-planting-seminar'
-                ? '/church/church-planting-seminar.jpg'
+                ? './church/church-planting-seminar.jpg'
                 : ministry.id === 'leaders-seminar'
-                  ? '/church/leaders-seminar.jpg'
+                  ? './church/leaders-seminar.jpg'
                   : ministry.id === 'gospel-ministries'
-                    ? '/church/gospel-ministries.jpg'
+                    ? './church/gospel-ministries.jpg'
                     : null
               const backgroundImage = managed?.image_url || fallbackImage
               return (

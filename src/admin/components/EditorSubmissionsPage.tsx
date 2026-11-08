@@ -9,6 +9,8 @@ const reviewModules: Record<ContentReviewRequestRow['table_name'], { label: stri
   worship_services: { label: 'Worship Times', route: 'services' },
   events: { label: 'Events', route: 'events' },
   videos: { label: 'YouTube & Media', route: 'videos' },
+  audio_albums: { label: 'Audio Albums', route: 'audio-albums' },
+  audio_tracks: { label: 'Audio Tracks', route: 'audio-library' },
   ministries: { label: 'Ministries', route: 'ministries' },
   page_content: { label: 'Page Copy', route: 'page-content' },
   gallery_albums: { label: 'Gallery Albums', route: 'albums' },

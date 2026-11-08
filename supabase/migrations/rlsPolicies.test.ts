@@ -18,6 +18,8 @@ const membershipRealtimePath = fileURLToPath(new URL('./202611070031_admin_membe
 const membershipRealtimeSql = readFileSync(membershipRealtimePath, 'utf8').toLowerCase()
 const reviewHistoryPath = fileURLToPath(new URL('./202611070032_content_review_history.sql', import.meta.url))
 const reviewHistorySql = readFileSync(reviewHistoryPath, 'utf8').toLowerCase()
+const audioLibraryPath = fileURLToPath(new URL('./202611080042_audio_library.sql', import.meta.url))
+const audioLibrarySql = readFileSync(audioLibraryPath, 'utf8').toLowerCase()
 const exposedTables = ['admin_memberships', 'site_settings', 'page_content', 'media_assets', 'hero_slides', 'gallery_albums', 'gallery_images', 'announcements', 'events', 'videos', 'worship_services', 'ministries']
 
 describe('RLS migration safeguards', () => {
@@ -105,5 +107,16 @@ describe('RLS migration safeguards', () => {
     expect(reviewHistorySql).toContain("member_role = 'editor'")
     expect(reviewHistorySql).toContain("resolution = 'pending'")
     expect(reviewHistorySql).toContain('alter publication supabase_realtime add table public.content_review_requests')
+  })
+
+  it('keeps draft audio private and publishes only owner-approved album tracks', () => {
+    expect(audioLibrarySql).toContain('alter table public.audio_albums enable row level security')
+    expect(audioLibrarySql).toContain('alter table public.audio_tracks enable row level security')
+    expect(audioLibrarySql).toContain("status = 'published'")
+    expect(audioLibrarySql).toContain('editors insert draft audio tracks')
+    expect(audioLibrarySql).toContain("status in ('draft', 'pending_review')")
+    expect(audioLibrarySql).toContain('track_content_review_request')
+    expect(audioLibrarySql).toContain("'audio/mpeg'")
+    expect(audioLibrarySql).toContain('52428800')
   })
 })

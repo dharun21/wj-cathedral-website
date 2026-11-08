@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { isSupabaseConfigured } from '../lib/env'
 import {
   fetchPublishedAnnouncements,
+  fetchPublishedAudioLibrary,
   fetchPublishedEvents,
   fetchDailyBibleVerse,
   fetchPublishedGallery,
@@ -137,6 +138,24 @@ export function usePublishedVideos(fallback: Sermon[]) {
     ...publicQueryOptions,
   })
   return { ...query, data: isSupabaseConfigured ? (query.data ?? []) : fallback }
+}
+
+export function usePublishedVideoRows() {
+  return useQuery({
+    queryKey: ['public', 'video-rows'],
+    queryFn: fetchPublishedVideos,
+    enabled: isSupabaseConfigured,
+    ...publicQueryOptions,
+  })
+}
+
+export function usePublishedAudioLibrary() {
+  return useQuery({
+    queryKey: ['public', 'audio-library'],
+    queryFn: fetchPublishedAudioLibrary,
+    enabled: isSupabaseConfigured,
+    ...publicQueryOptions,
+  })
 }
 
 export function usePublishedGallery(fallback: GalleryItem[]) {

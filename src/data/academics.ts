@@ -57,7 +57,7 @@ export const academicHeroSlides: AcademicHeroSlide[] = [
 export const academicCollege = {
   name: 'Worship To Jesus Bible Institute & College',
   affiliation: 'National Theological Association (NTA)',
-  established: '2017',
+  established: '2015',
   founder: 'Rev. Pr. A. Paulraj',
   principal: 'Pr. A. George Edward',
   address: {

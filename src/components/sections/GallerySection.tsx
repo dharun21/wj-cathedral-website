@@ -1,4 +1,4 @@
-import { Camera, ChevronLeft, ChevronRight, ImageIcon, Maximize2, X } from 'lucide-react'
+import { ArrowRight, Camera, ChevronLeft, ChevronRight, ImageIcon, Maximize2, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -105,6 +105,9 @@ export function GallerySection() {
               </button>
             </Reveal>
           ))}
+        </div>
+        <div className="gallery-section__actions">
+          <a className="button button--navy" href="#gallery">{t('gallery.viewAll')} <ArrowRight size={17} aria-hidden="true" /></a>
         </div>
       </div>
       <AnimatePresence>

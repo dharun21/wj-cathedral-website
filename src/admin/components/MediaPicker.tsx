@@ -7,7 +7,7 @@ import type { MediaAssetRow } from '../../types/database'
 export function MediaPicker({ onSelect, onClose }: { onSelect: (asset: MediaAssetRow) => void; onClose: () => void }) {
   const [search, setSearch] = useState('')
   const query = useQuery({ queryKey: ['admin', 'media_assets'], queryFn: () => listAdminRecords<MediaAssetRow & Record<string, unknown>>('media_assets', { orderBy: 'created_at', ascending: false }) })
-  const assets = (query.data ?? []).filter((asset) => asset.approval_status === 'approved' && asset.public_url && `${asset.original_name} ${asset.alt_en} ${asset.alt_ta}`.toLowerCase().includes(search.toLowerCase()))
+  const assets = (query.data ?? []).filter((asset) => asset.mime_type.startsWith('image/') && asset.approval_status === 'approved' && asset.public_url && `${asset.original_name} ${asset.alt_en} ${asset.alt_ta}`.toLowerCase().includes(search.toLowerCase()))
   return (
     <div className="admin-dialog admin-media-picker" role="dialog" aria-modal="true" aria-label="Choose an approved image">
       <button className="admin-dialog__backdrop" type="button" onClick={onClose} aria-label="Close media picker" />

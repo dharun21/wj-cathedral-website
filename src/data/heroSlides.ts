@@ -93,10 +93,10 @@ export const heroSlides: HeroSlide[] = [
       en: 'From tree planting and family relief to hospital care, medical camps, free tuition and school essentials, Community Care turns compassion into practical service.',
       ta: 'மரநடுகை மற்றும் குடும்ப நிவாரணம் முதல் மருத்துவமனை உதவி, மருத்துவ முகாம்கள், இலவச பயிற்சி மற்றும் பள்ளி உபகரணங்கள் வரை, சமூக அக்கறை இரக்கத்தை நடைமுறைச் சேவையாக்குகிறது.',
     },
-    image: './hero/welcome-wj-cathedral.jpg',
+    image: './hero/community-care-in-action.jpg',
     imageAlt: {
-      en: 'The WJ Cathedral congregation gathered together outside the church in Nannilam',
-      ta: 'நன்னிலத்தில் உள்ள WJ Cathedral திருச்சபைக்கு வெளியே ஒன்றுகூடியுள்ள சபையார்',
+      en: 'A collage of WJ Cathedral Community Care activities including tree planting, children’s programmes and community gatherings',
+      ta: 'மரநடுகை, சிறுவர் நிகழ்ச்சிகள் மற்றும் சமூக ஒன்றுகூடல்கள் உள்ளிட்ட WJ Cathedral சமூக அக்கறைப் பணிகளின் படத்தொகுப்பு',
     },
     cta: { href: '#community-care', label: { en: 'Explore Community Care', ta: 'சமூக அக்கறைப் பணிகளை அறியுங்கள்' } },
     secondaryCta: { href: '#give', label: { en: 'Support the mission', ta: 'இந்தப் பணியை ஆதரியுங்கள்' } },

@@ -35,7 +35,7 @@ export function AboutUsPage() {
             </div>
           </Reveal>
           <Reveal className="about-hero__portrait" delay={0.08}>
-            <img src="./hero/welcome-wj-cathedral.jpg" alt={t('aboutPage.hero.imageAlt')} />
+            <img src="./about/one-church-one-story.jpg" alt={t('aboutPage.hero.imageAlt')} />
             <div><small>{churchInfo.shortName}</small><strong>{localize(churchInfo.locationShort)}</strong></div>
           </Reveal>
         </div>

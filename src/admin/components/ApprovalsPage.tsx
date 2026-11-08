@@ -11,6 +11,8 @@ const approvalModules = [
   { table: 'worship_services', route: 'services', label: 'Worship Times' },
   { table: 'events', route: 'events', label: 'Events' },
   { table: 'videos', route: 'videos', label: 'YouTube & Media' },
+  { table: 'audio_albums', route: 'audio-albums', label: 'Audio Albums' },
+  { table: 'audio_tracks', route: 'audio-library', label: 'Audio Tracks' },
   { table: 'ministries', route: 'ministries', label: 'Ministries' },
   { table: 'page_content', route: 'page-content', label: 'Page Copy' },
   { table: 'gallery_albums', route: 'albums', label: 'Gallery Albums' },
@@ -56,8 +58,8 @@ export function ApprovalsPage() {
         ...row,
         id: String(row.id),
         table: 'media_assets' as const,
-        route: 'media-library',
-        moduleLabel: 'Media Library',
+        route: String(row.mime_type ?? '').startsWith('audio/') ? 'audio-library' : 'media-library',
+        moduleLabel: String(row.mime_type ?? '').startsWith('audio/') ? 'Audio Uploads' : 'Media Library',
         updated_at: row.created_at,
       }))
       return ([...groups.flat(), ...media] as ApprovalItem[]).sort((a, b) => String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? '')))
@@ -65,8 +67,8 @@ export function ApprovalsPage() {
   })
 
   const review = (item: ApprovalItem) => {
-    if (item.route === 'media-library') {
-      window.location.hash = '#/admin/media-library'
+    if (item.route === 'media-library' || item.route === 'audio-library') {
+      window.location.hash = `#/admin/${item.route}`
       return
     }
     const parameters = new URLSearchParams({ status: 'pending_review', open: item.id })

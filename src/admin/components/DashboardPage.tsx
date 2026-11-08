@@ -16,7 +16,7 @@ const cards = [
 
 const actions = [
   ['announcements', 'Publish announcement'], ['media-library', 'Upload photos'], ['slides', 'Change homepage banner'],
-  ['events', 'Add event'], ['videos', 'Add YouTube video'], ['verses', 'Add Bible verse'],
+  ['events', 'Add event'], ['videos', 'Add YouTube video'], ['audio-library', 'Upload audio'], ['verses', 'Add Bible verse'],
 ] as const
 
 export function DashboardPage() {

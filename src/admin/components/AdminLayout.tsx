@@ -1,5 +1,6 @@
-import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, FileText, GalleryHorizontalEnd, Images, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
+import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, FileText, GalleryHorizontalEnd, Headphones, Images, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { LogoMark } from '../../components/common/LogoMark'
 import { useAdminAuth } from '../context/AdminAuthContext'
 
 interface AdminNavigationItem { path: string; label: string; icon: LucideIcon; ownerOnly?: boolean; editorOnly?: boolean }
@@ -8,7 +9,7 @@ interface AdminNavigationSection { group: string; items: AdminNavigationItem[] }
 const navigation: AdminNavigationSection[] = [
   { group: 'Overview', items: [{ path: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
   { group: 'Homepage', items: [{ path: 'slides', label: 'Carousel Slides', icon: PanelsTopLeft }, { path: 'verses', label: 'Daily Bible Verses', icon: BookHeart }, { path: 'announcements', label: 'Announcements', icon: BellRing }, { path: 'services', label: 'Worship Times', icon: Clock3 }] },
-  { group: 'Church Content', items: [{ path: 'events', label: 'Events', icon: CalendarDays }, { path: 'videos', label: 'YouTube & Media', icon: CirclePlay }, { path: 'ministries', label: 'Ministries', icon: Church }, { path: 'page-content', label: 'Page Copy', icon: FileText }] },
+  { group: 'Church Content', items: [{ path: 'events', label: 'Events', icon: CalendarDays }, { path: 'videos', label: 'YouTube Videos & Live', icon: CirclePlay }, { path: 'audio-albums', label: 'Audio Albums', icon: Headphones }, { path: 'audio-library', label: 'Audio Uploads', icon: Headphones }, { path: 'ministries', label: 'Ministries', icon: Church }, { path: 'page-content', label: 'Page Copy', icon: FileText }] },
   { group: 'Photos', items: [{ path: 'media-library', label: 'Media Library', icon: Images }, { path: 'albums', label: 'Gallery Albums', icon: GalleryHorizontalEnd }, { path: 'gallery-images', label: 'Gallery Photos', icon: Images }] },
   { group: 'Workflow', items: [{ path: 'submissions', label: 'Pending Approval', icon: FileClock, editorOnly: true }, { path: 'approvals', label: 'Attention Required', icon: ShieldCheck, ownerOnly: true }] },
   { group: 'Administration', items: [{ path: 'admissions', label: 'Admission Applications', icon: UserRoundCheck, ownerOnly: true }, { path: 'team-access', label: 'Team & Access', icon: UserCog, ownerOnly: true }] },
@@ -22,7 +23,7 @@ export function AdminLayout({ route, children }: { route: string; children: Reac
   return (
     <div className="admin-shell">
       <aside className={`admin-sidebar ${drawerOpen ? 'is-open' : ''}`}>
-        <div className="admin-sidebar__brand"><span>WJ</span><div><strong>Cathedral CMS</strong><small>Content administration</small></div><button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation"><X /></button></div>
+        <div className="admin-sidebar__brand"><LogoMark compact /><div><strong>Cathedral CMS</strong><small>Content administration</small></div><button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close navigation"><X /></button></div>
         <nav aria-label="Admin navigation">
           {navigation.map((section) => { const visibleItems = section.items.filter((item) => (isOwner ? !item.editorOnly : !item.ownerOnly)); return visibleItems.length > 0 && <div className="admin-nav-group" key={section.group}><p>{section.group}</p>{visibleItems.map((item) => { const Icon = item.icon; const active = route === item.path; return <button type="button" className={active ? 'is-active' : ''} key={item.path} onClick={() => navigate(item.path)}><Icon size={18} /><span>{item.label}</span>{active && <ChevronRight size={15} />}</button> })}</div> })}
         </nav>

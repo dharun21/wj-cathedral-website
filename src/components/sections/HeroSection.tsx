@@ -3,8 +3,9 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, ImageIcon, Pause, Play } from 'luc
 import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { heroSlides } from '../../data/heroSlides'
+import { sermons } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
-import { useDailyBibleVerse, usePublishedHeroSlides } from '../../hooks/usePublishedContent'
+import { useDailyBibleVerse, usePublishedHeroSlides, usePublishedVideoRows } from '../../hooks/usePublishedContent'
 import type { HeroSlide } from '../../types/content'
 
 const retiredPrayerSlideIds = new Set(['prayer', 'daily-verse', '10000000-0000-4000-8000-000000000003'])
@@ -18,6 +19,7 @@ export function HeroSection() {
   const hoverPause = useRef(false)
   const publishedSlides = usePublishedHeroSlides('home', heroSlides)
   const dailyVerse = useDailyBibleVerse()
+  const publishedVideos = usePublishedVideoRows()
   const slides = useMemo(() => {
     const row = dailyVerse.data
     const fallback = heroSlides.find((slide) => slide.id === 'daily-verse')!
@@ -40,8 +42,28 @@ export function HeroSection() {
     } : fallback
     const staticSlides = publishedSlides.data.filter((slide) => !retiredPrayerSlideIds.has(slide.id))
     staticSlides.splice(Math.min(2, staticSlides.length), 0, verseSlide)
+    const managedLive = [...(publishedVideos.data ?? [])]
+      .filter((video) => video.category === 'live-session' || video.live_status !== 'recorded')
+      .sort((first, second) => second.created_at.localeCompare(first.created_at) || first.display_order - second.display_order)[0]
+    const fallbackLive = sermons.find((video) => video.mediaType === 'live-session')
+    const liveVideoId = managedLive?.youtube_id ?? fallbackLive?.videoId
+    if (liveVideoId) {
+      staticSlides.push({
+        id: `latest-live-${managedLive?.id ?? fallbackLive?.id ?? liveVideoId}`,
+        eyebrow: { en: 'Latest church live session', ta: 'சமீபத்திய திருச்சபை நேரலை நிகழ்வு' },
+        title: { en: 'Live from WJ Cathedral', ta: 'WJ Cathedral-இலிருந்து நேரலை' },
+        description: managedLive
+          ? { en: managedLive.title_en, ta: managedLive.title_ta }
+          : fallbackLive?.title ?? { en: 'Watch the latest session from WJ Cathedral.', ta: 'WJ Cathedral-இன் சமீபத்திய நிகழ்வைக் காணுங்கள்.' },
+        image: `https://i.ytimg.com/vi/${liveVideoId}/maxresdefault.jpg`,
+        imageAlt: { en: 'Preview of the latest WJ Cathedral YouTube live session', ta: 'சமீபத்திய WJ Cathedral YouTube நேரலை நிகழ்வின் முன்னோட்டம்' },
+        cta: { href: '#media-live', label: { en: 'Watch the latest session', ta: 'சமீபத்திய நிகழ்வைக் காணுங்கள்' } },
+        secondaryCta: { href: '#media', label: { en: 'Explore all media', ta: 'அனைத்து ஊடகங்களையும் காணுங்கள்' } },
+        mediaStatus: 'approved-client-supplied',
+      })
+    }
     return staticSlides
-  }, [dailyVerse.data, publishedSlides.data])
+  }, [dailyVerse.data, publishedSlides.data, publishedVideos.data])
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())

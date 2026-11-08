@@ -192,6 +192,36 @@ export interface VideoRow {
   updated_by: string | null
 }
 
+export interface AudioAlbumRow {
+  id: string
+  title_en: string
+  title_ta: string
+  description_en: string
+  description_ta: string
+  cover_image_url: string | null
+  status: ContentStatus
+  display_order: number
+  created_at: string
+  updated_at: string
+  updated_by: string | null
+}
+
+export interface AudioTrackRow {
+  id: string
+  album_id: string
+  media_asset_id: string
+  title_en: string
+  title_ta: string
+  description_en: string
+  description_ta: string
+  duration_seconds: number | null
+  status: ContentStatus
+  display_order: number
+  created_at: string
+  updated_at: string
+  updated_by: string | null
+}
+
 export interface WorshipServiceRow {
   id: string
   name_en: string
@@ -276,7 +306,7 @@ export interface DailyBibleVerseRow {
 
 export interface ContentReviewRequestRow {
   id: string
-  table_name: 'page_content' | 'hero_slides' | 'gallery_albums' | 'gallery_images' | 'announcements' | 'events' | 'videos' | 'worship_services' | 'ministries' | 'daily_bible_verses' | 'media_assets'
+  table_name: 'page_content' | 'hero_slides' | 'gallery_albums' | 'gallery_images' | 'announcements' | 'events' | 'videos' | 'worship_services' | 'ministries' | 'daily_bible_verses' | 'media_assets' | 'audio_albums' | 'audio_tracks'
   record_id: string
   title_snapshot: string
   submitted_by: string | null
@@ -308,6 +338,8 @@ export interface Database {
       announcements: TableDefinition<AnnouncementRow>
       events: TableDefinition<EventRow>
       videos: TableDefinition<VideoRow>
+      audio_albums: TableDefinition<AudioAlbumRow>
+      audio_tracks: TableDefinition<AudioTrackRow>
       worship_services: TableDefinition<WorshipServiceRow>
       ministries: TableDefinition<MinistryRow>
       admission_applications: TableDefinition<AdmissionApplicationRow>
