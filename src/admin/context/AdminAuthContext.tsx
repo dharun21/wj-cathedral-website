@@ -1,5 +1,5 @@
 import type { Session, User } from '@supabase/supabase-js'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { isSupabaseConfigured } from '../../lib/env'
 import { checkAdminMembership, getCurrentSession, signInAdmin, signOutAdmin, subscribeToAuth, subscribeToOwnMembership } from '../../services/authService'
 
@@ -29,6 +29,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(isSupabaseConfigured)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
+  const lastMembershipCheck = useRef(0)
 
   const loadSession = useCallback(async (nextSession?: Session | null, silent = false) => {
     if (!isSupabaseConfigured) {
@@ -43,6 +44,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         setProfile(null)
         return
       }
+      lastMembershipCheck.current = Date.now()
       const membership = await checkAdminMembership(activeSession.user)
       setProfile(membership?.is_active ? {
         userId: activeSession.user.id,
@@ -51,6 +53,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         role: membership.role,
       } : null)
     } catch (error) {
+      lastMembershipCheck.current = 0
       console.error('Administrator session validation failed.', error)
       if (!silent) {
         setSession(null)
@@ -78,16 +81,18 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const userId = session?.user.id
     if (!isSupabaseConfigured || !userId) return undefined
-    const recheckAccess = () => { void loadSession(undefined, true) }
-    const unsubscribeMembership = subscribeToOwnMembership(userId, recheckAccess)
-    const interval = window.setInterval(recheckAccess, 60_000)
+    const recheckAccess = (force = false) => {
+      if (!force && Date.now() - lastMembershipCheck.current < 5 * 60_000) return
+      lastMembershipCheck.current = Date.now()
+      void loadSession(undefined, true)
+    }
+    const unsubscribeMembership = subscribeToOwnMembership(userId, () => recheckAccess(true))
+    const interval = window.setInterval(() => { if (!document.hidden) recheckAccess() }, 5 * 60_000)
     const handleVisibility = () => { if (!document.hidden) recheckAccess() }
-    window.addEventListener('focus', recheckAccess)
     document.addEventListener('visibilitychange', handleVisibility)
     return () => {
       unsubscribeMembership()
       window.clearInterval(interval)
-      window.removeEventListener('focus', recheckAccess)
       document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [loadSession, session?.user.id])

@@ -5,6 +5,7 @@ import {
   fetchPublishedAnnouncements,
   fetchPublishedAcademicCourses,
   fetchPublishedAcademicSettings,
+  fetchPublishedAudioAlbumSummary,
   fetchPublishedAudioLibrary,
   fetchPublishedEvents,
   fetchDailyBibleVerse,
@@ -20,7 +21,13 @@ import type { GalleryItem, HeroSlide, LocalizedText, Sermon, Service } from '../
 import type { HeroSlideRow, MinistryRow } from '../types/database'
 import { indiaDateKey, millisecondsUntilNextIndiaDay } from '../utils/indiaDate'
 
-const publicQueryOptions = { staleTime: 5 * 60_000, gcTime: 30 * 60_000 } as const
+const MINUTE = 60_000
+const publicCache = {
+  timeSensitive: { staleTime: 10 * MINUTE, gcTime: 60 * MINUTE },
+  homepage: { staleTime: 25 * MINUTE, gcTime: 2 * 60 * MINUTE },
+  media: { staleTime: 30 * MINUTE, gcTime: 2 * 60 * MINUTE },
+  churchInfo: { staleTime: 60 * MINUTE, gcTime: 4 * 60 * MINUTE },
+} as const
 
 function localized(en: string, ta: string): LocalizedText {
   return { en, ta }
@@ -32,6 +39,14 @@ function approvedHash(value: string | null, fallback: `#${string}`): `#${string}
 
 function mapHeroSlide(row: HeroSlideRow): HeroSlide {
   const secondaryHref = row.secondary_cta_href ? approvedHash(row.secondary_cta_href, '#home') : null
+  const builtInHomeIds = new Set([
+    '10000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-000000000002',
+    '10000000-0000-4000-8000-000000000004',
+    '10000000-0000-4000-8000-000000000005',
+    '10000000-0000-4000-8000-000000000006',
+  ])
+  const showCta = row.scope !== 'home' || row.slide_kind === 'default' || builtInHomeIds.has(row.id)
   return {
     id: row.id,
     eyebrow: localized(row.eyebrow_en, row.eyebrow_ta),
@@ -39,8 +54,8 @@ function mapHeroSlide(row: HeroSlideRow): HeroSlide {
     description: localized(row.description_en, row.description_ta),
     image: row.image_url || './banners/welcome.svg',
     imageAlt: localized(row.image_alt_en, row.image_alt_ta),
-    cta: { href: approvedHash(row.cta_href, '#home'), label: localized(row.cta_label_en, row.cta_label_ta) },
-    ...(secondaryHref && row.secondary_cta_label_en && row.secondary_cta_label_ta
+    ...(showCta ? { cta: { href: approvedHash(row.cta_href, '#home'), label: localized(row.cta_label_en, row.cta_label_ta) } } : {}),
+    ...(showCta && secondaryHref && row.secondary_cta_label_en && row.secondary_cta_label_ta
       ? { secondaryCta: { href: secondaryHref, label: localized(row.secondary_cta_label_en, row.secondary_cta_label_ta) } }
       : {}),
     mediaStatus: row.image_url ? 'approved-client-supplied' : 'placeholder-awaiting-approved-photo',
@@ -52,7 +67,7 @@ export function usePublishedTranslations() {
     queryKey: ['public', 'page-content'],
     queryFn: fetchPublishedTranslations,
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.homepage,
   })
   const translations = useMemo(() => Object.fromEntries((query.data ?? []).map((item) => [
     item.content_key,
@@ -67,7 +82,7 @@ export function usePublishedHeroSlides(scope: HeroSlideRow['scope'], fallback: H
     queryFn: () => fetchPublishedHeroSlides(scope),
     enabled: isSupabaseConfigured,
     select: (rows) => rows.map(mapHeroSlide),
-    ...publicQueryOptions,
+    ...publicCache.homepage,
   })
   return { ...query, data: isSupabaseConfigured ? (query.data ?? []) : fallback, usingFallback: !isSupabaseConfigured }
 }
@@ -77,7 +92,7 @@ export function usePublishedHeroRows(scope: HeroSlideRow['scope']) {
     queryKey: ['public', 'hero-slides', scope],
     queryFn: () => fetchPublishedHeroSlides(scope),
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.homepage,
   })
 }
 
@@ -86,7 +101,7 @@ export function usePublishedAcademicSettings() {
     queryKey: ['public', 'academic-settings'],
     queryFn: fetchPublishedAcademicSettings,
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.churchInfo,
   })
 }
 
@@ -95,7 +110,7 @@ export function usePublishedAcademicCourses() {
     queryKey: ['public', 'academic-courses'],
     queryFn: fetchPublishedAcademicCourses,
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.churchInfo,
   })
 }
 
@@ -130,17 +145,17 @@ export function usePublishedWorship(fallback: Service[]) {
       icon: index === 0 ? 'sun' : 'moon',
       verification: 'public-source',
     })),
-    ...publicQueryOptions,
+    ...publicCache.churchInfo,
   })
   return { ...query, data: isSupabaseConfigured ? (query.data ?? []) : fallback }
 }
 
 export function usePublishedAnnouncements() {
-  return useQuery({ queryKey: ['public', 'announcements'], queryFn: fetchPublishedAnnouncements, enabled: isSupabaseConfigured, ...publicQueryOptions })
+  return useQuery({ queryKey: ['public', 'announcements'], queryFn: fetchPublishedAnnouncements, enabled: isSupabaseConfigured, ...publicCache.timeSensitive })
 }
 
 export function usePublishedEvents() {
-  return useQuery({ queryKey: ['public', 'events'], queryFn: fetchPublishedEvents, enabled: isSupabaseConfigured, ...publicQueryOptions })
+  return useQuery({ queryKey: ['public', 'events'], queryFn: fetchPublishedEvents, enabled: isSupabaseConfigured, ...publicCache.timeSensitive })
 }
 
 export function usePublishedVideos(fallback: Sermon[]) {
@@ -155,7 +170,7 @@ export function usePublishedVideos(fallback: Sermon[]) {
       description: localized(row.description_en, row.description_ta),
       verification: 'public-source',
     })),
-    ...publicQueryOptions,
+    ...publicCache.media,
   })
   return { ...query, data: isSupabaseConfigured ? (query.data ?? []) : fallback }
 }
@@ -165,7 +180,7 @@ export function usePublishedVideoRows() {
     queryKey: ['public', 'video-rows'],
     queryFn: fetchPublishedVideos,
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.media,
   })
 }
 
@@ -174,7 +189,16 @@ export function usePublishedAudioLibrary() {
     queryKey: ['public', 'audio-library'],
     queryFn: fetchPublishedAudioLibrary,
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.media,
+  })
+}
+
+export function usePublishedAudioAlbumSummary() {
+  return useQuery({
+    queryKey: ['public', 'audio-album-summary'],
+    queryFn: fetchPublishedAudioAlbumSummary,
+    enabled: isSupabaseConfigured,
+    ...publicCache.media,
   })
 }
 
@@ -193,7 +217,7 @@ export function usePublishedGallery(fallback: GalleryItem[], pageScope: 'gallery
         approved: true,
       })).filter((image) => image.src)
     },
-    ...publicQueryOptions,
+    ...publicCache.media,
   })
   return { ...query, data: isSupabaseConfigured ? (query.data ?? []) : fallback }
 }
@@ -203,7 +227,7 @@ export function usePublishedMinistries(groupKey: MinistryRow['group_key']) {
     queryKey: ['public', 'ministries', groupKey],
     queryFn: () => fetchPublishedMinistries(groupKey),
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.churchInfo,
   })
 }
 
@@ -212,6 +236,6 @@ export function usePublishedSiteSettings() {
     queryKey: ['public', 'site-settings'],
     queryFn: fetchPublishedSiteSettings,
     enabled: isSupabaseConfigured,
-    ...publicQueryOptions,
+    ...publicCache.churchInfo,
   })
 }

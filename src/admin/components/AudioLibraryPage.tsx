@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, FileAudio, Headphones, Send, Trash2, Upload } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { deleteAdminRecord, listAdminRecords, saveAdminRecord } from '../../services/contentService'
+import { invalidatePublishedContent } from '../../lib/contentCache'
+import { deleteAdminRecord, listAdminMediaAssets, listAdminRecords, saveAdminRecord } from '../../services/contentService'
 import { deleteMediaAsset, getMediaPreviewUrl, publishMediaAsset, uploadDraftAudio } from '../../services/mediaService'
 import type { AudioAlbumRow, AudioTrackRow, MediaAssetRow } from '../../types/database'
 import { useAdminAuth } from '../context/AdminAuthContext'
@@ -21,7 +22,7 @@ function AudioAdminCard({ item, owner, busy, onPublish, onSubmit, onDelete }: { 
   const status = item.status === 'published' ? 'published' : item.status === 'pending_review' ? 'pending_review' : 'draft'
   return <article className="admin-audio-card">
     <div className="admin-audio-card__icon"><Headphones aria-hidden="true" /></div>
-    <div className="admin-audio-card__copy"><span className={`admin-status admin-status--${status}`}>{status.replace('_', ' ')}</span><small>{item.album?.title_en ?? 'Album unavailable'}</small><h2>{item.title_en}</h2><p lang="ta">{item.title_ta}</p>{previewUrl ? <audio controls preload="metadata" src={previewUrl} /> : <em>Private preview unavailable</em>}</div>
+    <div className="admin-audio-card__copy"><span className={`admin-status admin-status--${status}`}>{status.replace('_', ' ')}</span><small>{item.album?.title_en ?? 'Album unavailable'}</small><h2>{item.title_en}</h2><p lang="ta">{item.title_ta}</p>{previewUrl ? <audio controls preload="none" src={previewUrl} /> : <em>Private preview unavailable</em>}</div>
     <div className="admin-audio-card__actions">
       {owner && item.status !== 'published' && <button type="button" className="admin-primary-button" disabled={busy || !item.asset} onClick={onPublish}><CheckCircle2 size={16} /> Approve &amp; publish</button>}
       {!owner && item.status === 'draft' && <button type="button" className="admin-primary-button" disabled={busy} onClick={onSubmit}><Send size={16} /> Send for approval</button>}
@@ -44,11 +45,11 @@ export function AudioLibraryPage() {
   const [deleting, setDeleting] = useState<AudioTrackWithAsset | null>(null)
   const albumsQuery = useQuery({ queryKey: ['admin', 'audio_albums'], queryFn: () => listAdminRecords<AudioAlbumRow & Record<string, unknown>>('audio_albums', { orderBy: 'display_order' }) })
   const tracksQuery = useQuery({ queryKey: ['admin', 'audio_tracks'], queryFn: () => listAdminRecords<AudioTrackRow & Record<string, unknown>>('audio_tracks', { orderBy: 'display_order' }) })
-  const mediaQuery = useQuery({ queryKey: ['admin', 'media_assets'], queryFn: () => listAdminRecords<MediaAssetRow & Record<string, unknown>>('media_assets', { orderBy: 'created_at', ascending: false }) })
+  const mediaQuery = useQuery({ queryKey: ['admin', 'media_assets', 'audio'], queryFn: () => listAdminMediaAssets('audio') })
   const albums = useMemo(() => albumsQuery.data ?? [], [albumsQuery.data])
   const tracks = useMemo(() => {
     const albumMap = new Map(albums.map((album) => [album.id, album]))
-    const mediaMap = new Map((mediaQuery.data ?? []).filter((asset) => asset.mime_type.startsWith('audio/')).map((asset) => [asset.id, asset]))
+    const mediaMap = new Map((mediaQuery.data ?? []).map((asset) => [asset.id, asset]))
     return (tracksQuery.data ?? []).map((track) => ({ ...track, album: albumMap.get(track.album_id), asset: mediaMap.get(track.media_asset_id) }))
   }, [albums, mediaQuery.data, tracksQuery.data])
   const refresh = () => {
@@ -56,7 +57,7 @@ export function AudioLibraryPage() {
     void queryClient.invalidateQueries({ queryKey: ['admin', 'media_assets'] })
     void queryClient.invalidateQueries({ queryKey: ['admin', 'pending-approvals'] })
     void queryClient.invalidateQueries({ queryKey: ['admin', 'review-activity'] })
-    void queryClient.invalidateQueries({ queryKey: ['public', 'audio-library'] })
+    void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-counts'] })
   }
   const upload = useMutation({
     mutationFn: async () => {
@@ -89,7 +90,7 @@ export function AudioLibraryPage() {
       await publishMediaAsset(item.asset)
       return saveAdminRecord('audio_tracks', { status: 'published' }, item.id)
     },
-    onSuccess: () => { refresh(); notify('Audio approved and published. Ensure its album is also published.') },
+    onSuccess: () => { refresh(); void invalidatePublishedContent(queryClient, 'audio_tracks'); notify('Audio approved and published. Ensure its album is also published.') },
     onError: (error) => notify(error instanceof Error ? error.message : 'Audio approval failed.', 'error'),
   })
   const submit = useMutation({
@@ -102,7 +103,7 @@ export function AudioLibraryPage() {
       await deleteAdminRecord('audio_tracks', item.id)
       if (item.asset) await deleteMediaAsset(item.asset)
     },
-    onSuccess: () => { refresh(); setDeleting(null); notify('Audio track deleted.') },
+    onSuccess: (_data, item) => { refresh(); if (item.status === 'published') void invalidatePublishedContent(queryClient, 'audio_tracks'); setDeleting(null); notify('Audio track deleted.') },
     onError: (error) => notify(error instanceof Error ? error.message : 'The audio track could not be deleted.', 'error'),
   })
   const busy = upload.isPending || publish.isPending || submit.isPending || remove.isPending

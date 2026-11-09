@@ -20,6 +20,10 @@ const reviewHistoryPath = fileURLToPath(new URL('./202611070032_content_review_h
 const reviewHistorySql = readFileSync(reviewHistoryPath, 'utf8').toLowerCase()
 const audioLibraryPath = fileURLToPath(new URL('./202611080042_audio_library.sql', import.meta.url))
 const audioLibrarySql = readFileSync(audioLibraryPath, 'utf8').toLowerCase()
+const visitorSummaryPath = fileURLToPath(new URL('./202611090049_owner_visitor_summary.sql', import.meta.url))
+const visitorSummarySql = readFileSync(visitorSummaryPath, 'utf8').toLowerCase()
+const visitorTrendPath = fileURLToPath(new URL('./202611090050_owner_visitor_trend.sql', import.meta.url))
+const visitorTrendSql = readFileSync(visitorTrendPath, 'utf8').toLowerCase()
 const exposedTables = ['admin_memberships', 'site_settings', 'page_content', 'media_assets', 'hero_slides', 'gallery_albums', 'gallery_images', 'announcements', 'events', 'videos', 'worship_services', 'ministries']
 
 describe('RLS migration safeguards', () => {
@@ -118,5 +122,24 @@ describe('RLS migration safeguards', () => {
     expect(audioLibrarySql).toContain('track_content_review_request')
     expect(audioLibrarySql).toContain("'audio/mpeg'")
     expect(audioLibrarySql).toContain('52428800')
+  })
+
+  it('records privacy-minimal visits and exposes only owner aggregate totals', () => {
+    expect(visitorSummarySql).toContain('alter table public.website_daily_visitors enable row level security')
+    expect(visitorSummarySql).toContain('on conflict (visited_on, visitor_id) do nothing')
+    expect(visitorSummarySql).toContain('if not public.is_owner()')
+    expect(visitorSummarySql).toContain('count(distinct visitor.visitor_id)')
+    expect(visitorSummarySql).toContain('revoke all on table public.website_daily_visitors from anon, authenticated')
+    expect(visitorSummarySql).not.toContain('ip_address')
+    expect(visitorSummarySql).not.toContain('user_agent')
+    expect(visitorSummarySql).not.toContain('page_path')
+  })
+
+  it('exposes only owner-authorized daily visitor aggregates for bounded ranges', () => {
+    expect(visitorTrendSql).toContain('if not public.is_owner()')
+    expect(visitorTrendSql).toContain("p_to - p_from > 366")
+    expect(visitorTrendSql).toContain('count(distinct visitor.visitor_id)')
+    expect(visitorTrendSql).toContain('revoke all on function public.get_owner_visitor_trend(date, date) from public')
+    expect(visitorTrendSql).not.toContain('select visitor.visitor_id')
   })
 })

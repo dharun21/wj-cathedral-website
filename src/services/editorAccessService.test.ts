@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createEditorSchema } from './editorAccessService'
+import { createEditorSchema, editorFunctionConnectionMessage } from './editorAccessService'
 
 describe('owner-created editor validation', () => {
   it('accepts a valid editor account and normalizes the email address', () => {
@@ -18,5 +18,16 @@ describe('owner-created editor validation', () => {
       email: 'editor@gmail.com',
       password,
     })).toThrow()
+  })
+
+  it('explains when the editor Edge Function is missing', () => {
+    expect(editorFunctionConnectionMessage({
+      message: 'Edge Function returned a non-2xx status code',
+      context: new Response(null, { status: 404 }),
+    })).toContain('not active yet')
+  })
+
+  it('turns a generic Functions fetch error into an actionable message', () => {
+    expect(editorFunctionConnectionMessage({ message: 'Failed to send a request to the Edge Function' })).toContain('could not reach Supabase')
   })
 })

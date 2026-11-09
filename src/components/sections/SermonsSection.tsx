@@ -1,13 +1,13 @@
 import { ArrowRight, ExternalLink, Headphones, Play, Radio, SquarePlay } from 'lucide-react'
 import { sermons, youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
-import { usePublishedAudioLibrary, usePublishedVideoRows } from '../../hooks/usePublishedContent'
+import { usePublishedAudioAlbumSummary, usePublishedVideoRows } from '../../hooks/usePublishedContent'
 import { Reveal } from '../common/Reveal'
 
 export function SermonsSection() {
   const { localize, language } = useLanguage()
   const publishedVideos = usePublishedVideoRows()
-  const audioLibrary = usePublishedAudioLibrary()
+  const audioAlbums = usePublishedAudioAlbumSummary()
   const managedLive = (publishedVideos.data ?? [])
     .filter((video) => video.category === 'live-session' || video.live_status !== 'recorded')
     .sort((first, second) => second.created_at.localeCompare(first.created_at) || first.display_order - second.display_order)
@@ -22,7 +22,7 @@ export function SermonsSection() {
     : latestFallback ? localize(latestFallback.title) : localize({ en: 'Latest WJ Cathedral live session', ta: 'சமீபத்திய WJ Cathedral நேரலை நிகழ்வு' })
   const liveCount = publishedVideos.data ? managedLive.length : fallbackLive.length
   const videoCount = publishedVideos.data ? managedRegular.length : fallbackRegular.length
-  const albumCount = audioLibrary.data?.filter((album) => album.tracks.length > 0).length ?? 0
+  const albumCount = audioAlbums.data?.filter((album) => album.trackCount > 0).length ?? 0
 
   const pathways = [
     { href: '#media-live', Icon: Radio, count: liveCount, title: { en: 'Live Sessions', ta: 'நேரலை நிகழ்வுகள்' }, body: { en: 'Church services, prayers and gatherings originally shared through YouTube Live.', ta: 'YouTube நேரலை வழியாகப் பகிரப்பட்ட திருச்சபை ஆராதனைகள், ஜெபங்கள் மற்றும் கூடுகைகள்.' } },

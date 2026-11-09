@@ -4,11 +4,13 @@ import { CSS } from '@dnd-kit/utilities'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Eye, GripVertical, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { invalidatePublishedContent } from '../../lib/contentCache'
 import { deleteAdminRecord, listAdminGalleryImages, listAdminRecords, reorderAdminRecords, saveAdminRecord } from '../../services/contentService'
 import type { ContentStatus } from '../../types/database'
 import { useNotification } from '../context/NotificationContext'
 import type { AdminField, AdminModuleDefinition, AdminRecord } from '../types'
 import { ConfirmDialog } from './ConfirmDialog'
+import { DailyVerseBackgroundControl } from './DailyVerseBackgroundControl'
 import { MediaPicker } from './MediaPicker'
 import { useAdminAuth } from '../context/AdminAuthContext'
 
@@ -100,8 +102,7 @@ function SortableGalleryPhoto({ record, definition, albumName, orderNumber, owne
       </div>
       <div className="admin-gallery-photo-card__body">
         <small>Album · {albumName}</small>
-        <strong>{displayValue(record.caption_en) || 'Untitled photo'}</strong>
-        <p>{displayValue(record.alt_en) || 'No English image description'}</p>
+        <strong>{displayValue(record.alt_en) || 'Photo description pending'}</strong>
       </div>
       <div className="admin-gallery-photo-card__actions"><button type="button" onClick={onEdit} disabled={!owner && !editorCanEdit} aria-label={owner || editorCanEdit ? 'Edit photo' : 'Awaiting owner action'}><Pencil size={17} /></button>{owner && definition.allowDelete !== false && <button type="button" className="is-danger" onClick={onDelete} aria-label="Delete photo"><Trash2 size={17} /></button>}</div>
     </article>
@@ -200,23 +201,24 @@ export function CollectionPage({ definition }: { definition: AdminModuleDefiniti
       const normalized = definition.beforeSave ? definition.beforeSave(record) : record
       return saveAdminRecord(definition.table, preparePayload({ ...normalized, status: targetStatus }), record.id)
     },
-    onSuccess: (_data, variables) => { void queryClient.invalidateQueries({ queryKey }); void queryClient.invalidateQueries({ queryKey: ['admin', 'review-activity'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'pending-approvals'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-counts'] }); setEditor(null); notify(variables.targetStatus === 'pending_review' ? 'Sent to the owner for approval.' : `${definition.singular[0]?.toUpperCase()}${definition.singular.slice(1)} saved successfully.`) },
+    onSuccess: (_data, variables) => { const wasPublished = (recordsQuery.data ?? []).some((record) => record.id === variables.record.id && record.status === 'published'); void queryClient.invalidateQueries({ queryKey }); void queryClient.invalidateQueries({ queryKey: ['admin', 'review-activity'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'pending-approvals'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-counts'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'recent-content'] }); if (wasPublished || variables.targetStatus === 'published') void invalidatePublishedContent(queryClient, definition.table); setEditor(null); notify(variables.targetStatus === 'pending_review' ? 'Sent to the owner for approval.' : `${definition.singular[0]?.toUpperCase()}${definition.singular.slice(1)} saved successfully.`) },
     onError: (error) => notify(error instanceof Error ? error.message : 'The content could not be saved.', 'error'),
   })
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteAdminRecord(definition.table, id),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey }); setDeleting(null); notify('Content deleted.') },
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey }); void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-counts'] }); void queryClient.invalidateQueries({ queryKey: ['admin', 'recent-content'] }); if (deleting?.status === 'published') void invalidatePublishedContent(queryClient, definition.table); setDeleting(null); notify('Content deleted.') },
     onError: (error) => notify(error instanceof Error ? error.message : 'The content could not be deleted.', 'error'),
   })
   const reorderMutation = useMutation({
     mutationFn: (ids: string[]) => reorderAdminRecords(definition.table, ids),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey }); notify('Display order updated.') },
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey }); void queryClient.invalidateQueries({ queryKey: ['admin', 'recent-content'] }); void invalidatePublishedContent(queryClient, definition.table); notify('Display order updated.') },
     onError: () => { void queryClient.invalidateQueries({ queryKey }); notify('The new order could not be saved.', 'error') },
   })
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }))
   const records = useMemo(() => recordsQuery.data ?? [], [recordsQuery.data])
   const createRecord = () => setEditor({
     ...definition.defaults,
+    ...(definition.orderable ? { display_order: records.length } : {}),
     ...(definition.albumScope && (albumsQuery.data?.length ?? 0) === 1 ? { album_id: String(albumsQuery.data?.[0]?.id) } : {}),
   })
   useEffect(() => {
@@ -276,6 +278,7 @@ export function CollectionPage({ definition }: { definition: AdminModuleDefiniti
   return (
     <section className="admin-module-page">
       <div className="admin-page-heading"><div><p>Content management</p><h1>{definition.title}</h1><span>{definition.description}</span></div>{definition.allowCreate !== false && <button className="admin-primary-button" onClick={createRecord} disabled={Boolean(definition.albumScope && !albumsQuery.data?.length)}><Plus size={18} /> Add {definition.singular}</button>}</div>
+      {definition.key === 'verses' && <DailyVerseBackgroundControl />}
       <div className="admin-toolbar"><label><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${definition.title.toLowerCase()}…`} /></label><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="draft">Draft</option><option value="pending_review">Pending approval</option><option value="published">Published</option><option value="archived">Archived</option></select><span>{filtered.length} item{filtered.length === 1 ? '' : 's'}</span></div>
       {recordsQuery.isLoading ? <div className="admin-record-skeletons">{[1, 2, 3].map((item) => <i key={item} />)}</div>
         : recordsQuery.isError ? <div className="admin-empty-state"><Archive /><h2>Content could not be loaded</h2><p>Check the Supabase connection and try again.</p><button className="admin-secondary-button" onClick={() => void recordsQuery.refetch()}>Try again</button></div>

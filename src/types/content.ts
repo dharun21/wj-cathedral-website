@@ -17,7 +17,7 @@ export interface HeroSlide {
   description: LocalizedText
   image: string
   imageAlt: LocalizedText
-  cta: { href: `#${string}`; label: LocalizedText }
+  cta?: { href: `#${string}`; label: LocalizedText }
   secondaryCta?: { href: `#${string}`; label: LocalizedText }
   mediaStatus: 'approved-client-supplied' | 'placeholder-awaiting-approved-photo'
   variant?: 'standard' | 'daily-verse'

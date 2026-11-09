@@ -47,6 +47,15 @@ export async function listAdmissionApplications() {
   return (data ?? []) as AdmissionApplicationRow[]
 }
 
+export async function fetchNewAdmissionApplicationCount() {
+  const { count, error } = await requireSupabase()
+    .from('admission_applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'new')
+  if (error) throw new Error(error.message)
+  return count ?? 0
+}
+
 const admissionReviewSchema = z.object({
   status: z.enum(['new', 'reviewing', 'contacted', 'closed']),
   ownerNotes: z.string().trim().max(3000),

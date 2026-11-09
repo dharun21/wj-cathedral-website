@@ -15,6 +15,12 @@ export interface AdminMembershipRow {
   revoked_by: string | null
 }
 
+export interface WebsiteDailyVisitorRow {
+  visited_on: string
+  visitor_id: string
+  first_seen_at: string
+}
+
 export interface SiteSettingsRow {
   id: string
   singleton_key: string
@@ -32,6 +38,8 @@ export interface SiteSettingsRow {
   footer_en: string | null
   footer_ta: string | null
   prayer_247_confirmed: boolean
+  daily_verse_background_url: string | null
+  daily_verse_background_media_id: string | null
   giving_account_name: string | null
   giving_bank_name: string | null
   giving_bank_branch: string | null
@@ -84,7 +92,7 @@ export interface HeroSlideRow {
   id: string
   scope: 'home' | 'academics' | 'community'
   slide_kind: 'default' | 'custom'
-  default_key: 'admissions' | 'licence' | 'graduation' | null
+  default_key: 'admissions' | 'licence' | 'graduation' | 'home-welcome' | 'home-sunday' | 'home-admissions' | 'home-ministries' | 'home-community' | null
   eyebrow_en: string
   eyebrow_ta: string
   title_en: string
@@ -384,6 +392,7 @@ export interface Database {
       admission_applications: TableDefinition<AdmissionApplicationRow>
       daily_bible_verses: TableDefinition<DailyBibleVerseRow>
       content_review_requests: TableDefinition<ContentReviewRequestRow>
+      website_daily_visitors: TableDefinition<WebsiteDailyVisitorRow>
     }
     Views: Record<string, never>
     Functions: {
@@ -409,6 +418,18 @@ export interface Database {
       get_daily_bible_verse: {
         Args: { p_date: string }
         Returns: DailyBibleVerseRow[]
+      }
+      record_public_visit: {
+        Args: { p_visitor_id: string }
+        Returns: boolean
+      }
+      get_owner_visitor_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: Array<{ today: number; this_week: number; this_month: number }>
+      }
+      get_owner_visitor_trend: {
+        Args: { p_from: string; p_to: string }
+        Returns: Array<{ visited_on: string; visitors: number }>
       }
     }
     Enums: {

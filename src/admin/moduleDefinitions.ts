@@ -21,13 +21,10 @@ const bilingualDescriptionFields = [
 const galleryPhotoFields = [
   { name: 'album_id', label: 'Gallery album', type: 'select', requiredForPublish: true, options: [] },
   { name: 'image_url', label: 'Approved image URL', type: 'text', requiredForPublish: true, fullWidth: true },
-  { name: 'caption_en', label: 'English caption', type: 'text', requiredForPublish: true },
-  { name: 'caption_ta', label: 'Tamil caption', tamilLabel: 'தமிழ் விளக்கவரி', type: 'text', requiredForPublish: true },
-  { name: 'alt_en', label: 'English alt text', type: 'textarea', requiredForPublish: true, fullWidth: true },
-  { name: 'alt_ta', label: 'Tamil alt text', tamilLabel: 'தமிழ் மாற்று உரை', type: 'textarea', requiredForPublish: true, fullWidth: true },
+  { name: 'alt_en', label: 'English image description', type: 'text', requiredForPublish: true, placeholder: 'Briefly describe what is visible in the photo' },
+  { name: 'alt_ta', label: 'Tamil image description', tamilLabel: 'தமிழ் பட விளக்கம்', type: 'text', requiredForPublish: true, placeholder: 'படத்தில் உள்ளதைச் சுருக்கமாக விவரிக்கவும்' },
   { name: 'featured', label: 'Featured photo', type: 'boolean' },
   { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-  { name: 'display_order', label: 'Display order', type: 'number' },
 ] as const
 
 function normalizeVideo(record: AdminRecord) {
@@ -40,8 +37,8 @@ function normalizeVideo(record: AdminRecord) {
 export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
   verses: {
     key: 'verses', title: 'Daily Bible Verses', singular: 'verse', table: 'daily_bible_verses', orderBy: 'display_order', orderable: true,
-    description: 'Build the approved bilingual verse rotation and schedule date-specific verses for special days.', titleField: 'reference_en', subtitleField: 'scheduled_date',
-    defaults: { verse_en: '', verse_ta: '', reference_en: '', reference_ta: '', translation_en: '', translation_ta: '', background_image_url: '', scheduled_date: '', active: true, status: 'draft', display_order: 0 },
+    description: 'Build the approved bilingual verse rotation and schedule date-specific verses for special days. Every verse uses the same shared Bible background.', titleField: 'reference_en', subtitleField: 'scheduled_date',
+    defaults: { verse_en: '', verse_ta: '', reference_en: '', reference_ta: '', translation_en: '', translation_ta: '', scheduled_date: '', active: true, status: 'draft', display_order: 0 },
     fields: [
       { name: 'verse_en', label: 'English verse text', type: 'textarea', requiredForPublish: true, fullWidth: true, help: 'Use church-approved wording and confirm the translation licence.' },
       { name: 'verse_ta', label: 'Tamil verse text', tamilLabel: 'தமிழ் வேதவசனம்', type: 'textarea', requiredForPublish: true, fullWidth: true, help: 'Do not use automatic translation for Scripture.' },
@@ -49,19 +46,16 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       { name: 'reference_ta', label: 'Tamil Bible reference', tamilLabel: 'தமிழ் வேதாகமக் குறிப்பு', type: 'text', requiredForPublish: true },
       { name: 'translation_en', label: 'English translation/version', type: 'text', help: 'Optional, but recommended for attribution.' },
       { name: 'translation_ta', label: 'Tamil translation/version', type: 'text' },
-      { name: 'background_image_url', label: 'Optional approved background image', type: 'text', fullWidth: true },
       { name: 'scheduled_date', label: 'Special display date', type: 'date', help: 'Optional. A scheduled verse overrides automatic rotation on this India date.' },
       { name: 'active', label: 'Include in daily display', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Rotation order', type: 'number' },
     ],
   },
-  slides: {
-    key: 'slides', title: 'Carousel Slides', singular: 'slide', table: 'hero_slides', orderBy: 'display_order', orderable: true, excludeFilters: { scope: 'academics' },
-    description: 'Manage homepage and Community Care carousel slides. Academics has its own protected carousel editor.', titleField: 'title_en', subtitleField: 'scope',
-    defaults: { scope: 'home', status: 'draft', enabled: true, display_order: 0, eyebrow_en: '', eyebrow_ta: '', title_en: '', title_ta: '', description_en: '', description_ta: '', image_url: '', image_alt_en: '', image_alt_ta: '', cta_label_en: '', cta_label_ta: '', cta_href: '#home', secondary_cta_label_en: '', secondary_cta_label_ta: '', secondary_cta_href: '' },
+  'community-carousel': {
+    key: 'community-carousel', title: 'Community Care Carousel', singular: 'slide', table: 'hero_slides', orderBy: 'display_order', orderable: true, filters: { scope: 'community' },
+    description: 'Manage the Community Care page carousel.', titleField: 'title_en', subtitleField: 'scope',
+    defaults: { scope: 'community', status: 'draft', enabled: true, display_order: 0, eyebrow_en: '', eyebrow_ta: '', title_en: '', title_ta: '', description_en: '', description_ta: '', image_url: '', image_alt_en: '', image_alt_ta: '', cta_label_en: '', cta_label_ta: '', cta_href: '#community-care', secondary_cta_label_en: '', secondary_cta_label_ta: '', secondary_cta_href: '' },
     fields: [
-      { name: 'scope', label: 'Carousel', type: 'select', requiredForPublish: true, options: [{ value: 'home', label: 'Homepage' }, { value: 'community', label: 'Community Care' }] },
       { name: 'eyebrow_en', label: 'English short label', type: 'text', requiredForPublish: true },
       { name: 'eyebrow_ta', label: 'Tamil short label', tamilLabel: 'தமிழ் குறுந்தலைப்பு', type: 'text', requiredForPublish: true },
       ...bilingualTitleFields, ...bilingualDescriptionFields,
@@ -76,7 +70,6 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       { name: 'secondary_cta_href', label: 'Second button destination', type: 'text' },
       { name: 'enabled', label: 'Enabled', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   announcements: {
@@ -120,7 +113,6 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       { name: 'live_status', label: 'Video status', type: 'select', options: [{ value: 'recorded', label: 'Recorded' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'live_confirmed', label: 'Live — manually confirmed' }] },
       { name: 'featured', label: 'Featured video', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   'audio-albums': {
@@ -132,7 +124,6 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       ...bilingualDescriptionFields,
       { name: 'cover_image_url', label: 'Optional approved cover image', type: 'text', fullWidth: true, help: 'Choose an approved image or leave blank to use the WJ audio artwork.' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   services: {
@@ -154,15 +145,19 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       { name: 'active', label: 'Active service', type: 'boolean' },
       { name: 'verified', label: 'Schedule confirmed by church', type: 'boolean', help: 'Required before publishing.' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   ministries: {
-    key: 'ministries', title: 'Ministry Photos', singular: 'ministry photo', table: 'ministries', orderBy: 'display_order', excludeFilters: { group_key: 'academics' }, allowCreate: false, allowDelete: false,
-    description: 'Replace the approved image used for each Church ministry.', titleField: 'title_en', subtitleField: 'eyebrow_en',
+    key: 'ministries', title: 'Ministry Slides', singular: 'ministry slide', table: 'ministries', orderBy: 'display_order', orderable: true, filters: { group_key: 'church' }, allowCreate: true, allowDelete: false,
+    description: 'Edit existing Church ministry slides or add a new ministry slide.', titleField: 'title_en', subtitleField: 'eyebrow_en',
     defaults: { slug: '', group_key: 'church', title_en: '', title_ta: '', eyebrow_en: '', eyebrow_ta: '', description_en: '', description_ta: '', image_url: '', icon_key: '', featured: false, status: 'draft', display_order: 0, metadata: {} },
     fields: [
-      { name: 'image_url', label: 'Approved ministry image', type: 'text', requiredForPublish: true, fullWidth: true, help: 'Choose a replacement from the approved Upload Library.' },
+      { name: 'slug', label: 'Ministry identifier', type: 'text', requiredForPublish: true, placeholder: 'example: youth-ministry', help: 'Lowercase letters, numbers and hyphens only.' },
+      ...bilingualTitleFields,
+      { name: 'eyebrow_en', label: 'English short heading', type: 'text', requiredForPublish: true, placeholder: 'Example: Faith · Friendship · Purpose' },
+      { name: 'eyebrow_ta', label: 'Tamil short heading', tamilLabel: 'தமிழ் குறுந்தலைப்பு', type: 'text', requiredForPublish: true },
+      ...bilingualDescriptionFields,
+      { name: 'image_url', label: 'Approved ministry image', type: 'text', requiredForPublish: true, fullWidth: true, help: 'Choose an approved image from the Upload Library.' },
     ],
   },
   academics: {
@@ -184,7 +179,6 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       { name: 'duration_en', label: 'Duration — English', type: 'text', requiredForPublish: true, placeholder: 'Example: 3 years' },
       { name: 'duration_ta', label: 'Duration — Tamil', tamilLabel: 'கால அளவு — தமிழ்', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: 3 ஆண்டுகள்' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   albums: {
@@ -194,18 +188,17 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     fields: [
       { name: 'slug', label: 'Album identifier', type: 'text', requiredForPublish: true }, ...bilingualTitleFields, ...bilingualDescriptionFields,
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
-      { name: 'display_order', label: 'Display order', type: 'number' },
     ],
   },
   'gallery-images': {
     key: 'gallery-images', title: 'Gallery Page Photos', singular: 'photo', table: 'gallery_images', orderBy: 'display_order', orderable: true, presentation: 'photo-grid', albumScope: 'gallery',
-    description: 'Photos shown on the public Gallery page, organised under its albums.', titleField: 'caption_en', subtitleField: 'status',
+    description: 'Photos shown on the public Gallery page, organised under its albums.', titleField: 'alt_en', subtitleField: 'status',
     defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', featured: false, status: 'draft', display_order: 0 },
     fields: galleryPhotoFields,
   },
   'academic-gallery': {
     key: 'academic-gallery', title: 'Graduation Photos', singular: 'graduation photo', table: 'gallery_images', orderBy: 'display_order', orderable: true, presentation: 'photo-grid', albumScope: 'academics',
-    description: 'Photos shown only in the Academics graduation section. Albums cannot be created here.', titleField: 'caption_en', subtitleField: 'status',
+    description: 'Photos shown only in the Academics graduation section. Albums cannot be created here.', titleField: 'alt_en', subtitleField: 'status',
     defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', featured: false, status: 'draft', display_order: 0 },
     fields: galleryPhotoFields,
   },

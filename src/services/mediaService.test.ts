@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
 import { maxAudioBytes, maxImageBytes, validateAudioFile, validateImageFile } from './mediaService'
+import { maxSourceImageBytes, validateOptimizedImage } from '../utils/imageOptimization'
 
 describe('media upload validation', () => {
   it('accepts approved browser image formats within the size limit', () => {
@@ -10,12 +11,22 @@ describe('media upload validation', () => {
 
   it('rejects unsafe file types', () => {
     const file = new File(['<svg onload=alert(1)>'], 'unsafe.svg', { type: 'image/svg+xml' })
-    expect(() => validateImageFile(file)).toThrow(/JPG, PNG, WebP or AVIF/)
+    expect(() => validateImageFile(file)).toThrow(/never converted to WebP/)
   })
 
-  it('rejects oversized images', () => {
-    const file = new File([new Uint8Array(maxImageBytes + 1)], 'large.jpg', { type: 'image/jpeg' })
-    expect(() => validateImageFile(file)).toThrow(/8 MB or smaller/)
+  it('allows a large source image to proceed to optimization', () => {
+    const file = { name: 'large.jpg', type: 'image/jpeg', size: maxImageBytes + 1 } as File
+    expect(() => validateImageFile(file)).not.toThrow()
+  })
+
+  it('rejects a source image too large to process safely', () => {
+    const file = { name: 'huge.jpg', type: 'image/jpeg', size: maxSourceImageBytes + 1 } as File
+    expect(() => validateImageFile(file)).toThrow(/smaller than 50 MB/)
+  })
+
+  it('enforces the final two-megabyte upload limit', () => {
+    const file = { name: 'optimized.webp', type: 'image/webp', size: maxImageBytes + 1 } as File
+    expect(() => validateOptimizedImage(file)).toThrow(/larger than 2 MB/)
   })
 
   it('accepts supported church audio formats', () => {

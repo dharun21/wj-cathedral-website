@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { Check, ImageIcon, Search, X } from 'lucide-react'
 import { useState } from 'react'
-import { listAdminRecords } from '../../services/contentService'
+import { listAdminMediaAssets } from '../../services/contentService'
 import type { MediaAssetRow } from '../../types/database'
 
 export function MediaPicker({ onSelect, onClose }: { onSelect: (asset: MediaAssetRow) => void; onClose: () => void }) {
   const [search, setSearch] = useState('')
-  const query = useQuery({ queryKey: ['admin', 'media_assets'], queryFn: () => listAdminRecords<MediaAssetRow & Record<string, unknown>>('media_assets', { orderBy: 'created_at', ascending: false }) })
-  const assets = (query.data ?? []).filter((asset) => asset.mime_type.startsWith('image/') && asset.approval_status === 'approved' && asset.public_url && `${asset.original_name} ${asset.alt_en} ${asset.alt_ta}`.toLowerCase().includes(search.toLowerCase()))
+  const query = useQuery({ queryKey: ['admin', 'media_assets', 'approved-images'], queryFn: () => listAdminMediaAssets('image', true) })
+  const assets = (query.data ?? []).filter((asset) => `${asset.original_name} ${asset.alt_en} ${asset.alt_ta}`.toLowerCase().includes(search.toLowerCase()))
   return (
     <div className="admin-dialog admin-media-picker" role="dialog" aria-modal="true" aria-label="Choose an approved image">
       <button className="admin-dialog__backdrop" type="button" onClick={onClose} aria-label="Close media picker" />

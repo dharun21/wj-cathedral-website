@@ -44,7 +44,9 @@ function SubmissionCard({ request }: { request: ContentReviewRequestRow }) {
     let route = module.route
     if (request.table_name === 'hero_slides') {
       const records = await listAdminRecords<Record<string, unknown>>('hero_slides')
-      if (records.find((record) => String(record.id) === request.record_id)?.scope === 'academics') route = 'academic-carousel'
+      const scope = records.find((record) => String(record.id) === request.record_id)?.scope
+      if (scope === 'academics') route = 'academic-carousel'
+      if (scope === 'community') route = 'community-carousel'
     }
     if (request.table_name === 'ministries') {
       const records = await listAdminRecords<Record<string, unknown>>('ministries')
@@ -69,7 +71,7 @@ function SubmissionCard({ request }: { request: ContentReviewRequestRow }) {
 }
 
 export function EditorSubmissionsPage() {
-  const activity = useReviewActivity()
+  const activity = useReviewActivity({ subscribe: false })
   const visibleActivity = (activity.data ?? []).filter((item) => Boolean(reviewModules[item.table_name]))
   const pending = visibleActivity.filter((item) => item.resolution === 'pending')
   const history = visibleActivity.filter((item) => item.resolution !== 'pending')

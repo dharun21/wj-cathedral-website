@@ -40,7 +40,7 @@ function formatSubmitted(value: unknown) {
 }
 
 export function ApprovalsPage() {
-  const reviewActivity = useReviewActivity()
+  const reviewActivity = useReviewActivity({ subscribe: false })
   const approvals = useQuery({
     queryKey: ['admin', 'pending-approvals'],
     queryFn: async () => {
@@ -52,12 +52,13 @@ export function ApprovalsPage() {
           const academicFaculty = module.table === 'ministries' && row.group_key === 'academics'
           const academicPhoto = module.table === 'gallery_images' && academicAlbumIds.has(String(row.album_id))
           const academicSlide = module.table === 'hero_slides' && row.scope === 'academics'
+          const communitySlide = module.table === 'hero_slides' && row.scope === 'community'
           return {
             ...row,
             id: String(row.id),
             table: module.table,
-            route: academicFaculty ? 'academics' : academicPhoto ? 'academic-gallery' : academicSlide ? 'academic-carousel' : module.route,
-            moduleLabel: academicFaculty ? 'Academics Faculty Photos' : academicPhoto ? 'Academics Graduation Photos' : academicSlide ? 'Academics Carousel' : module.label,
+            route: academicFaculty ? 'academics' : academicPhoto ? 'academic-gallery' : academicSlide ? 'academic-carousel' : communitySlide ? 'community-carousel' : module.route,
+            moduleLabel: academicFaculty ? 'Academics Faculty Photos' : academicPhoto ? 'Academics Graduation Photos' : academicSlide ? 'Academics Carousel' : communitySlide ? 'Community Care Carousel' : module.label,
           }
         })
       }))

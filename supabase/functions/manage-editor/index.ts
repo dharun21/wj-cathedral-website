@@ -75,7 +75,7 @@ Deno.serve(async (request) => {
 
     const { count, error: countError } = await serviceClient
       .from('admin_memberships')
-      .select('*', { count: 'exact', head: true })
+      .select('user_id', { count: 'exact', head: true })
       .eq('role', 'editor')
       .eq('is_active', true)
     if (countError) return json({ error: countError.message }, 400)

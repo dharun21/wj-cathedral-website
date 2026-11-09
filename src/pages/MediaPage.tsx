@@ -49,7 +49,7 @@ function AudioTrackPlayer({ track, activeTrack, onActivate }: { track: Published
     </button>
     <span><strong>{localize({ en: track.title_en, ta: track.title_ta })}</strong>{(track.description_en || track.description_ta) && <small>{localize({ en: track.description_en, ta: track.description_ta })}</small>}</span>
     <time>{duration}</time>
-    <audio ref={audioRef} src={track.audio_url} preload="metadata" onEnded={() => onActivate(null)} />
+    <audio ref={audioRef} src={track.audio_url} preload="none" onEnded={() => onActivate(null)} />
   </li>
 }
 

@@ -69,6 +69,26 @@ export function HomeWelcomeStory() {
 export function HomeMinistryPathways() {
   const { localize } = useLanguage()
   const managedRows = usePublishedMinistries('church').data ?? []
+  const knownIds = new Set(generationMinistries.map((ministry) => ministry.id))
+  const ministryCards = [
+    ...generationMinistries.map((ministry) => {
+      const managed = managedRows.find((row) => row.slug === ministry.id)
+      return {
+        id: ministry.id,
+        eyebrow: managed ? { en: managed.eyebrow_en || ministry.eyebrow.en, ta: managed.eyebrow_ta || ministry.eyebrow.ta } : ministry.eyebrow,
+        title: managed ? { en: managed.title_en, ta: managed.title_ta } : ministry.title,
+        description: managed ? { en: managed.description_en, ta: managed.description_ta } : ministry.description,
+        imageUrl: ministry.id === 'youth-ministry' ? ministryImages[ministry.id] : managed?.image_url || ministryImages[ministry.id],
+      }
+    }),
+    ...managedRows.filter((row) => !knownIds.has(row.slug as (typeof generationMinistries)[number]['id'])).map((row) => ({
+      id: row.slug,
+      eyebrow: { en: row.eyebrow_en || 'Church ministry', ta: row.eyebrow_ta || 'திருச்சபை ஊழியம்' },
+      title: { en: row.title_en, ta: row.title_ta },
+      description: { en: row.description_en, ta: row.description_ta },
+      imageUrl: row.image_url || './church/gospel-ministries.jpg',
+    })),
+  ]
   return (
     <section className="section home-ministries">
       <div className="container">
@@ -81,13 +101,12 @@ export function HomeMinistryPathways() {
           <a className="home-heading-link" href="#church">{localize({ en: 'Explore every ministry', ta: 'அனைத்து ஊழியங்களையும் அறியுங்கள்' })} <ArrowRight size={17} /></a>
         </div>
         <div className="home-ministry-grid">
-          {generationMinistries.map((ministry, index) => {
-            const managed = managedRows.find((row) => row.slug === ministry.id)
+          {ministryCards.map((ministry, index) => {
             const Icon = ministryIcons[index] ?? Church
             return (
               <Reveal className="home-ministry-card" key={ministry.id} delay={index * 0.06}>
                 <img
-                  src={ministry.id === 'youth-ministry' ? ministryImages[ministry.id] : managed?.image_url || ministryImages[ministry.id]}
+                  src={ministry.imageUrl}
                   alt={localize(ministry.title)}
                   loading="lazy"
                 />
@@ -95,9 +114,9 @@ export function HomeMinistryPathways() {
                 <div className="home-ministry-card__number">0{index + 1}</div>
                 <div className="home-ministry-card__copy">
                   <Icon size={22} aria-hidden="true" />
-                  <p>{localize(managed ? { en: managed.eyebrow_en || ministry.eyebrow.en, ta: managed.eyebrow_ta || ministry.eyebrow.ta } : ministry.eyebrow)}</p>
-                  <h3>{localize(managed ? { en: managed.title_en, ta: managed.title_ta } : ministry.title)}</h3>
-                  <span>{localize(managed ? { en: managed.description_en, ta: managed.description_ta } : ministry.description)}</span>
+                  <p>{localize(ministry.eyebrow)}</p>
+                  <h3>{localize(ministry.title)}</h3>
+                  <span>{localize(ministry.description)}</span>
                 </div>
               </Reveal>
             )

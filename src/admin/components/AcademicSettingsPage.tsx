@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Save, School } from 'lucide-react'
 import { useState } from 'react'
+import { invalidatePublishedContent } from '../../lib/contentCache'
 import { listAdminRecords, saveAdminRecord } from '../../services/contentService'
 import type { AcademicSettingsRow } from '../../types/database'
 import { useNotification } from '../context/NotificationContext'
@@ -44,7 +45,8 @@ function AcademicSettingsForm({ initial }: { initial: AcademicSettingsDraft }) {
     }, record.id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin', 'academic_settings'] })
-      void queryClient.invalidateQueries({ queryKey: ['public', 'academic-settings'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard-counts'] })
+      void invalidatePublishedContent(queryClient, 'academic_settings')
       notify('College details and admission availability updated.')
     },
     onError: (error) => notify(error instanceof Error ? error.message : 'Academic settings could not be saved.', 'error'),

@@ -13,6 +13,7 @@ import type {
   GalleryAlbumRow,
   GalleryImageRow,
   HeroSlideRow,
+  MediaAssetRow,
   MinistryRow,
   PageContentRow,
   SiteSettingsRow,
@@ -29,6 +30,15 @@ export interface PublishedAudioAlbum extends AudioAlbumRow {
   tracks: PublishedAudioTrack[]
 }
 
+export interface PublishedAudioAlbumSummary {
+  id: string
+  title_en: string
+  title_ta: string
+  cover_image_url: string | null
+  display_order: number
+  trackCount: number
+}
+
 function genericClient(): SupabaseClient {
   return requireSupabase() as unknown as SupabaseClient
 }
@@ -40,7 +50,7 @@ function throwIfError(error: { message: string } | null) {
 export async function fetchPublishedTranslations() {
   const { data, error } = await requireSupabase()
     .from('page_content')
-    .select('*')
+    .select('content_key, content_en, content_ta')
     .eq('status', 'published')
     .order('display_order')
   throwIfError(error)
@@ -50,6 +60,7 @@ export async function fetchPublishedTranslations() {
 export async function fetchPublishedHeroSlides(scope: HeroSlideRow['scope']) {
   const { data, error } = await requireSupabase()
     .from('hero_slides')
+    // Keep wildcard compatibility until the protected default/custom slide migration is deployed remotely.
     .select('*')
     .eq('scope', scope)
     .eq('status', 'published')
@@ -62,7 +73,7 @@ export async function fetchPublishedHeroSlides(scope: HeroSlideRow['scope']) {
 export async function fetchPublishedAcademicSettings() {
   const { data, error } = await requireSupabase()
     .from('academic_settings')
-    .select('*')
+    .select('id, college_name, affiliation, established, founder, principal, address_en, address_ta, phone_primary, phone_secondary, admissions_open')
     .eq('singleton_key', 'default')
     .eq('status', 'published')
     .maybeSingle()
@@ -73,7 +84,7 @@ export async function fetchPublishedAcademicSettings() {
 export async function fetchPublishedAcademicCourses() {
   const { data, error } = await requireSupabase()
     .from('academic_courses')
-    .select('*')
+    .select('id, slug, short_name, title_en, title_ta, duration_en, duration_ta, display_order')
     .eq('status', 'published')
     .order('display_order')
   throwIfError(error)
@@ -90,7 +101,7 @@ export async function fetchPublishedAnnouncements() {
   const now = new Date().toISOString()
   const { data, error } = await requireSupabase()
     .from('announcements')
-    .select('*')
+    .select('id, title_en, title_ta, description_en, description_ta, featured, publish_at')
     .eq('status', 'published')
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .or(`expires_at.is.null,expires_at.gt.${now}`)
@@ -103,7 +114,7 @@ export async function fetchPublishedAnnouncements() {
 export async function fetchPublishedEvents() {
   const { data, error } = await requireSupabase()
     .from('events')
-    .select('*')
+    .select('id, title_en, title_ta, description_en, description_ta, starts_at, ends_at, venue_en, venue_ta, category')
     .eq('status', 'published')
     .order('starts_at')
   throwIfError(error)
@@ -113,7 +124,7 @@ export async function fetchPublishedEvents() {
 export async function fetchPublishedVideos() {
   const { data, error } = await requireSupabase()
     .from('videos')
-    .select('*')
+    .select('id, youtube_id, title_en, title_ta, description_en, description_ta, category, featured, live_status, display_order, created_at')
     .eq('status', 'published')
     .order('featured', { ascending: false })
     .order('display_order')
@@ -124,8 +135,8 @@ export async function fetchPublishedVideos() {
 export async function fetchPublishedAudioLibrary(): Promise<PublishedAudioAlbum[]> {
   const client = genericClient()
   const [albumsResult, tracksResult] = await Promise.all([
-    client.from('audio_albums').select('*').eq('status', 'published').order('display_order'),
-    client.from('audio_tracks').select('*').eq('status', 'published').order('display_order'),
+    client.from('audio_albums').select('id, title_en, title_ta, description_en, description_ta, cover_image_url, display_order').eq('status', 'published').order('display_order'),
+    client.from('audio_tracks').select('id, album_id, media_asset_id, title_en, title_ta, description_en, description_ta, duration_seconds, display_order').eq('status', 'published').order('display_order'),
   ])
   throwIfError(albumsResult.error)
   throwIfError(tracksResult.error)
@@ -135,7 +146,7 @@ export async function fetchPublishedAudioLibrary(): Promise<PublishedAudioAlbum[
   if (!mediaIds.length) return albums.map((album) => ({ ...album, tracks: [] }))
   const { data: media, error } = await client
     .from('media_assets')
-    .select('*')
+    .select('id, public_url, mime_type')
     .in('id', mediaIds)
     .eq('approval_status', 'approved')
   throwIfError(error)
@@ -151,10 +162,23 @@ export async function fetchPublishedAudioLibrary(): Promise<PublishedAudioAlbum[
   }))
 }
 
+export async function fetchPublishedAudioAlbumSummary(): Promise<PublishedAudioAlbumSummary[]> {
+  const client = genericClient()
+  const [albumsResult, tracksResult] = await Promise.all([
+    client.from('audio_albums').select('id, title_en, title_ta, cover_image_url, display_order').eq('status', 'published').order('display_order'),
+    client.from('audio_tracks').select('album_id').eq('status', 'published'),
+  ])
+  throwIfError(albumsResult.error)
+  throwIfError(tracksResult.error)
+  const trackCounts = new Map<string, number>()
+  for (const track of tracksResult.data ?? []) trackCounts.set(String(track.album_id), (trackCounts.get(String(track.album_id)) ?? 0) + 1)
+  return (albumsResult.data ?? []).map((album) => ({ ...album, trackCount: trackCounts.get(String(album.id)) ?? 0 })) as PublishedAudioAlbumSummary[]
+}
+
 export async function fetchPublishedWorshipServices() {
   const { data, error } = await requireSupabase()
     .from('worship_services')
-    .select('*')
+    .select('id, name_en, name_ta, day_en, day_ta, time_display_en, time_display_ta, description_en, description_ta, display_order')
     .eq('status', 'published')
     .eq('active', true)
     .eq('verified', true)
@@ -166,7 +190,7 @@ export async function fetchPublishedWorshipServices() {
 export async function fetchPublishedMinistries(groupKey: MinistryRow['group_key']) {
   const { data, error } = await requireSupabase()
     .from('ministries')
-    .select('*')
+    .select('id, slug, group_key, title_en, title_ta, eyebrow_en, eyebrow_ta, description_en, description_ta, image_url, icon_key, featured, display_order')
     .eq('group_key', groupKey)
     .eq('status', 'published')
     .order('display_order')
@@ -176,11 +200,11 @@ export async function fetchPublishedMinistries(groupKey: MinistryRow['group_key'
 
 export async function fetchPublishedGallery(pageScope: GalleryAlbumRow['page_scope'] = 'gallery') {
   const client = requireSupabase()
-  const albumsResult = await client.from('gallery_albums').select('*').eq('status', 'published').eq('page_scope', pageScope).order('display_order')
+  const albumsResult = await client.from('gallery_albums').select('id, title_en, title_ta, display_order').eq('status', 'published').eq('page_scope', pageScope).order('display_order')
   throwIfError(albumsResult.error)
   const albums = (albumsResult.data ?? []) as GalleryAlbumRow[]
   if (!albums.length) return { albums, images: [] as GalleryImageRow[] }
-  const imagesResult = await client.from('gallery_images').select('*').eq('status', 'published').in('album_id', albums.map((album) => album.id)).order('display_order')
+  const imagesResult = await client.from('gallery_images').select('id, album_id, image_url, alt_en, alt_ta, display_order').eq('status', 'published').in('album_id', albums.map((album) => album.id)).order('display_order')
   throwIfError(imagesResult.error)
   return {
     albums,
@@ -202,7 +226,7 @@ export async function listAdminGalleryImages<Row extends Record<string, unknown>
 export async function fetchPublishedSiteSettings() {
   const { data, error } = await requireSupabase()
     .from('site_settings')
-    .select('*')
+    .select('id, display_name, short_name, phone, public_email, address_en, address_ta, maps_url, instagram_url, facebook_url, youtube_url, footer_en, footer_ta, prayer_247_confirmed, daily_verse_background_url, daily_verse_background_media_id, giving_account_name, giving_bank_name, giving_bank_branch, giving_account_number, giving_ifsc, giving_gpay_number, giving_gpay_name, giving_upi_id, giving_qr_url, giving_note_en, giving_note_ta, giving_payment_verified')
     .eq('singleton_key', 'default')
     .eq('status', 'published')
     .maybeSingle()
@@ -227,6 +251,18 @@ export async function listAdminRecords<Row extends Record<string, unknown>>(tabl
   const { data, error } = await query
   throwIfError(error)
   return (data ?? []) as Row[]
+}
+
+export async function listAdminMediaAssets(kind: 'image' | 'audio', approvedOnly = false) {
+  let query = genericClient()
+    .from('media_assets')
+    .select('*')
+    .like('mime_type', `${kind}/%`)
+    .order('created_at', { ascending: false })
+  if (approvedOnly) query = query.eq('approval_status', 'approved').not('public_url', 'is', null)
+  const { data, error } = await query
+  throwIfError(error)
+  return (data ?? []) as MediaAssetRow[]
 }
 
 export async function listPendingApprovalRecords<Row extends Record<string, unknown>>(table: CmsTableName) {
@@ -297,7 +333,7 @@ export async function reorderAdminRecords(table: CmsTableName, orderedIds: strin
 export async function fetchDashboardCounts() {
   const client = genericClient()
   const count = async (table: CmsTableName, filters: Record<string, string> = {}) => {
-    let query = client.from(table).select('*', { count: 'exact', head: true })
+    let query = client.from(table).select('id', { count: 'exact', head: true })
     for (const [column, value] of Object.entries(filters)) query = query.eq(column, value)
     const { count: total, error } = await query
     throwIfError(error)
@@ -306,7 +342,7 @@ export async function fetchDashboardCounts() {
   const now = new Date().toISOString()
   const [announcements, events, gallery, slides, videos, verses, draftGroups, pendingGroups, pendingMedia] = await Promise.all([
     count('announcements', { status: 'published' }),
-    client.from('events').select('*', { count: 'exact', head: true }).eq('status', 'published').or(`starts_at.gte.${now},ends_at.gte.${now}`),
+    client.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').or(`starts_at.gte.${now},ends_at.gte.${now}`),
     count('gallery_images', { status: 'published' }),
     count('hero_slides', { status: 'published', enabled: 'true' }),
     count('videos', { status: 'published' }),

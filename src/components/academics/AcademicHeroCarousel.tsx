@@ -44,6 +44,7 @@ export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen
       description: { en: row.description_en, ta: row.description_ta },
       ctaLabel: builtIn.ctaLabel,
       ctaHref: builtIn.ctaHref,
+      imageUrl: row.image_url,
     }
     return {
       id: row.id,
@@ -97,11 +98,11 @@ export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen
         <div className="academic-hero__container">
           {slides.map((slide, index) => {
             const Icon = slide.frame === 'custom' ? GraduationCap : slideIcons[slide.frame]
-            const customBackground = slide.frame === 'custom' && slide.imageUrl
+            const customBackground = slide.imageUrl
               ? { backgroundImage: `linear-gradient(90deg, rgba(5, 21, 33, .9), rgba(5, 21, 33, .45)), url("${slide.imageUrl.replaceAll('"', '%22')}")` }
               : undefined
             return (
-              <article className={`academic-hero__slide academic-hero__slide--${slide.frame}`} style={customBackground} key={slide.id} aria-hidden={selectedIndex !== index}>
+              <article className={`academic-hero__slide academic-hero__slide--${slide.frame}${slide.imageUrl ? ' has-background-image' : ''}`} style={customBackground} key={slide.id} aria-hidden={selectedIndex !== index}>
                 <div className="academic-hero__pattern" aria-hidden="true"><span /><span /><span /></div>
                 <div className="container academic-hero__content">
                   {selectedIndex === index && (

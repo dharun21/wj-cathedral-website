@@ -16,10 +16,18 @@ export const createEditorSchema = z.object({
   password: z.string().min(12).max(72).refine((value) => /[A-Za-z]/.test(value) && /[0-9]/.test(value), 'Password must contain letters and numbers.'),
 })
 
+export function editorFunctionConnectionMessage(error: { message?: string; context?: Response }) {
+  if (error.context?.status === 404) return 'Editor management is not active yet. Deploy the “manage-editor” Supabase Edge Function, then try again.'
+  if (/failed to send (a )?request to (the )?edge function/i.test(error.message ?? '')) {
+    return 'Editor management could not reach Supabase. The “manage-editor” Edge Function may not be deployed, or the network connection may be unavailable.'
+  }
+  return error.message || 'The editor access request failed.'
+}
+
 async function invokeEditorFunction<T>(body: Record<string, unknown>) {
   const { data, error } = await requireSupabase().functions.invoke('manage-editor', { body })
   if (error) {
-    let message = error.message || 'The editor access request failed.'
+    let message = editorFunctionConnectionMessage(error as { message?: string; context?: Response })
     const context = (error as { context?: Response }).context
     if (context) {
       try {

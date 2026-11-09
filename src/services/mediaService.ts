@@ -1,10 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { requireSupabase } from '../lib/supabase'
 import type { MediaAssetRow } from '../types/database'
+import { maxOptimizedImageBytes, optimizeImageFile, validateImageSelection, validateOptimizedImage } from '../utils/imageOptimization'
 
-const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
 const allowedAudioTypes = new Set(['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/x-wav', 'audio/ogg'])
-export const maxImageBytes = 8 * 1024 * 1024
+export const maxImageBytes = maxOptimizedImageBytes
 export const maxAudioBytes = 50 * 1024 * 1024
 
 function untypedClient(): SupabaseClient {
@@ -12,8 +12,7 @@ function untypedClient(): SupabaseClient {
 }
 
 export function validateImageFile(file: File) {
-  if (!allowedImageTypes.has(file.type)) throw new Error('Use a JPG, PNG, WebP or AVIF image.')
-  if (file.size > maxImageBytes) throw new Error('The image must be 8 MB or smaller.')
+  validateImageSelection(file)
 }
 
 export function validateAudioFile(file: File) {
@@ -32,46 +31,21 @@ function extensionForMime(mimeType: string) {
   return 'webp'
 }
 
-async function imageDimensions(file: File) {
-  const bitmap = await createImageBitmap(file)
-  const dimensions = { width: bitmap.width, height: bitmap.height }
-  bitmap.close()
-  return dimensions
-}
-
-export async function optimizeImage(file: File, maxDimension = 2400) {
-  validateImageFile(file)
-  const bitmap = await createImageBitmap(file)
-  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height))
-  const width = Math.max(1, Math.round(bitmap.width * scale))
-  const height = Math.max(1, Math.round(bitmap.height * scale))
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const context = canvas.getContext('2d')
-  if (!context) throw new Error('Image processing is unavailable in this browser.')
-  context.drawImage(bitmap, 0, 0, width, height)
-  bitmap.close()
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((result) => result ? resolve(result) : reject(new Error('The image could not be prepared.')), 'image/webp', 0.84)
-  })
-  return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.webp`, { type: 'image/webp' })
-}
-
 export async function uploadDraftImage(file: File, altEn: string, altTa: string, onProgress?: (progress: number) => void) {
   validateImageFile(file)
   const client = requireSupabase()
   const { data: userData } = await client.auth.getUser()
   const user = userData.user
   if (!user) throw new Error('Your admin session has expired.')
-  onProgress?.(10)
-  const optimized = await optimizeImage(file)
-  const dimensions = await imageDimensions(optimized)
-  const path = `${user.id}/${new Date().getUTCFullYear()}/${crypto.randomUUID()}.webp`
+  onProgress?.(5)
+  const optimized = await optimizeImageFile(file)
+  validateOptimizedImage(optimized.file)
+  const extension = extensionForMime(optimized.file.type)
+  const path = `${user.id}/${new Date().getUTCFullYear()}/${crypto.randomUUID()}.${extension}`
   onProgress?.(35)
-  const { error: uploadError } = await client.storage.from('church-drafts').upload(path, optimized, {
-    cacheControl: '3600',
-    contentType: 'image/webp',
+  const { error: uploadError } = await client.storage.from('church-drafts').upload(path, optimized.file, {
+    cacheControl: '31536000',
+    contentType: optimized.file.type,
     upsert: false,
   })
   if (uploadError) throw uploadError
@@ -81,10 +55,10 @@ export async function uploadDraftImage(file: File, altEn: string, altTa: string,
     storage_path: path,
     public_url: null,
     original_name: file.name,
-    mime_type: optimized.type,
-    file_size: optimized.size,
-    width: dimensions.width,
-    height: dimensions.height,
+    mime_type: optimized.file.type,
+    file_size: optimized.file.size,
+    width: optimized.width,
+    height: optimized.height,
     alt_en: altEn.trim(),
     alt_ta: altTa.trim(),
     approval_status: 'pending',

@@ -19,6 +19,9 @@
   --radius-md: 22px;
   --radius-lg: 32px;
   --header-height: 78px;
+  --scrollbar-track: #eee6d9;
+  --scrollbar-thumb: #b98236;
+  --scrollbar-thumb-hover: #8f6025;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--ivory);
@@ -26,9 +29,14 @@
   text-rendering: optimizeLegibility;
 }
 
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 16px); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 16px); scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
 html[data-language='ta'] body { font-family: "Noto Sans Tamil", "Nirmala UI", Latha, Inter, sans-serif; line-height: 1.7; }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+*::-webkit-scrollbar-thumb { border: 2px solid var(--scrollbar-track); border-radius: 999px; background: var(--scrollbar-thumb); }
+*::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+*::-webkit-scrollbar-corner { background: var(--scrollbar-track); }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--ivory); color: var(--ink); overflow-x: hidden; }
 body.menu-open, body.lightbox-open { overflow: hidden; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -216,7 +224,7 @@ html[data-language='ta'] .prayer-need-card h3, html[data-language='ta'] .prayer-
 .academics-page { background: var(--ivory); }
 .academic-hero { position: relative; height: min(780px, 100svh); min-height: 650px; overflow: hidden; background: var(--navy); color: #fff; }
 .academic-hero__viewport, .academic-hero__container, .academic-hero__slide { height: 100%; }.academic-hero__viewport { overflow: hidden; }.academic-hero__container { display: flex; touch-action: pan-y pinch-zoom; }
-.academic-hero__slide { position: relative; min-width: 100%; flex: 0 0 100%; overflow: hidden; }.academic-hero__slide--admissions { background: linear-gradient(135deg, #071827 5%, #123b58 58%, #76572c); }.academic-hero__slide--licence { background: linear-gradient(135deg, #061723 8%, #163247 55%, #4b3d62); }.academic-hero__slide--graduation { background: linear-gradient(135deg, #081a29 4%, #173b4f 52%, #7a5428); }.academic-hero__slide--custom{background-color:#0b2639;background-position:center;background-size:cover}
+.academic-hero__slide { position: relative; min-width: 100%; flex: 0 0 100%; overflow: hidden; }.academic-hero__slide--admissions { background: linear-gradient(135deg, #071827 5%, #123b58 58%, #76572c); }.academic-hero__slide--licence { background: linear-gradient(135deg, #061723 8%, #163247 55%, #4b3d62); }.academic-hero__slide--graduation { background: linear-gradient(135deg, #081a29 4%, #173b4f 52%, #7a5428); }.academic-hero__slide--custom,.academic-hero__slide.has-background-image{background-color:#0b2639;background-position:center;background-size:cover}
 .academic-hero__pattern { position: absolute; inset: 0; overflow: hidden; opacity: .75; }.academic-hero__pattern::before { content: ''; position: absolute; width: 680px; height: 680px; right: -180px; top: -210px; border: 1px solid rgba(232,199,131,.18); border-radius: 50%; box-shadow: 0 0 0 90px rgba(232,199,131,.025), 0 0 0 180px rgba(232,199,131,.018); }.academic-hero__pattern::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(90deg, transparent, #000 48%, #000); }.academic-hero__pattern span { position: absolute; display: block; border: 1px solid rgba(232,199,131,.16); border-radius: 50%; }.academic-hero__pattern span:nth-child(1) { width: 90px; height: 90px; left: 7%; top: 18%; }.academic-hero__pattern span:nth-child(2) { width: 34px; height: 34px; left: 44%; bottom: 19%; background: rgba(232,199,131,.08); }.academic-hero__pattern span:nth-child(3) { width: 210px; height: 210px; right: 16%; bottom: -110px; }
 .academic-hero__content { position: relative; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: center; gap: clamp(50px, 8vw, 120px); padding-top: var(--header-height); padding-bottom: 72px; }.academic-hero__copy { max-width: 740px; }.academic-hero__eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: var(--gold-light); font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }.academic-hero__copy h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(3rem, 5.8vw, 5.8rem); font-weight: 500; line-height: 1; letter-spacing: -.045em; text-wrap: balance; }.academic-hero__description { max-width: 650px; margin-top: 24px; color: rgba(255,255,255,.76); font-size: clamp(1rem, 1.25vw, 1.16rem); line-height: 1.75; }.academic-hero__copy .button { margin-top: 30px; }
 html[data-language='ta'] .academic-hero__copy h1 { font-family: "Noto Sans Tamil", "Nirmala UI", sans-serif; font-size: clamp(2.2rem, 4.9vw, 4.5rem); font-weight: 700; line-height: 1.2; }

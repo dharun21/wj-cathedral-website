@@ -1,9 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { BackToTop } from './components/common/BackToTop'
 import { Footer } from './components/layout/Footer'
 import { Header } from './components/layout/Header'
 import { useLanguage } from './context/LanguageContext'
+import { subscribeToPublishedContentChanges } from './lib/contentCache'
 import { HomePage } from './pages/HomePage'
+import { recordPublicVisit } from './services/analyticsService'
 
 const AcademicsPage = lazy(() => import('./pages/AcademicsPage').then((module) => ({ default: module.AcademicsPage })))
 const ChurchPage = lazy(() => import('./pages/ChurchPage').then((module) => ({ default: module.ChurchPage })))
@@ -18,6 +21,7 @@ const AdminApp = lazy(() => import('./admin/AdminApp').then((module) => ({ defau
 
 function App() {
   const { t } = useLanguage()
+  const queryClient = useQueryClient()
   const [hash, setHash] = useState(() => window.location.hash || '#home')
   const isAdmin = hash.startsWith('#/admin')
   const currentPage = hash.startsWith('#academics')
@@ -45,6 +49,12 @@ function App() {
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
+
+  useEffect(() => subscribeToPublishedContentChanges(queryClient), [queryClient])
+
+  useEffect(() => {
+    if (!isAdmin) void recordPublicVisit()
+  }, [isAdmin])
 
   useEffect(() => {
     if (isAdmin) return undefined
