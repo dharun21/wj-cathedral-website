@@ -165,6 +165,17 @@ address { font-style: normal; }
 
 /* Hero */
 .hero { position: relative; height: min(820px, 100svh); min-height: 650px; background: var(--navy); color: #fff; overflow: hidden; }
+.hero--loading { background: linear-gradient(118deg, #071827 0%, #102e42 54%, #1c4050 100%); }
+.hero--loading::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 72% 38%, rgba(201,149,69,.14), transparent 34%), linear-gradient(90deg, rgba(5,21,35,.72), rgba(5,21,35,.18)); }
+.hero-loading__content { position: relative; height: 100%; display: flex; align-items: center; padding-top: var(--header-height); }
+.hero-loading__skeleton { width: min(650px, 65%); display: grid; gap: 15px; }
+.hero-loading__line { display: block; height: 18px; border-radius: 999px; background: linear-gradient(100deg, rgba(255,255,255,.08) 30%, rgba(255,255,255,.18) 48%, rgba(255,255,255,.08) 66%); background-size: 220% 100%; animation: hero-loading-shimmer 1.4s ease-in-out infinite; }
+.hero-loading__line--eyebrow { width: 32%; height: 10px; margin-bottom: 8px; }
+.hero-loading__line--title { width: 94%; height: clamp(42px, 5.5vw, 72px); }
+.hero-loading__line--title-short { width: 67%; height: clamp(42px, 5.5vw, 72px); }
+.hero-loading__line--body { width: 78%; height: 15px; margin-top: 9px; }
+.hero-loading__line--button { width: 190px; height: 50px; margin-top: 13px; }
+@keyframes hero-loading-shimmer { to { background-position: -220% 0; } }
 .hero__viewport, .hero__container, .hero-slide { height: 100%; }
 .hero__viewport { overflow: hidden; }
 .hero__container { display: flex; touch-action: pan-y pinch-zoom; }
@@ -177,10 +188,16 @@ address { font-style: normal; }
 .hero-slide__eyebrow::before { content: ''; width: 36px; height: 1px; background: currentColor; }
 .hero-slide h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; font-size: clamp(3rem, 6vw, 6.1rem); line-height: .98; letter-spacing: -.045em; text-wrap: balance; }
 html[data-language='ta'] .hero-slide h1 { font-family: "Noto Sans Tamil", "Nirmala UI", sans-serif; font-size: clamp(2.35rem, 5.3vw, 5rem); line-height: 1.18; font-weight: 700; }
+.hero-slide.is-medium-title h1 { font-size:clamp(2.6rem,4.7vw,4.8rem); line-height:1.04; }.hero-slide.is-long-title h1 { font-size:clamp(2.15rem,3.7vw,3.8rem); line-height:1.1; }.hero-slide.is-extra-long-title h1 { max-height:48vh; padding-right:10px; overflow-y:auto; font-size:clamp(1.65rem,2.8vw,3rem); line-height:1.18; }
+html[data-language='ta'] .hero-slide.is-medium-title h1 { font-size:clamp(2.25rem,4.1vw,4.1rem); line-height:1.18; }html[data-language='ta'] .hero-slide.is-long-title h1 { font-size:clamp(1.9rem,3.35vw,3.35rem); line-height:1.22; }html[data-language='ta'] .hero-slide.is-extra-long-title h1 { font-size:clamp(1.5rem,2.5vw,2.65rem); line-height:1.28; }
 .hero-slide__description { max-width: 610px; font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.72; color: rgba(255,255,255,.8); margin-top: 24px; }
 .hero-slide__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 .hero-slide__media-note { display: inline-flex; align-items: center; gap: 7px; margin-top: 24px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.16); border-radius: 999px; color: rgba(255,255,255,.58); font-size: .69rem; letter-spacing: .03em; }
 .hero-slide--daily-verse .hero-slide__overlay { background:linear-gradient(90deg,rgba(4,18,30,.92),rgba(5,24,39,.6)),radial-gradient(circle at 78% 34%,rgba(232,199,131,.18),transparent 30%); }.hero-slide--daily-verse .hero-slide__copy { width:min(900px,88%); }.hero-slide--daily-verse h1 { max-width:900px; font-size:clamp(2.5rem,4.8vw,4.9rem); line-height:1.12; letter-spacing:-.035em; }.hero-slide--daily-verse.is-long-verse h1 { font-size:clamp(2rem,3.7vw,3.7rem); line-height:1.18; }.hero-slide--daily-verse .hero-slide__description { color:var(--gold-light); font-size:.8rem; font-weight:800; letter-spacing:.11em; text-transform:uppercase; }
+.hero-slide--daily-verse.is-medium-title h1,html[data-language='ta'] .hero-slide--daily-verse.is-medium-title h1 { font-size:clamp(2.25rem,3.65vw,3.7rem); line-height:1.16; }
+.hero-slide--daily-verse.is-long-title h1,html[data-language='ta'] .hero-slide--daily-verse.is-long-title h1 { font-size:clamp(1.8rem,2.9vw,3rem); line-height:1.22; }
+.hero-slide--daily-verse.is-extra-long-title h1,html[data-language='ta'] .hero-slide--daily-verse.is-extra-long-title h1 { max-height:50vh; font-size:clamp(1.35rem,2.15vw,2.25rem); line-height:1.32; }
+.hero-slide.is-extra-long-title h1,.academic-hero__slide.is-extra-long-title .academic-hero__copy h1 { scrollbar-width:thin; scrollbar-color:rgba(232,199,131,.56) rgba(255,255,255,.08); }.hero-slide.is-extra-long-title h1::-webkit-scrollbar,.academic-hero__slide.is-extra-long-title .academic-hero__copy h1::-webkit-scrollbar { width:5px; }.hero-slide.is-extra-long-title h1::-webkit-scrollbar-track,.academic-hero__slide.is-extra-long-title .academic-hero__copy h1::-webkit-scrollbar-track { background:rgba(255,255,255,.08); border-radius:999px; }.hero-slide.is-extra-long-title h1::-webkit-scrollbar-thumb,.academic-hero__slide.is-extra-long-title .academic-hero__copy h1::-webkit-scrollbar-thumb { background:rgba(232,199,131,.56); border-radius:999px; }
 .hero__controls { position: absolute; z-index: 3; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; }
 .hero__arrows { display: flex; gap: 8px; }
 .hero__arrows button, .hero__autoplay { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.32); background: rgba(7,25,39,.3); color: #fff; backdrop-filter: blur(8px); transition: background .2s, border-color .2s; }
@@ -228,6 +245,8 @@ html[data-language='ta'] .prayer-need-card h3, html[data-language='ta'] .prayer-
 .academic-hero__pattern { position: absolute; inset: 0; overflow: hidden; opacity: .75; }.academic-hero__pattern::before { content: ''; position: absolute; width: 680px; height: 680px; right: -180px; top: -210px; border: 1px solid rgba(232,199,131,.18); border-radius: 50%; box-shadow: 0 0 0 90px rgba(232,199,131,.025), 0 0 0 180px rgba(232,199,131,.018); }.academic-hero__pattern::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(90deg, transparent, #000 48%, #000); }.academic-hero__pattern span { position: absolute; display: block; border: 1px solid rgba(232,199,131,.16); border-radius: 50%; }.academic-hero__pattern span:nth-child(1) { width: 90px; height: 90px; left: 7%; top: 18%; }.academic-hero__pattern span:nth-child(2) { width: 34px; height: 34px; left: 44%; bottom: 19%; background: rgba(232,199,131,.08); }.academic-hero__pattern span:nth-child(3) { width: 210px; height: 210px; right: 16%; bottom: -110px; }
 .academic-hero__content { position: relative; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: center; gap: clamp(50px, 8vw, 120px); padding-top: var(--header-height); padding-bottom: 72px; }.academic-hero__copy { max-width: 740px; }.academic-hero__eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: var(--gold-light); font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }.academic-hero__copy h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(3rem, 5.8vw, 5.8rem); font-weight: 500; line-height: 1; letter-spacing: -.045em; text-wrap: balance; }.academic-hero__description { max-width: 650px; margin-top: 24px; color: rgba(255,255,255,.76); font-size: clamp(1rem, 1.25vw, 1.16rem); line-height: 1.75; }.academic-hero__copy .button { margin-top: 30px; }
 html[data-language='ta'] .academic-hero__copy h1 { font-family: "Noto Sans Tamil", "Nirmala UI", sans-serif; font-size: clamp(2.2rem, 4.9vw, 4.5rem); font-weight: 700; line-height: 1.2; }
+.academic-hero__slide.is-medium-title .academic-hero__copy h1 { font-size:clamp(2.5rem,4.4vw,4.6rem); line-height:1.07; }.academic-hero__slide.is-long-title .academic-hero__copy h1 { font-size:clamp(2.05rem,3.5vw,3.7rem); line-height:1.13; }.academic-hero__slide.is-extra-long-title .academic-hero__copy h1 { max-height:46vh; padding-right:10px; overflow-y:auto; font-size:clamp(1.6rem,2.7vw,3rem); line-height:1.2; }
+html[data-language='ta'] .academic-hero__slide.is-medium-title .academic-hero__copy h1 { font-size:clamp(2.15rem,3.9vw,4rem); line-height:1.2; }html[data-language='ta'] .academic-hero__slide.is-long-title .academic-hero__copy h1 { font-size:clamp(1.8rem,3.15vw,3.2rem); line-height:1.25; }html[data-language='ta'] .academic-hero__slide.is-extra-long-title .academic-hero__copy h1 { font-size:clamp(1.45rem,2.4vw,2.55rem); line-height:1.3; }
 .academic-hero__emblem { justify-self: end; width: 270px; height: 340px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(232,199,131,.32); border-radius: 140px 140px 28px 28px; background: rgba(6,23,35,.35); backdrop-filter: blur(10px); box-shadow: inset 0 0 0 12px rgba(255,255,255,.018); }.academic-hero__emblem > span { width: 112px; height: 112px; display: grid; place-items: center; border: 1px solid rgba(232,199,131,.35); border-radius: 50%; color: var(--gold-light); background: rgba(232,199,131,.07); }.academic-hero__emblem small { margin-top: 28px; color: var(--gold-light); font-family: Georgia, serif; font-size: 2rem; }.academic-hero__emblem strong { margin-top: 4px; color: rgba(255,255,255,.72); font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; }
 .academic-hero__controls { position: absolute; z-index: 3; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; }.academic-hero__arrows { display: flex; gap: 8px; }.academic-hero__arrows button, .academic-hero__autoplay { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; background: rgba(7,25,39,.34); color: #fff; backdrop-filter: blur(8px); }.academic-hero__arrows button:hover, .academic-hero__autoplay:hover { background: rgba(255,255,255,.13); }.academic-hero__dots { display: flex; align-items: center; gap: 3px; margin-left: 8px; }.academic-hero__dots button { width: 32px; height: 40px; padding: 0 4px; border: 0; background: transparent; }.academic-hero__dots span { display: block; height: 2px; background: rgba(255,255,255,.34); }.academic-hero__dots button.is-active span { background: var(--gold-light); transform: scaleY(2); }.academic-hero__count { margin-left: auto; display: flex; align-items: baseline; gap: 5px; font-family: Georgia, serif; }.academic-hero__count strong { color: var(--gold-light); font-size: 1.35rem; }.academic-hero__count span { opacity: .5; font-size: .78rem; }
 .academic-about__intro { display: grid; grid-template-columns: minmax(0, .9fr) minmax(380px, .7fr); gap: clamp(50px, 9vw, 120px); align-items: end; }.academic-about__intro .section-heading { margin-bottom: 0; }.academic-about__copy { display: grid; gap: 17px; color: var(--muted); font-size: 1rem; line-height: 1.82; }
@@ -434,6 +453,144 @@ html[data-language='ta'] .home-story__copy h2,html[data-language='ta'] .home-min
 
 @media (max-width: 660px) {
   .hero-slide__image { object-position: 70% center; }
+  .hero-slide.is-medium-title h1,html[data-language='ta'] .hero-slide.is-medium-title h1 { font-size:clamp(2rem,9vw,3.2rem); line-height:1.08; }
+  .hero-slide.is-long-title h1,html[data-language='ta'] .hero-slide.is-long-title h1 { font-size:clamp(1.65rem,7.4vw,2.65rem); line-height:1.15; }
+  .hero-slide.is-extra-long-title h1,html[data-language='ta'] .hero-slide.is-extra-long-title h1 { max-height:42vh; font-size:clamp(1.35rem,5.9vw,2.15rem); line-height:1.24; }
+  .hero-slide--daily-verse.is-medium-title h1,html[data-language='ta'] .hero-slide--daily-verse.is-medium-title h1 { font-size:clamp(1.75rem,7.6vw,2.5rem); line-height:1.18; }
+  .hero-slide--daily-verse.is-long-title h1,html[data-language='ta'] .hero-slide--daily-verse.is-long-title h1 { font-size:clamp(1.45rem,6.2vw,2rem); line-height:1.23; }
+  .hero-slide--daily-verse.is-extra-long-title h1,html[data-language='ta'] .hero-slide--daily-verse.is-extra-long-title h1 { max-height:42vh; font-size:clamp(1.15rem,4.8vw,1.55rem); line-height:1.32; }
+  .academic-hero__slide.is-medium-title .academic-hero__copy h1,html[data-language='ta'] .academic-hero__slide.is-medium-title .academic-hero__copy h1 { font-size:clamp(1.9rem,8.5vw,3rem); line-height:1.12; }
+  .academic-hero__slide.is-long-title .academic-hero__copy h1,html[data-language='ta'] .academic-hero__slide.is-long-title .academic-hero__copy h1 { font-size:clamp(1.55rem,7vw,2.5rem); line-height:1.18; }
+  .academic-hero__slide.is-extra-long-title .academic-hero__copy h1,html[data-language='ta'] .academic-hero__slide.is-extra-long-title .academic-hero__copy h1 { max-height:40vh; font-size:clamp(1.3rem,5.6vw,2.05rem); line-height:1.26; }
+  .hero-loading__content { align-items: flex-end; padding-bottom: 130px; }
+  .hero-loading__skeleton { width: 100%; }
+}
+
+/* Tamil uses taller, wider glyphs than the English display type. Keep a
+   dedicated public-site scale so translated CMS content cannot overflow the
+   layouts when editors add longer wording later. */
+html[data-language='ta'] body {
+  font-size: .9rem;
+  line-height: 1.65;
+}
+html[data-language='ta'] :is(h1, h2, h3) {
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+html[data-language='ta'] :is(.inner-hero h1, .about-hero__copy h1, .church-hero__copy h1, .community-hero__copy h1, .prayer-support-hero__copy h1) {
+  font-size: clamp(1.9rem, 3.65vw, 3.35rem);
+  line-height: 1.28;
+}
+html[data-language='ta'] :is(.section-heading h2, .page-section-heading h2, .about-history__growth-heading h2, .about-history__final h2, .home-story__copy h2, .home-schedule__heading h2, .home-prayer-band__copy h2, .home-academics__copy h2, .home-care__copy h2, .home-give-callout h2, .give-stewardship__copy h2) {
+  font-size: clamp(1.65rem, 3vw, 2.75rem);
+  line-height: 1.3;
+}
+html[data-language='ta'] :is(.story-grid h2, .event-page-card h2, .gathering-card h2, .public-empty h2, .about-history__foundation h3, .about-history__location h3, .home-ministry-card__copy h3, .home-schedule-row h3, .care-programme-card h3, .academic-pillar h3, .academic-module h3, .academic-institute-card h3, .academic-admissions-callout h3, .academic-course h3, .academic-faculty-card__copy h3, .service-card h3, .announcement-card h3, .video-card__body h2, .home-media-hub__heading h2, .home-media-feature__copy h3, .home-media-pathways h3, .activity-card h3, .map-card__content h3, .give-support-card h3, .give-payment-card h3, .give-pending h3) {
+  font-size: clamp(1.05rem, 1.8vw, 1.55rem);
+  line-height: 1.35;
+}
+
+/* Home carousel: Tamil titles need a lower ceiling than English even before
+   the shared content-length classes begin reducing them. */
+html[data-language='ta'] .hero-slide h1 {
+  font-size: clamp(1.9rem, 3.5vw, 3.35rem);
+  line-height: 1.28;
+}
+html[data-language='ta'] .hero-slide.is-medium-title h1 {
+  font-size: clamp(1.6rem, 2.65vw, 2.45rem);
+  line-height: 1.32;
+}
+html[data-language='ta'] .hero-slide.is-long-title h1 {
+  font-size: clamp(1.3rem, 2.05vw, 1.95rem);
+  line-height: 1.36;
+}
+html[data-language='ta'] .hero-slide.is-extra-long-title h1 {
+  font-size: clamp(1.05rem, 1.6vw, 1.55rem);
+  line-height: 1.42;
+}
+
+/* Scripture is often considerably longer than an ordinary slide heading. */
+html[data-language='ta'] .hero-slide--daily-verse h1 {
+  font-size: clamp(1.65rem, 2.8vw, 2.65rem);
+  line-height: 1.34;
+}
+html[data-language='ta'] .hero-slide--daily-verse.is-medium-title h1 {
+  font-size: clamp(1.35rem, 2.15vw, 2.05rem);
+  line-height: 1.4;
+}
+html[data-language='ta'] .hero-slide--daily-verse.is-long-title h1 {
+  font-size: clamp(1.12rem, 1.75vw, 1.65rem);
+  line-height: 1.45;
+}
+html[data-language='ta'] .hero-slide--daily-verse.is-extra-long-title h1 {
+  font-size: clamp(.98rem, 1.4vw, 1.35rem);
+  line-height: 1.5;
+}
+
+/* Academics carousel, including the Graduation slide and future CMS slides. */
+html[data-language='ta'] .academic-hero__copy h1 {
+  font-size: clamp(1.8rem, 3.3vw, 3.05rem);
+  line-height: 1.3;
+}
+html[data-language='ta'] .academic-hero__slide.is-medium-title .academic-hero__copy h1 {
+  font-size: clamp(1.5rem, 2.55vw, 2.35rem);
+  line-height: 1.34;
+}
+html[data-language='ta'] .academic-hero__slide.is-long-title .academic-hero__copy h1 {
+  font-size: clamp(1.25rem, 2vw, 1.85rem);
+  line-height: 1.4;
+}
+html[data-language='ta'] .academic-hero__slide.is-extra-long-title .academic-hero__copy h1 {
+  font-size: clamp(1.05rem, 1.55vw, 1.45rem);
+  line-height: 1.46;
+}
+
+@media (max-width: 660px) {
+  html[data-language='ta'] :is(.inner-hero h1, .about-hero__copy h1, .church-hero__copy h1, .community-hero__copy h1, .prayer-support-hero__copy h1) {
+    font-size: clamp(1.55rem, 7.8vw, 2.35rem);
+  }
+  html[data-language='ta'] :is(.section-heading h2, .page-section-heading h2, .about-history__growth-heading h2, .about-history__final h2, .home-story__copy h2, .home-schedule__heading h2, .home-prayer-band__copy h2, .home-academics__copy h2, .home-care__copy h2, .home-give-callout h2, .give-stewardship__copy h2) {
+    font-size: clamp(1.45rem, 6.8vw, 2.05rem);
+  }
+  html[data-language='ta'] .hero-slide h1 {
+    font-size: clamp(1.55rem, 7vw, 2.2rem);
+  }
+  html[data-language='ta'] .hero-slide.is-medium-title h1 {
+    font-size: clamp(1.3rem, 5.8vw, 1.8rem);
+  }
+  html[data-language='ta'] .hero-slide.is-long-title h1 {
+    font-size: clamp(1.08rem, 4.8vw, 1.5rem);
+  }
+  html[data-language='ta'] .hero-slide.is-extra-long-title h1 {
+    max-height: 40vh;
+    font-size: clamp(.92rem, 4vw, 1.25rem);
+  }
+  html[data-language='ta'] .hero-slide--daily-verse h1 {
+    font-size: clamp(1.3rem, 5.7vw, 1.75rem);
+  }
+  html[data-language='ta'] .hero-slide--daily-verse.is-medium-title h1 {
+    font-size: clamp(1.05rem, 4.55vw, 1.42rem);
+  }
+  html[data-language='ta'] .hero-slide--daily-verse.is-long-title h1 {
+    font-size: clamp(.92rem, 3.85vw, 1.2rem);
+  }
+  html[data-language='ta'] .hero-slide--daily-verse.is-extra-long-title h1 {
+    max-height: 38vh;
+    font-size: clamp(.8rem, 3.35vw, 1rem);
+  }
+  html[data-language='ta'] .academic-hero__copy h1 {
+    font-size: clamp(1.5rem, 6.8vw, 2.1rem);
+  }
+  html[data-language='ta'] .academic-hero__slide.is-medium-title .academic-hero__copy h1 {
+    font-size: clamp(1.25rem, 5.6vw, 1.7rem);
+  }
+  html[data-language='ta'] .academic-hero__slide.is-long-title .academic-hero__copy h1 {
+    font-size: clamp(1.05rem, 4.7vw, 1.42rem);
+  }
+  html[data-language='ta'] .academic-hero__slide.is-extra-long-title .academic-hero__copy h1 {
+    max-height: 38vh;
+    font-size: clamp(.9rem, 3.9vw, 1.18rem);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

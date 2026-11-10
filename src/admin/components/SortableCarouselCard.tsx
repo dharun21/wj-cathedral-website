@@ -9,7 +9,7 @@ function statusLabel(status: unknown) {
   return status === 'published' ? 'Published' : status === 'pending_review' ? 'Pending approval' : status === 'archived' ? 'Archived' : 'Draft'
 }
 
-export function SortableCarouselCard({ slide, index, builtIn, fixedButton, owner, onEdit, onDelete }: { slide: SlideRecord; index: number; builtIn: boolean; fixedButton?: string | undefined; owner: boolean; onEdit: () => void; onDelete: () => void }) {
+export function SortableCarouselCard({ slide, index, builtIn, system = false, fixedButton, owner, onEdit, onDelete }: { slide: SlideRecord; index: number; builtIn: boolean; system?: boolean; fixedButton?: string | undefined; owner: boolean; onEdit: () => void; onDelete: () => void }) {
   const sortable = useSortable({ id: String(slide.id), disabled: !owner })
   const style = { transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }
   return <article ref={sortable.setNodeRef} style={style} className="academic-slide-admin-card">
@@ -19,7 +19,7 @@ export function SortableCarouselCard({ slide, index, builtIn, fixedButton, owner
       {/* oxlint-disable-next-line react/refs -- dnd-kit exposes listener props through its sortable hook. */}
       {owner && <button type="button" className="admin-drag-handle" {...sortable.attributes} {...sortable.listeners} aria-label="Drag to change slide order"><GripVertical size={18} /></button>}
     </div>
-    <div className="academic-slide-admin-card__body"><div><small className={builtIn ? 'is-default' : 'is-custom'}>{builtIn ? 'Default slide' : 'Custom slide'}</small><span className={`admin-status admin-status--${slide.status ?? 'draft'}`}>{statusLabel(slide.status)}</span></div><h2>{String(slide.title_en || 'Untitled slide')}</h2><p>{String(slide.description_en || 'No supporting text')}</p>{builtIn && <em><LockKeyhole size={13} /> Fixed button: {fixedButton || 'Protected'}</em>}</div>
-    <footer><button type="button" onClick={onEdit} aria-label="Edit slide"><Pencil size={17} /></button>{owner && !builtIn && <button type="button" className="is-danger" onClick={onDelete} aria-label="Delete custom slide"><Trash2 size={17} /></button>}</footer>
+    <div className="academic-slide-admin-card__body"><div><small className={system ? 'is-system' : builtIn ? 'is-default' : 'is-custom'}>{system ? 'System slide' : builtIn ? 'Default slide' : 'Custom slide'}</small><span className={`admin-status admin-status--${slide.status ?? 'draft'}`}>{statusLabel(slide.status)}</span></div><h2>{String(slide.title_en || 'Untitled slide')}</h2><p>{String(slide.description_en || 'No supporting text')}</p>{system ? <em><LockKeyhole size={13} /> Automatically uses the latest published live session</em> : builtIn && <em><LockKeyhole size={13} /> Fixed button: {fixedButton || 'Protected'}</em>}</div>
+    {!system && <footer><button type="button" onClick={onEdit} aria-label="Edit slide"><Pencil size={17} /></button>{owner && !builtIn && <button type="button" className="is-danger" onClick={onDelete} aria-label="Delete custom slide"><Trash2 size={17} /></button>}</footer>}
   </article>
 }

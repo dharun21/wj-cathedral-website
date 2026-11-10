@@ -38,14 +38,12 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
   verses: {
     key: 'verses', title: 'Daily Bible Verses', singular: 'verse', table: 'daily_bible_verses', orderBy: 'display_order', orderable: true,
     description: 'Build the approved bilingual verse rotation and schedule date-specific verses for special days. Every verse uses the same shared Bible background.', titleField: 'reference_en', subtitleField: 'scheduled_date',
-    defaults: { verse_en: '', verse_ta: '', reference_en: '', reference_ta: '', translation_en: '', translation_ta: '', scheduled_date: '', active: true, status: 'draft', display_order: 0 },
+    defaults: { verse_en: '', verse_ta: '', reference_en: '', reference_ta: '', scheduled_date: '', active: true, status: 'draft', display_order: 0 },
     fields: [
       { name: 'verse_en', label: 'English verse text', type: 'textarea', requiredForPublish: true, fullWidth: true, help: 'Use church-approved wording and confirm the translation licence.' },
       { name: 'verse_ta', label: 'Tamil verse text', tamilLabel: 'தமிழ் வேதவசனம்', type: 'textarea', requiredForPublish: true, fullWidth: true, help: 'Do not use automatic translation for Scripture.' },
       { name: 'reference_en', label: 'English Bible reference', type: 'text', requiredForPublish: true, placeholder: 'Example: Philippians 4:13' },
       { name: 'reference_ta', label: 'Tamil Bible reference', tamilLabel: 'தமிழ் வேதாகமக் குறிப்பு', type: 'text', requiredForPublish: true },
-      { name: 'translation_en', label: 'English translation/version', type: 'text', help: 'Optional, but recommended for attribution.' },
-      { name: 'translation_ta', label: 'Tamil translation/version', type: 'text' },
       { name: 'scheduled_date', label: 'Special display date', type: 'date', help: 'Optional. A scheduled verse overrides automatic rotation on this India date.' },
       { name: 'active', label: 'Include in daily display', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },

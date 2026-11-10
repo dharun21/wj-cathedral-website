@@ -3,6 +3,7 @@ import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { LockKeyhole, Plus, Presentation, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { HOME_LIVE_SLIDE_SLOT_ID } from '../../constants/heroSlides'
 import { invalidatePublishedContent } from '../../lib/contentCache'
 import { deleteAdminRecord, listAdminRecords, reorderAdminRecords, saveAdminRecord } from '../../services/contentService'
 import type { ContentStatus, HeroSlideRow, MediaAssetRow } from '../../types/database'
@@ -24,6 +25,10 @@ const builtInIds = new Set([
 
 function isBuiltIn(slide: SlideDraft) {
   return slide.slide_kind === 'default' || builtInIds.has(String(slide.id ?? ''))
+}
+
+function isLiveSystemSlide(slide: SlideDraft) {
+  return String(slide.id ?? '') === HOME_LIVE_SLIDE_SLOT_ID || slide.default_key === 'home-live'
 }
 
 function HomeSlideEditor({ initial, owner, saving, onClose, onSave }: { initial: SlideDraft; owner: boolean; saving: boolean; onClose: () => void; onSave: (record: SlideDraft, status: ContentStatus) => void }) {
@@ -89,7 +94,7 @@ export function HomeCarouselPage() {
     if (!requestedId.current || !slides.length) return
     const requested = slides.find((slide) => String(slide.id) === requestedId.current)
     requestedId.current = null
-    if (requested) setEditor({ ...requested })
+    if (requested && !isLiveSystemSlide(requested)) setEditor({ ...requested })
   }, [slides])
 
   const save = useMutation({
@@ -144,10 +149,10 @@ export function HomeCarouselPage() {
 
   return <section className="admin-module-page">
     <div className="admin-page-heading"><div><p>Homepage</p><h1>Carousel Slides</h1><span>Default slides retain their approved buttons. Custom slides use only a heading, supporting text and background image.</span></div><button className="admin-primary-button" onClick={() => setEditor({ scope: 'home', slide_kind: 'custom', default_key: null, title_en: '', title_ta: '', description_en: '', description_ta: '', image_url: '', status: 'draft', enabled: true })}><Plus size={18} /> Add custom slide</button></div>
-    <div className="academic-carousel-note"><LockKeyhole size={20} /><div><strong>Default buttons are protected</strong><p>Button fields are not shown in the editor. Newly added slides never include public buttons.</p></div></div>
+    <div className="academic-carousel-note"><LockKeyhole size={20} /><div><strong>Default buttons and system content are protected</strong><p>Button fields are not shown in the editor. The live-session slide can be reordered, but its content updates automatically from the latest published live session.</p></div></div>
     {query.isLoading ? <div className="admin-record-skeletons"><i /><i /><i /></div>
       : query.isError ? <div className="admin-empty-state"><Presentation /><h2>Homepage slides could not be loaded</h2><p>Check the Supabase connection and apply the latest migration.</p><button className="admin-secondary-button" onClick={() => void query.refetch()}>Try again</button></div>
-      : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={dragEnd}><SortableContext items={slides.map((slide) => String(slide.id))} strategy={rectSortingStrategy}><div className="academic-slide-admin-grid">{slides.map((slide, index) => <SortableCarouselCard key={String(slide.id)} slide={slide} index={index} builtIn={isBuiltIn(slide)} fixedButton={String(slide.cta_label_en || 'Protected')} owner={isOwner} onEdit={() => setEditor({ ...slide })} onDelete={() => setDeleting(slide)} />)}</div></SortableContext></DndContext>}
+      : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={dragEnd}><SortableContext items={slides.map((slide) => String(slide.id))} strategy={rectSortingStrategy}><div className="academic-slide-admin-grid">{slides.map((slide, index) => <SortableCarouselCard key={String(slide.id)} slide={slide} index={index} builtIn={isBuiltIn(slide)} system={isLiveSystemSlide(slide)} fixedButton={String(slide.cta_label_en || 'Protected')} owner={isOwner} onEdit={() => { if (!isLiveSystemSlide(slide)) setEditor({ ...slide }) }} onDelete={() => setDeleting(slide)} />)}</div></SortableContext></DndContext>}
     {editor && <HomeSlideEditor initial={editor} owner={isOwner} saving={save.isPending} onClose={() => setEditor(null)} onSave={(record, status) => save.mutate({ record, status })} />}
     {isOwner && deleting?.id && <ConfirmDialog title="Delete this custom slide?" message="This removes the slide from the homepage carousel and cannot be undone." confirmLabel="Delete slide" busy={remove.isPending} onCancel={() => setDeleting(null)} onConfirm={() => remove.mutate(String(deleting.id))} />}
   </section>

@@ -2,13 +2,30 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, ImageIcon, Pause, Play } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { academicCollege } from '../../data/academics'
 import { heroSlides } from '../../data/heroSlides'
 import { sermons } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
-import { useDailyBibleVerse, usePublishedHeroSlides, usePublishedSiteSettings, usePublishedVideoRows } from '../../hooks/usePublishedContent'
+import { useDailyBibleVerse, usePublishedAcademicSettings, usePublishedHeroSlides, usePublishedSiteSettings, usePublishedVideoRows } from '../../hooks/usePublishedContent'
 import type { HeroSlide } from '../../types/content'
+import { contentLengthClass } from '../../utils/contentLength'
+import { HOME_LIVE_SLIDE_SLOT_ID } from '../../constants/heroSlides'
 
 const retiredPrayerSlideIds = new Set(['prayer', 'daily-verse', '10000000-0000-4000-8000-000000000003'])
+
+function asCollegeInformationSlide(slide: HeroSlide, college: { name: string; affiliation: string; established: string; principal: string }): HeroSlide {
+  const collegeSlide = { ...slide }
+  delete collegeSlide.cta
+  return {
+    ...collegeSlide,
+    eyebrow: { en: 'Bible college', ta: 'வேதாகமக் கல்லூரி' },
+    title: { en: college.name, ta: college.name },
+    description: {
+      en: `Affiliated with ${college.affiliation} and established in ${college.established}.`,
+      ta: `${college.affiliation}-இன் இணைப்புடன் ${college.established}-ஆம் ஆண்டு நிறுவப்பட்டது.`,
+    },
+  }
+}
 
 export function HeroSection() {
   const { localize, t, language } = useLanguage()
@@ -18,10 +35,13 @@ export function HeroSection() {
   const [autoplay, setAutoplay] = useState(!reducedMotion)
   const hoverPause = useRef(false)
   const publishedSlides = usePublishedHeroSlides('home', heroSlides)
+  const academicSettings = usePublishedAcademicSettings()
   const dailyVerse = useDailyBibleVerse()
   const siteSettings = usePublishedSiteSettings()
   const publishedVideos = usePublishedVideoRows()
+  const isInitialHeroLoading = publishedSlides.isLoading
   const slides = useMemo(() => {
+    if (isInitialHeroLoading) return []
     const row = dailyVerse.data
     const fallback = heroSlides.find((slide) => slide.id === 'daily-verse')!
     const verseSlide: HeroSlide = row ? {
@@ -29,8 +49,8 @@ export function HeroSection() {
       eyebrow: { en: 'Today’s Scripture', ta: 'இன்றைய வேதவசனம்' },
       title: { en: `“${row.verse_en}”`, ta: `“${row.verse_ta}”` },
       description: {
-        en: [row.reference_en, row.translation_en].filter(Boolean).join(' · '),
-        ta: [row.reference_ta, row.translation_ta].filter(Boolean).join(' · '),
+        en: row.reference_en,
+        ta: row.reference_ta,
       },
       image: siteSettings.data?.daily_verse_background_url || './hero/daily-bible-verse.jpg',
       imageAlt: {
@@ -41,15 +61,27 @@ export function HeroSection() {
       mediaStatus: 'approved-client-supplied',
       variant: 'daily-verse',
     } : fallback
-    const staticSlides = publishedSlides.data.filter((slide) => !retiredPrayerSlideIds.has(slide.id))
+    const admissionsOpen = academicSettings.data?.admissions_open ?? true
+    const college = {
+      name: academicSettings.data?.college_name ?? academicCollege.name,
+      affiliation: academicSettings.data?.affiliation ?? academicCollege.affiliation,
+      established: academicSettings.data?.established ?? academicCollege.established,
+      principal: academicSettings.data?.principal ?? academicCollege.principal,
+    }
+    const staticSlides = (publishedSlides.isError ? heroSlides : publishedSlides.data)
+      .filter((slide) => !retiredPrayerSlideIds.has(slide.id))
+      .map((slide): HeroSlide => slide.cta?.href === '#academics-admission' && !admissionsOpen
+        ? asCollegeInformationSlide(slide, college)
+        : slide)
     staticSlides.splice(Math.min(2, staticSlides.length), 0, verseSlide)
     const managedLive = [...(publishedVideos.data ?? [])]
       .filter((video) => video.category === 'live-session' || video.live_status !== 'recorded')
       .sort((first, second) => second.created_at.localeCompare(first.created_at) || first.display_order - second.display_order)[0]
     const fallbackLive = sermons.find((video) => video.mediaType === 'live-session')
     const liveVideoId = managedLive?.youtube_id ?? fallbackLive?.videoId
+    const liveSlotIndex = staticSlides.findIndex((slide) => slide.id === HOME_LIVE_SLIDE_SLOT_ID)
     if (liveVideoId) {
-      staticSlides.push({
+      const liveSlide: HeroSlide = {
         id: `latest-live-${managedLive?.id ?? fallbackLive?.id ?? liveVideoId}`,
         eyebrow: { en: 'Latest church live session', ta: 'சமீபத்திய திருச்சபை நேரலை நிகழ்வு' },
         title: { en: 'Live from WJ Cathedral', ta: 'WJ Cathedral-இலிருந்து நேரலை' },
@@ -61,10 +93,12 @@ export function HeroSection() {
         cta: { href: '#media-live', label: { en: 'Watch the latest session', ta: 'சமீபத்திய நிகழ்வைக் காணுங்கள்' } },
         secondaryCta: { href: '#media', label: { en: 'Explore all media', ta: 'அனைத்து ஊடகங்களையும் காணுங்கள்' } },
         mediaStatus: 'approved-client-supplied',
-      })
-    }
+      }
+      if (liveSlotIndex >= 0) staticSlides.splice(liveSlotIndex, 1, liveSlide)
+      else staticSlides.push(liveSlide)
+    } else if (liveSlotIndex >= 0) staticSlides.splice(liveSlotIndex, 1)
     return staticSlides
-  }, [dailyVerse.data, publishedSlides.data, publishedVideos.data, siteSettings.data?.daily_verse_background_url])
+  }, [academicSettings.data, dailyVerse.data, isInitialHeroLoading, publishedSlides.data, publishedSlides.isError, publishedVideos.data, siteSettings.data?.daily_verse_background_url])
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -88,12 +122,28 @@ export function HeroSection() {
     return () => window.clearInterval(timer)
   }, [emblaApi, autoplay, reducedMotion])
 
+  if (isInitialHeroLoading) return (
+    <section id="home" className="hero hero--loading" aria-busy="true" aria-label={t('a11y.heroCarousel')}>
+      <div className="container hero-loading__content" aria-hidden="true">
+        <div className="hero-loading__skeleton">
+          <span className="hero-loading__line hero-loading__line--eyebrow" />
+          <span className="hero-loading__line hero-loading__line--title" />
+          <span className="hero-loading__line hero-loading__line--title-short" />
+          <span className="hero-loading__line hero-loading__line--body" />
+          <span className="hero-loading__line hero-loading__line--button" />
+        </div>
+      </div>
+      <span className="sr-only">Loading current homepage slides…</span>
+    </section>
+  )
+
   const activeSlide = slides[selectedIndex] ?? slides[0]
 
   return (
     <section
       id="home"
       className="hero"
+      aria-busy={isInitialHeroLoading}
       aria-roledescription="carousel"
       aria-label={t('a11y.heroCarousel')}
       onMouseEnter={() => { hoverPause.current = true }}
@@ -108,7 +158,7 @@ export function HeroSection() {
       <div className="hero__viewport" ref={emblaRef}>
         <div className="hero__container">
           {slides.map((slide, index) => (
-            <article className={`hero-slide${slide.variant === 'daily-verse' ? ' hero-slide--daily-verse' : ''}${slide.variant === 'daily-verse' && localize(slide.title).length > 180 ? ' is-long-verse' : ''}`} key={slide.id} aria-hidden={selectedIndex !== index}>
+            <article className={`hero-slide${slide.variant === 'daily-verse' ? ' hero-slide--daily-verse' : ''} ${contentLengthClass(localize(slide.title), slide.variant === 'daily-verse' ? { medium: 100, long: 220, extraLong: 360 } : undefined)}`.trim()} key={slide.id} aria-hidden={selectedIndex !== index}>
               <img className="hero-slide__image" src={slide.image} alt={localize(slide.imageAlt)} loading={index === 0 ? 'eager' : 'lazy'} decoding="async" fetchPriority={index === 0 ? 'high' : 'low'} />
               <div className="hero-slide__overlay" aria-hidden="true" />
               <div className="container hero-slide__content">
@@ -138,7 +188,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      <div className="container hero__controls">
+      {!isInitialHeroLoading && slides.length > 1 && <div className="container hero__controls">
         <div className="hero__arrows">
           <button type="button" onClick={() => emblaApi?.scrollPrev()} aria-label={t('a11y.previousSlide')}><ArrowLeft aria-hidden="true" /></button>
           <button type="button" onClick={() => emblaApi?.scrollNext()} aria-label={t('a11y.nextSlide')}><ArrowRight aria-hidden="true" /></button>
@@ -161,7 +211,7 @@ export function HeroSection() {
           </button>
         )}
         <p className="hero__count"><strong>0{selectedIndex + 1}</strong><span>/ 0{slides.length}</span></p>
-      </div>
+      </div>}
       {activeSlide && <span className="sr-only" aria-live="polite">{localize(activeSlide.title)}</span>}
     </section>
   )

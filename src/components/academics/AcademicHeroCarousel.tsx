@@ -6,6 +6,7 @@ import { academicHeroSlides } from '../../data/academics'
 import { useLanguage } from '../../context/LanguageContext'
 import { usePublishedHeroRows } from '../../hooks/usePublishedContent'
 import type { LocalizedText } from '../../types/content'
+import { contentLengthClass } from '../../utils/contentLength'
 
 const slideIcons = {
   admissions: BookOpenText,
@@ -102,7 +103,7 @@ export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen
               ? { backgroundImage: `linear-gradient(90deg, rgba(5, 21, 33, .9), rgba(5, 21, 33, .45)), url("${slide.imageUrl.replaceAll('"', '%22')}")` }
               : undefined
             return (
-              <article className={`academic-hero__slide academic-hero__slide--${slide.frame}${slide.imageUrl ? ' has-background-image' : ''}`} style={customBackground} key={slide.id} aria-hidden={selectedIndex !== index}>
+              <article className={`academic-hero__slide academic-hero__slide--${slide.frame}${slide.imageUrl ? ' has-background-image' : ''} ${contentLengthClass(localize(slide.title))}`.trim()} style={customBackground} key={slide.id} aria-hidden={selectedIndex !== index}>
                 <div className="academic-hero__pattern" aria-hidden="true"><span /><span /><span /></div>
                 <div className="container academic-hero__content">
                   {selectedIndex === index && (

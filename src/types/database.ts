@@ -99,7 +99,7 @@ export interface HeroSlideRow {
   id: string
   scope: 'home' | 'academics' | 'community'
   slide_kind: 'default' | 'custom'
-  default_key: 'admissions' | 'licence' | 'graduation' | 'home-welcome' | 'home-sunday' | 'home-admissions' | 'home-ministries' | 'home-community' | null
+  default_key: 'admissions' | 'licence' | 'graduation' | 'home-welcome' | 'home-sunday' | 'home-admissions' | 'home-ministries' | 'home-community' | 'home-live' | null
   eyebrow_en: string
   eyebrow_ta: string
   title_en: string
