@@ -24,6 +24,8 @@ const visitorSummaryPath = fileURLToPath(new URL('./202611090049_owner_visitor_s
 const visitorSummarySql = readFileSync(visitorSummaryPath, 'utf8').toLowerCase()
 const visitorTrendPath = fileURLToPath(new URL('./202611090050_owner_visitor_trend.sql', import.meta.url))
 const visitorTrendSql = readFileSync(visitorTrendPath, 'utf8').toLowerCase()
+const whatsappSettingsPath = fileURLToPath(new URL('./202611100051_whatsapp_channel_settings.sql', import.meta.url))
+const whatsappSettingsSql = readFileSync(whatsappSettingsPath, 'utf8').toLowerCase()
 const exposedTables = ['admin_memberships', 'site_settings', 'page_content', 'media_assets', 'hero_slides', 'gallery_albums', 'gallery_images', 'announcements', 'events', 'videos', 'worship_services', 'ministries']
 
 describe('RLS migration safeguards', () => {
@@ -141,5 +143,13 @@ describe('RLS migration safeguards', () => {
     expect(visitorTrendSql).toContain('count(distinct visitor.visitor_id)')
     expect(visitorTrendSql).toContain('revoke all on function public.get_owner_visitor_trend(date, date) from public')
     expect(visitorTrendSql).not.toContain('select visitor.visitor_id')
+  })
+
+  it('adds WhatsApp channel settings without weakening existing security', () => {
+    expect(whatsappSettingsSql).toContain('alter table public.site_settings')
+    expect(whatsappSettingsSql).toContain('whatsapp_channel_url')
+    expect(whatsappSettingsSql).toContain('whatsapp_qr_url')
+    expect(whatsappSettingsSql).not.toContain('disable row level security')
+    expect(whatsappSettingsSql).not.toContain('service_role')
   })
 })

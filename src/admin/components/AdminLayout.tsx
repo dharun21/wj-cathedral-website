@@ -1,4 +1,4 @@
-import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, GalleryHorizontalEnd, GraduationCap, Headphones, Images, LayoutDashboard, LogOut, Menu, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
+import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, GalleryHorizontalEnd, GraduationCap, Headphones, Images, LayoutDashboard, LogOut, Menu, MessageCircle, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { LogoMark } from '../../components/common/LogoMark'
@@ -17,7 +17,7 @@ const navigation: AdminNavigationSection[] = [
   { group: 'Gallery Page', items: [{ path: 'albums', label: 'Albums', icon: GalleryHorizontalEnd }, { path: 'gallery-images', label: 'Photos', icon: Images }] },
   { group: 'Uploads', items: [{ path: 'media-library', label: 'Upload Library', icon: Images }] },
   { group: 'Administration', items: [{ path: 'team-access', label: 'Team & Access', icon: UserCog, ownerOnly: true }] },
-  { group: 'Configuration', items: [{ path: 'settings', label: 'Website Settings', icon: Settings, ownerOnly: true }, { path: 'guide', label: 'Admin Guide', icon: BookOpenCheck }] },
+  { group: 'Configuration', items: [{ path: 'whatsapp-channel', label: 'WhatsApp Channel', icon: MessageCircle, ownerOnly: true }, { path: 'settings', label: 'Website Settings', icon: Settings, ownerOnly: true }, { path: 'guide', label: 'Admin Guide', icon: BookOpenCheck }] },
 ]
 
 export function AdminLayout({ route, children }: { route: string; children: ReactNode }) {

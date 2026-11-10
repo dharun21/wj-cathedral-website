@@ -2,8 +2,10 @@ import { ArrowRight, ArrowUpRight, CalendarDays, MapPin, Navigation, Phone, Squa
 import { churchInfo } from '../../data/churchInfo'
 import { recurringGatherings } from '../../data/recurringGatherings'
 import { youtubeChannelUrl } from '../../data/sermons'
+import { whatsappChannelDefaults } from '../../data/whatsappChannel'
 import { useLanguage } from '../../context/LanguageContext'
 import { LogoMark } from '../common/LogoMark'
+import { WhatsAppIcon } from '../common/WhatsAppIcon'
 import { usePublishedSiteSettings, usePublishedWorship } from '../../hooks/usePublishedContent'
 
 const currentYear = new Date().getFullYear()
@@ -37,6 +39,14 @@ export function Footer() {
   const mapsUrl = settings?.maps_url || churchInfo.mapsUrl
   const youtubeUrl = settings?.youtube_url || youtubeChannelUrl
   const instagramUrl = settings?.instagram_url || churchInfo.instagramUrl
+  const whatsappEnabled = settings?.whatsapp_channel_enabled ?? whatsappChannelDefaults.enabled
+  const whatsappUrl = settings?.whatsapp_channel_url || whatsappChannelDefaults.channelUrl
+  const whatsappQrUrl = settings?.whatsapp_qr_url || whatsappChannelDefaults.qrUrl
+  const whatsappBlogUrl = settings?.whatsapp_blog_url || whatsappChannelDefaults.blogUrl
+  const whatsappTitle = localize({
+    en: settings?.whatsapp_channel_title_en || whatsappChannelDefaults.titleEn,
+    ta: settings?.whatsapp_channel_title_ta || whatsappChannelDefaults.titleTa,
+  })
   const contacts = [
     { ...churchInfo.contacts[0], phone: settings?.phone || churchInfo.contacts[0].phone },
     churchInfo.contacts[1],
@@ -72,6 +82,7 @@ export function Footer() {
           <div className="footer-socials" aria-label={localize({ en: 'Official social channels', ta: 'அதிகாரப்பூர்வ சமூக வலைதளங்கள்' })}>
             <a href={youtubeUrl} target="_blank" rel="noreferrer" aria-label={t('header.youtube')}><SquarePlay size={18} /> YouTube</a>
             <a href={instagramUrl} target="_blank" rel="noreferrer" aria-label={t('header.instagram')}><InstagramIcon /> Instagram</a>
+            {whatsappEnabled && <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={whatsappTitle}><WhatsAppIcon /> WhatsApp</a>}
           </div>
         </div>
 
@@ -98,6 +109,11 @@ export function Footer() {
           <a className="footer-schedule-link" href="#events">{localize({ en: 'View the full prayer schedule', ta: 'முழு ஜெப அட்டவணையைப் பாருங்கள்' })} <ArrowRight size={15} /></a>
         </div>
       </div>
+
+      {whatsappEnabled && <div className="container footer-whatsapp-wrap"><section className="footer-whatsapp-card">
+        <div className="footer-whatsapp-card__copy"><small>{localize({ en: 'Official WhatsApp channel', ta: 'அதிகாரப்பூர்வ WhatsApp சேனல்' })}</small><h2>{whatsappTitle}</h2><p>{localize({ en: 'Scan the QR code or use the button to receive church updates directly on WhatsApp.', ta: 'திருச்சபை அறிவிப்புகளை WhatsApp-ல் நேரடியாகப் பெற QR குறியீட்டை ஸ்கேன் செய்யவும் அல்லது பொத்தானைப் பயன்படுத்தவும்.' })}</p><div><a className="button button--gold" href={whatsappUrl} target="_blank" rel="noreferrer"><WhatsAppIcon /> {localize({ en: 'Follow the channel', ta: 'சேனலைப் பின்தொடருங்கள்' })}</a><a className="footer-whatsapp-card__blog" href={whatsappBlogUrl} target="_blank" rel="noreferrer">{localize({ en: 'Read: Jesus Loves People', ta: 'வாசிக்க: இயேசு மக்களை நேசிக்கிறார்' })} <ArrowUpRight size={15} /></a></div></div>
+        <a className="footer-whatsapp-card__qr" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={localize({ en: 'Open the WJ Cathedral WhatsApp channel', ta: 'WJ Cathedral WhatsApp சேனலைத் திறக்கவும்' })}><img src={whatsappQrUrl} alt={localize({ en: 'QR code for the WJ Cathedral WhatsApp channel', ta: 'WJ Cathedral WhatsApp சேனலுக்கான QR குறியீடு' })} /><span>{localize({ en: 'Scan to follow', ta: 'பின்தொடர ஸ்கேன் செய்யவும்' })}</span></a>
+      </section></div>}
 
       <div className="container footer-contact-bar">
         <a className="footer-address" href={mapsUrl} target="_blank" rel="noreferrer"><MapPin size={19} /><span><small>{t('contact.address')}</small><strong>{localize(address)}</strong></span></a>

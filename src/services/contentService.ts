@@ -226,7 +226,7 @@ export async function listAdminGalleryImages<Row extends Record<string, unknown>
 export async function fetchPublishedSiteSettings() {
   const { data, error } = await requireSupabase()
     .from('site_settings')
-    .select('id, display_name, short_name, phone, public_email, address_en, address_ta, maps_url, instagram_url, facebook_url, youtube_url, footer_en, footer_ta, prayer_247_confirmed, daily_verse_background_url, daily_verse_background_media_id, giving_account_name, giving_bank_name, giving_bank_branch, giving_account_number, giving_ifsc, giving_gpay_number, giving_gpay_name, giving_upi_id, giving_qr_url, giving_note_en, giving_note_ta, giving_payment_verified')
+    .select('id, display_name, short_name, phone, public_email, address_en, address_ta, maps_url, instagram_url, facebook_url, youtube_url, whatsapp_channel_enabled, whatsapp_channel_title_en, whatsapp_channel_title_ta, whatsapp_channel_url, whatsapp_qr_url, whatsapp_qr_media_id, whatsapp_blog_url, footer_en, footer_ta, prayer_247_confirmed, daily_verse_background_url, daily_verse_background_media_id, giving_account_name, giving_bank_name, giving_bank_branch, giving_account_number, giving_ifsc, giving_gpay_number, giving_gpay_name, giving_upi_id, giving_qr_url, giving_note_en, giving_note_ta, giving_payment_verified')
     .eq('singleton_key', 'default')
     .eq('status', 'published')
     .maybeSingle()

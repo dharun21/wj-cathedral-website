@@ -15,15 +15,11 @@ import { useEffect, useState } from 'react'
 import { churchInfo, headerNavItems } from '../../data/churchInfo'
 import { youtubeChannelUrl } from '../../data/sermons'
 import { useLanguage } from '../../context/LanguageContext'
-import { useActiveSection } from '../../hooks/useActiveSection'
 import { LanguageSwitcher } from '../common/LanguageSwitcher'
 import { LogoMark } from '../common/LogoMark'
+import { WhatsAppIcon } from '../common/WhatsAppIcon'
 import { usePublishedSiteSettings } from '../../hooks/usePublishedContent'
-
-const ministryItems = headerNavItems[2].children
-const sectionIds = headerNavItems.flatMap((item) => (
-  'children' in item ? item.children.map((child) => child.id) : [item.id]
-))
+import { whatsappChannelDefaults } from '../../data/whatsappChannel'
 
 const ministryIcons = {
   church: ChurchIcon,
@@ -57,15 +53,17 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
   const [ministriesOpen, setMinistriesOpen] = useState(false)
   const [mobileMinistriesOpen, setMobileMinistriesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { t } = useLanguage()
-  const activeSection = useActiveSection(sectionIds)
+  const { t, localize } = useLanguage()
   const reduceMotion = useReducedMotion()
   const settings = usePublishedSiteSettings().data
   const publicPhone = settings?.phone || churchInfo.phone
   const displayName = settings?.display_name || 'WJ Cathedral'
   const youtubeUrl = settings?.youtube_url || youtubeChannelUrl
   const instagramUrl = settings?.instagram_url || churchInfo.instagramUrl
-  const ministriesActive = currentPage === 'prayer-helpline' || currentPage === 'church' || currentPage === 'events' || currentPage === 'media' || currentPage === 'gallery' || (currentPage === 'home' && ministryItems.some((item) => item.id === activeSection))
+  const whatsappEnabled = settings?.whatsapp_channel_enabled ?? whatsappChannelDefaults.enabled
+  const whatsappUrl = settings?.whatsapp_channel_url || whatsappChannelDefaults.channelUrl
+  const whatsappLabel = localize({ en: 'Follow WJ Cathedral on WhatsApp', ta: 'WhatsApp-ல் WJ Cathedral-ஐ பின்தொடருங்கள்' })
+  const ministriesActive = currentPage === 'prayer-helpline' || currentPage === 'church' || currentPage === 'events' || currentPage === 'media' || currentPage === 'gallery'
   const translate = (key: string) => t(key as Parameters<typeof t>[0])
   const isMinistryChildActive = (childId: string) => (
     childId === 'prayer-helpline'
@@ -76,9 +74,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
           ? currentPage === 'events'
         : childId === 'sermons'
           ? currentPage === 'media'
-        : childId === 'gallery'
-          ? currentPage === 'gallery'
-        : currentPage === 'home' && activeSection === childId
+        : childId === 'gallery' && currentPage === 'gallery'
   )
   const isTopLevelActive = (itemId: string) => (
     itemId === 'about'
@@ -89,7 +85,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
         ? currentPage === 'community-care'
       : itemId === 'give'
         ? currentPage === 'give'
-        : currentPage === 'home' && activeSection === itemId
+        : itemId === 'home' && currentPage === 'home'
   )
 
   useEffect(() => {
@@ -241,6 +237,7 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
             >
               <InstagramIcon />
             </a>
+            {whatsappEnabled && <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={whatsappLabel} title={whatsappLabel}><WhatsAppIcon size={17} /></a>}
           </div>
           <LanguageSwitcher />
           <a className="header-call" href={`tel:${publicPhone}`} aria-label={`${t('common.callChurch')} ${publicPhone}`}>

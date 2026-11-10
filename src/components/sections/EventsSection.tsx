@@ -1,4 +1,4 @@
-import { ArrowRight, BellRing, CalendarCheck2, Phone } from 'lucide-react'
+import { ArrowRight, BellRing, Phone } from 'lucide-react'
 import { churchInfo } from '../../data/churchInfo'
 import { eventsState } from '../../data/events'
 import { useLanguage } from '../../context/LanguageContext'
@@ -20,7 +20,6 @@ export function EventsSection() {
         <Reveal className="announcement-card">
           <div className="announcement-card__icon"><BellRing size={30} aria-hidden="true" /></div>
           <div className="announcement-card__copy">
-            <span className="announcement-card__label"><CalendarCheck2 size={16} aria-hidden="true" /> {t('events.verifiedOnly')}</span>
             <h3>{title}</h3>
             <p>{message}</p>
           </div>

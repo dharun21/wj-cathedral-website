@@ -35,6 +35,13 @@ export interface SiteSettingsRow {
   instagram_url: string | null
   facebook_url: string | null
   youtube_url: string | null
+  whatsapp_channel_enabled: boolean
+  whatsapp_channel_title_en: string | null
+  whatsapp_channel_title_ta: string | null
+  whatsapp_channel_url: string | null
+  whatsapp_qr_url: string | null
+  whatsapp_qr_media_id: string | null
+  whatsapp_blog_url: string | null
   footer_en: string | null
   footer_ta: string | null
   prayer_247_confirmed: boolean
