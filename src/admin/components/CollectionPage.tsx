@@ -29,6 +29,19 @@ function inputValue(field: AdminField, value: unknown) {
   return field.type === 'datetime' && text ? text.slice(0, 16) : text
 }
 
+function dateTimePart(value: unknown, part: 'date' | 'time') {
+  const text = displayValue(value)
+  if (!text) return ''
+  return part === 'date' ? text.slice(0, 10) : text.slice(11, 16)
+}
+
+function combineDateTime(value: unknown, part: 'date' | 'time', nextValue: string) {
+  const date = part === 'date' ? nextValue : dateTimePart(value, 'date')
+  const time = part === 'time' ? nextValue : dateTimePart(value, 'time')
+  if (!date && !time) return ''
+  return `${date || new Date().toISOString().slice(0, 10)}T${time || '00:00'}`
+}
+
 function preparePayload(record: AdminRecord) {
   const payload: AdminRecord = {}
   for (const [key, value] of Object.entries(record)) {
@@ -78,7 +91,7 @@ function SortableRecord({ record, definition, owner, onEdit, onDelete }: { recor
     <article ref={sortable.setNodeRef} style={style} className="admin-record-card">
       {/* oxlint-disable-next-line react/refs -- dnd-kit exposes listener props through its sortable hook. */}
       {definition.orderable && owner && <button type="button" className="admin-drag-handle" {...sortable.attributes} {...sortable.listeners} aria-label="Drag to change display order"><GripVertical size={19} /></button>}
-      <div className="admin-record-card__body"><strong>{displayValue(record[definition.titleField]) || `Untitled ${definition.singular}`}</strong>{definition.subtitleField && <small>{displayValue(record[definition.subtitleField])}</small>}</div>
+      <div className={`admin-record-card__body${definition.key === 'academics' ? ' has-thumbnail' : ''}`}>{definition.key === 'academics' && displayValue(record.image_url) && <img className="admin-record-card__thumbnail" src={displayValue(record.image_url)} alt="" />}<span><strong>{displayValue(record[definition.titleField]) || `Untitled ${definition.singular}`}</strong>{definition.subtitleField && <small>{displayValue(record[definition.subtitleField])}</small>}</span></div>
       <span className={`admin-status admin-status--${record.status || 'draft'}`}>{statusLabel(record.status)}</span>
       <div className="admin-record-card__actions"><button type="button" onClick={onEdit} disabled={!owner && !editorCanEdit} aria-label={owner || editorCanEdit ? 'Edit' : 'Awaiting owner action'} title={!owner && !editorCanEdit ? 'Only an owner can change published or submitted content.' : undefined}><Pencil size={17} /></button>{owner && definition.allowDelete !== false && <button type="button" className="is-danger" onClick={onDelete} aria-label="Delete"><Trash2 size={17} /></button>}</div>
     </article>
@@ -122,6 +135,7 @@ function RecordEditor({ definition, initial, saving, owner, onSave, onClose }: {
     if (lastValidationStatus.current) setErrors(validationErrors(definition, next, lastValidationStatus.current))
   }
   const update = (name: string, value: unknown) => commitRecord({ ...latestRecord.current, [name]: value })
+  const showPreview = definition.presentation !== 'photo-grid' && definition.key !== 'announcements'
   const submit = (status: ContentStatus) => {
     lastValidationStatus.current = status
     const next = { ...latestRecord.current, status }
@@ -141,15 +155,16 @@ function RecordEditor({ definition, initial, saving, owner, onSave, onClose }: {
           {preview && <div className="admin-content-preview"><span>Preview</span>{Boolean(record.image_url) && <img src={String(record.image_url)} alt="" />}<h3>{displayValue(record.title_en) || displayValue(record.name_en) || displayValue(record.content_en)}</h3><p lang="ta">{displayValue(record.title_ta) || displayValue(record.name_ta) || displayValue(record.content_ta)}</p><p>{displayValue(record.description_en)}</p></div>}
           <div className="admin-form-grid">
             {definition.fields.filter((field) => field.name !== 'status').map((field) => <label className={field.fullWidth ? 'is-full' : ''} key={field.name}><span>{field.label}{field.tamilLabel && <small lang="ta">{field.tamilLabel}</small>}</span>
-              {field.type === 'textarea' ? <textarea rows={5} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)} />
+              {field.type === 'textarea' ? <textarea rows={5} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)} placeholder={field.placeholder} />
                 : field.type === 'select' ? <select value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)}>{field.options?.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>
                 : field.type === 'boolean' ? <span className="admin-switch"><input type="checkbox" checked={record[field.name] === true} onChange={(event) => update(field.name, event.target.checked)} /><i /><b>{record[field.name] === true ? 'Yes' : 'No'}</b></span>
-                : <><input type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : field.type === 'date' ? 'date' : field.type === 'time' ? 'time' : field.type === 'url' ? 'url' : 'text'} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, field.type === 'number' ? Number(event.target.value) : event.target.value)} placeholder={field.placeholder} />{(field.name === 'image_url' || field.name === 'background_image_url' || field.name === 'cover_image_url') && <button type="button" className="admin-inline-action" onClick={() => setMediaField(field.name)}>Choose from Upload Library</button>}</>}
+                : field.type === 'datetime' ? <div className="admin-datetime-fields"><input aria-label={`${field.label} date`} type="date" value={dateTimePart(record[field.name], 'date')} onChange={(event) => update(field.name, combineDateTime(record[field.name], 'date', event.target.value))} /><input aria-label={`${field.label} time`} type="time" value={dateTimePart(record[field.name], 'time')} onChange={(event) => update(field.name, combineDateTime(record[field.name], 'time', event.target.value))} /></div>
+                : <><input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'time' ? 'time' : field.type === 'url' ? 'url' : 'text'} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, field.type === 'number' ? Number(event.target.value) : event.target.value)} placeholder={field.placeholder} />{(field.name === 'image_url' || field.name === 'background_image_url' || field.name === 'cover_image_url') && <button type="button" className="admin-inline-action" onClick={() => setMediaField(field.name)}>Choose from Upload Library</button>}</>}
               {field.help && <em>{field.help}</em>}
             </label>)}
           </div>
         </div>
-        <footer><button type="button" className="admin-secondary-button" onClick={() => setPreview((current) => !current)}><Eye size={17} /> {preview ? 'Hide preview' : 'Preview'}</button><span /><button type="button" className="admin-secondary-button" disabled={saving} onClick={() => submit('draft')}>Save Draft</button><button type="button" className="admin-primary-button" disabled={saving} onClick={() => submit(owner ? 'published' : 'pending_review')}>{saving ? 'Saving…' : owner ? initial.status === 'pending_review' ? 'Approve & Publish' : 'Publish' : 'Send for Approval'}</button></footer>
+        <footer>{showPreview && <button type="button" className="admin-secondary-button" onClick={() => setPreview((current) => !current)}><Eye size={17} /> {preview ? 'Hide preview' : 'Preview'}</button>}<span /><button type="button" className="admin-secondary-button" disabled={saving} onClick={() => submit('draft')}>Save Draft</button><button type="button" className="admin-primary-button" disabled={saving} onClick={() => submit(owner ? 'published' : 'pending_review')}>{saving ? 'Saving…' : owner ? initial.status === 'pending_review' ? 'Approve & Publish' : 'Publish' : 'Send for Approval'}</button></footer>
       </div>
       {mediaField && <MediaPicker onClose={() => setMediaField(null)} onSelect={(asset) => {
         const next = { ...latestRecord.current, [mediaField]: asset.public_url ?? '' }

@@ -29,6 +29,7 @@ function AcademicSlideEditor({ initial, owner, saving, onClose, onSave }: { init
   const [mediaPicker, setMediaPicker] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
   const isDefault = record.slide_kind === 'default'
+  const isAdmissionSlide = isDefault && record.default_key === 'admissions'
   const canEdit = owner || record.status === 'draft' || !record.id
   const button = fixedButton(record)
   const update = (name: string, value: unknown) => {
@@ -41,6 +42,10 @@ function AcademicSlideEditor({ initial, owner, saving, onClose, onSave }: { init
       ['description_en', 'English supporting text'], ['description_ta', 'Tamil supporting text'],
     ]
     if (!isDefault) requiredFields.push(['image_url', 'Background image'])
+    if (isAdmissionSlide) requiredFields.push(
+      ['closed_title_en', 'Admissions closed English heading'], ['closed_title_ta', 'Admissions closed Tamil heading'],
+      ['closed_description_en', 'Admissions closed English text'], ['closed_description_ta', 'Admissions closed Tamil text'],
+    )
     const missing = requiredFields.filter(([name]) => !String(record[name] ?? '').trim()).map(([, label]) => `${label} is required.`)
     setErrors(missing)
     if (!missing.length) onSave(record, status)
@@ -65,6 +70,7 @@ function AcademicSlideEditor({ initial, owner, saving, onClose, onSave }: { init
           <label><span>Tamil heading <small lang="ta">தமிழ் தலைப்பு</small></span><input disabled={!canEdit} lang="ta" value={String(record.title_ta ?? '')} onChange={(event) => update('title_ta', event.target.value)} placeholder="முக்கிய தலைப்பை உள்ளிடவும்" /></label>
           <label className="is-full"><span>English supporting text</span><textarea disabled={!canEdit} rows={4} value={String(record.description_en ?? '')} onChange={(event) => update('description_en', event.target.value)} placeholder="Add a short supporting sentence" /></label>
           <label className="is-full"><span>Tamil supporting text <small lang="ta">தமிழ் துணை உரை</small></span><textarea disabled={!canEdit} lang="ta" rows={4} value={String(record.description_ta ?? '')} onChange={(event) => update('description_ta', event.target.value)} placeholder="குறுகிய துணை உரையை உள்ளிடவும்" /></label>
+          {isAdmissionSlide && <><div className="is-full academic-slide-scenario-heading"><strong>When admissions are closed</strong><p>This content replaces the admission message automatically. The Apply button is hidden.</p></div><label><span>English heading</span><input disabled={!canEdit} value={String(record.closed_title_en ?? '')} onChange={(event) => update('closed_title_en', event.target.value)} placeholder="College information" /></label><label><span>Tamil heading <small lang="ta">தமிழ் தலைப்பு</small></span><input disabled={!canEdit} lang="ta" value={String(record.closed_title_ta ?? '')} onChange={(event) => update('closed_title_ta', event.target.value)} placeholder="கல்லூரி தகவல்" /></label><label className="is-full"><span>English supporting text</span><textarea disabled={!canEdit} rows={4} value={String(record.closed_description_en ?? '')} onChange={(event) => update('closed_description_en', event.target.value)} placeholder="Describe the college, affiliation and available courses" /></label><label className="is-full"><span>Tamil supporting text <small lang="ta">தமிழ் துணை உரை</small></span><textarea disabled={!canEdit} lang="ta" rows={4} value={String(record.closed_description_ta ?? '')} onChange={(event) => update('closed_description_ta', event.target.value)} placeholder="கல்லூரி, இணைப்பு மற்றும் பாடநெறிகளை விவரிக்கவும்" /></label></>}
           <label className="is-full"><span>Background image</span><input readOnly value={String(record.image_url ?? '')} placeholder={isDefault ? 'Keep the built-in design or choose an approved image' : 'Choose an approved image from the Upload Library'} /><button type="button" className="admin-inline-action" disabled={!canEdit} onClick={() => setMediaPicker(true)}>Choose from Upload Library</button><em>{isDefault ? 'Changing this image does not change the fixed public button.' : 'Custom slides intentionally have no button fields.'}</em></label>
           {isDefault && button && <label className="is-full academic-fixed-button"><span>Fixed public button</span><input readOnly value={`${button.ctaLabel.en} → ${button.ctaHref}`} /><em>The button and destination remain exactly as they are in the current Academics carousel.</em></label>}
         </div>
@@ -101,6 +107,12 @@ export function AcademicCarouselPage() {
         title_ta: String(record.title_ta ?? '').trim(),
         description_en: String(record.description_en ?? '').trim(),
         description_ta: String(record.description_ta ?? '').trim(),
+        ...(record.default_key === 'admissions' ? {
+          closed_title_en: String(record.closed_title_en ?? '').trim(),
+          closed_title_ta: String(record.closed_title_ta ?? '').trim(),
+          closed_description_en: String(record.closed_description_en ?? '').trim(),
+          closed_description_ta: String(record.closed_description_ta ?? '').trim(),
+        } : {}),
         image_url: record.image_url || null,
         image_media_id: record.image_media_id ?? null,
         image_alt_en: String(record.title_en ?? '').trim(),

@@ -5,7 +5,7 @@ import { maxOptimizedImageBytes, optimizeImageFile, validateImageSelection, vali
 
 const allowedAudioTypes = new Set(['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/x-wav', 'audio/ogg'])
 export const maxImageBytes = maxOptimizedImageBytes
-export const maxAudioBytes = 50 * 1024 * 1024
+export const maxAudioBytes = 10 * 1024 * 1024
 
 function untypedClient(): SupabaseClient {
   return requireSupabase() as unknown as SupabaseClient
@@ -17,7 +17,7 @@ export function validateImageFile(file: File) {
 
 export function validateAudioFile(file: File) {
   if (!allowedAudioTypes.has(file.type)) throw new Error('Use an MP3, M4A, WAV or OGG audio file.')
-  if (file.size > maxAudioBytes) throw new Error('The audio file must be 50 MB or smaller.')
+  if (file.size > maxAudioBytes) throw new Error('The audio file must be 10 MB or smaller.')
 }
 
 function extensionForMime(mimeType: string) {
@@ -123,7 +123,10 @@ export async function publishMediaAsset(asset: MediaAssetRow) {
     public_url: publicUrl,
     approval_status: 'approved',
   }).eq('id', asset.id).select().single()
-  if (error) throw error
+  if (error) {
+    await client.storage.from('church-media').remove([publicPath])
+    throw error
+  }
   if (asset.storage_bucket === 'church-drafts') await client.storage.from('church-drafts').remove([asset.storage_path])
   return data as MediaAssetRow
 }

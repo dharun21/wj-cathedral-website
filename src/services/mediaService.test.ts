@@ -39,8 +39,8 @@ describe('media upload validation', () => {
     expect(() => validateAudioFile(file)).toThrow(/MP3, M4A, WAV or OGG/)
   })
 
-  it('rejects audio larger than 50 MB', () => {
+  it('rejects audio larger than 10 MB', () => {
     const file = { name: 'large.mp3', type: 'audio/mpeg', size: maxAudioBytes + 1 } as File
-    expect(() => validateAudioFile(file)).toThrow(/50 MB or smaller/)
+    expect(() => validateAudioFile(file)).toThrow(/10 MB or smaller/)
   })
 })

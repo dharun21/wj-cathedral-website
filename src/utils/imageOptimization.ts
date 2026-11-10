@@ -128,7 +128,13 @@ function nextFrame() {
   })
 }
 
-async function encodeWebp(source: CanvasImageSource, width: number, height: number, quality: number) {
+function fallbackMimeType(originalType: string) {
+  // Older iOS/Safari releases cannot encode WebP from Canvas. Keep PNG when
+  // transparency may be present; photographs can safely fall back to JPEG.
+  return originalType === 'image/png' ? 'image/png' : 'image/jpeg'
+}
+
+async function encodeImage(source: CanvasImageSource, width: number, height: number, quality: number, originalType: string) {
   await nextFrame()
   if (typeof OffscreenCanvas !== 'undefined') {
     try {
@@ -156,22 +162,28 @@ async function encodeWebp(source: CanvasImageSource, width: number, height: numb
   context.imageSmoothingQuality = 'high'
   context.clearRect(0, 0, width, height)
   context.drawImage(source, 0, 0, width, height)
-  const blob = await new Promise<Blob>((resolve, reject) => {
+  let blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((result) => result ? resolve(result) : reject(new Error('The image could not be optimized.')), 'image/webp', quality)
   })
+  if (blob.type !== 'image/webp') {
+    const fallbackType = fallbackMimeType(originalType)
+    blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((result) => result ? resolve(result) : reject(new Error('The image could not be optimized in this browser.')), fallbackType, fallbackType === 'image/png' ? undefined : quality)
+    })
+  }
   canvas.width = 1
   canvas.height = 1
-  if (blob.type !== 'image/webp') throw new Error('This browser cannot create WebP images.')
   return blob
 }
 
-function webpFilename(filename: string) {
+function optimizedFilename(filename: string, mimeType: string) {
   const base = filename.replace(/\.[^.]+$/, '').trim() || 'church-image'
-  return `${base}.webp`
+  const extension = mimeType === 'image/png' ? 'png' : mimeType === 'image/jpeg' ? 'jpg' : 'webp'
+  return `${base}.${extension}`
 }
 
 function asFile(blob: Blob, original: File) {
-  return new File([blob], webpFilename(original.name), { type: 'image/webp', lastModified: Date.now() })
+  return new File([blob], optimizedFilename(original.name, blob.type), { type: blob.type, lastModified: Date.now() })
 }
 
 function resizedDimensions(width: number, height: number, maxWidth: number | null, scale = 1) {
@@ -207,7 +219,7 @@ export async function optimizeImageFile(file: File, preset: ImageOptimizationPre
     }
 
     const base = resizedDimensions(decoded.width, decoded.height, settings.maxWidth)
-    const firstBlob = await encodeWebp(decoded.source, base.width, base.height, settings.quality)
+    const firstBlob = await encodeImage(decoded.source, base.width, base.height, settings.quality, file.type)
     let selected = { blob: firstBlob, width: base.width, height: base.height }
 
     if (firstBlob.size > maxOptimizedImageBytes) {
@@ -221,7 +233,7 @@ export async function optimizeImageFile(file: File, preset: ImageOptimizationPre
       let fitting: typeof selected | null = null
       for (const attempt of attempts) {
         const dimensions = resizedDimensions(decoded.width, decoded.height, settings.maxWidth, attempt.scale)
-        const blob = await encodeWebp(decoded.source, dimensions.width, dimensions.height, attempt.quality)
+        const blob = await encodeImage(decoded.source, dimensions.width, dimensions.height, attempt.quality, file.type)
         if (blob.size <= maxOptimizedImageBytes) {
           fitting = { blob, ...dimensions }
           break
@@ -232,7 +244,7 @@ export async function optimizeImageFile(file: File, preset: ImageOptimizationPre
       }
       selected = fitting
     } else if (firstBlob.size > settings.preferredBytes) {
-      const preferredBlob = await encodeWebp(decoded.source, base.width, base.height, Math.max(0.82, settings.quality - 0.03))
+      const preferredBlob = await encodeImage(decoded.source, base.width, base.height, Math.max(0.82, settings.quality - 0.03), file.type)
       if (preferredBlob.size < firstBlob.size && preferredBlob.size <= settings.preferredBytes) {
         selected = { blob: preferredBlob, width: base.width, height: base.height }
       }

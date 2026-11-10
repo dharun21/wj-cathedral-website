@@ -162,9 +162,7 @@ export function HomePrayerSupport() {
     { ...churchInfo.contacts[0], phone, display: phone === churchInfo.phone ? churchInfo.contacts[0].display : phone },
     churchInfo.contacts[1],
   ]
-  const availability = settings?.prayer_247_confirmed
-    ? { en: '24/7 prayer support', ta: '24/7 ஜெப உதவி' }
-    : { en: 'Prayer support from the church', ta: 'திருச்சபையின் ஜெப உதவி' }
+  const availability = { en: '24/7 prayer support', ta: '24/7 ஜெப உதவி' }
   return (
     <section className="home-prayer-band">
       <div className="container home-prayer-band__layout">

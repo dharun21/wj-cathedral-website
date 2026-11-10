@@ -45,20 +45,13 @@ export function AcademicsPage() {
     [managedGallery],
   )
   const activePhoto = activeGraduationPhoto === null ? null : graduationPhotos[activeGraduationPhoto]
-  const faculty = academicFaculty.map((member) => {
-    const managed = managedFaculty.find((entry) => entry.slug === member.id)
-    return {
-      ...member,
-      name: managed ? localize({ en: managed.title_en, ta: managed.title_ta }) : member.name,
-      role: managed?.eyebrow_en && managed.eyebrow_ta
-        ? { en: managed.eyebrow_en, ta: managed.eyebrow_ta }
-        : member.role,
-      qualification: managed && (managed.description_en || managed.description_ta)
-        ? localize({ en: managed.description_en, ta: managed.description_ta })
-        : member.qualification,
-      imageUrl: managed?.image_url || member.imageUrl,
-    }
-  })
+  const faculty = managedFaculty.length ? managedFaculty.map((member) => ({
+    id: member.slug,
+    name: localize({ en: member.title_en, ta: member.title_ta }),
+    role: { en: member.eyebrow_en || '', ta: member.eyebrow_ta || '' },
+    qualification: localize({ en: member.description_en || '', ta: member.description_ta || '' }),
+    imageUrl: member.image_url || '',
+  })) : academicFaculty
 
   useEffect(() => {
     if (activeGraduationPhoto === null || graduationPhotos.length === 0) return undefined

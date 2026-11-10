@@ -10,24 +10,20 @@ import { isSupabaseConfigured } from '../../lib/env'
 export function EventsSection() {
   const { t, localize, language } = useLanguage()
   const announcements = usePublishedAnnouncements()
-  const featured = announcements.data?.[0]
-  const title = featured ? (language === 'ta' ? featured.title_ta : featured.title_en) : localize(eventsState.title)
-  const message = featured ? (language === 'ta' ? featured.description_ta : featured.description_en) : localize(eventsState.message)
+  const activeAnnouncements = announcements.data ?? []
+  const cards = activeAnnouncements.length
+    ? activeAnnouncements.map((item) => ({ id: item.id, title: language === 'ta' ? item.title_ta : item.title_en, message: language === 'ta' ? item.description_ta : item.description_en }))
+    : !isSupabaseConfigured ? [{ id: 'fallback', title: localize(eventsState.title), message: localize(eventsState.message) }] : []
   return (
     <section id="events" className="section section--sand">
       <div className="container">
         <SectionHeading eyebrow={t('events.eyebrow')} title={t('events.title')} />
-        <Reveal className="announcement-card">
-          <div className="announcement-card__icon"><BellRing size={30} aria-hidden="true" /></div>
-          <div className="announcement-card__copy">
-            <h3>{title}</h3>
-            <p>{message}</p>
-          </div>
-          <a className="button button--navy" href={`tel:${churchInfo.phone}`}>
-            <Phone size={17} aria-hidden="true" /> {t('events.contactCta')} <ArrowRight size={17} aria-hidden="true" />
-          </a>
-        </Reveal>
-        {isSupabaseConfigured && !announcements.isLoading && !featured && <p className="section-empty-note">{language === 'ta' ? 'புதிய அங்கீகரிக்கப்பட்ட அறிவிப்புகள் வெளியிடப்பட்டதும் இங்கே தோன்றும்.' : 'New approved announcements will appear here after publication.'}</p>}
+        {cards.length > 0 && <div className="announcement-grid">{cards.map((card, index) => <Reveal className="announcement-card" key={card.id} delay={(index % 4) * .04}>
+          <div className="announcement-card__icon"><BellRing size={23} aria-hidden="true" /></div>
+          <div className="announcement-card__copy"><h3>{card.title}</h3><p>{card.message}</p></div>
+          <a className="button button--navy" href={`tel:${churchInfo.phone}`}><Phone size={16} aria-hidden="true" /> {t('events.contactCta')} <ArrowRight size={16} aria-hidden="true" /></a>
+        </Reveal>)}</div>}
+        {isSupabaseConfigured && !announcements.isLoading && !cards.length && <p className="section-empty-note">{language === 'ta' ? 'புதிய அங்கீகரிக்கப்பட்ட அறிவிப்புகள் வெளியிடப்பட்டதும் இங்கே தோன்றும்.' : 'New approved announcements will appear here after publication.'}</p>}
       </div>
     </section>
   )

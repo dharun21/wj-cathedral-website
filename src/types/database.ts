@@ -106,6 +106,10 @@ export interface HeroSlideRow {
   title_ta: string
   description_en: string
   description_ta: string
+    closed_title_en: string | null
+    closed_title_ta: string | null
+    closed_description_en: string | null
+    closed_description_ta: string | null
   image_media_id: string | null
   image_url: string | null
   image_alt_en: string

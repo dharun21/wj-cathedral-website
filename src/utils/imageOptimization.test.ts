@@ -4,7 +4,7 @@ import { imageOptimizationPresets, isAnimatedImage, maxOptimizedImageBytes, opti
 
 const MEBIBYTE = 1024 * 1024
 
-function mockBrowserImageProcessing(width: number, height: number, encodedSizes: number[]) {
+function mockBrowserImageProcessing(width: number, height: number, encodedSizes: number[], encodedType?: string) {
   const close = vi.fn()
   const createBitmap = vi.fn(async () => ({ width, height, close }))
   vi.stubGlobal('createImageBitmap', createBitmap)
@@ -23,7 +23,7 @@ function mockBrowserImageProcessing(width: number, height: number, encodedSizes:
       toBlob: (callback: BlobCallback, type?: string) => {
         outputDimensions.push({ width: canvas.width, height: canvas.height })
         const size = encodedSizes.shift() ?? 200 * 1024
-        callback(new Blob([new Uint8Array(size)], { type: type ?? 'image/webp' }))
+        callback(new Blob([new Uint8Array(size)], { type: encodedType ?? type ?? 'image/webp' }))
       },
     }
     return canvas as unknown as HTMLCanvasElement
@@ -101,6 +101,29 @@ describe('image optimization rules', () => {
     expect(browser.outputDimensions[0]).toEqual({ width: 800, height: 1600 })
     expect(browser.clearRect).toHaveBeenCalledWith(0, 0, 800, 1600)
     expect(browser.close).toHaveBeenCalledOnce()
+  })
+
+  it('falls back to JPEG when iOS Safari cannot encode WebP', async () => {
+    mockBrowserImageProcessing(2400, 1600, [320 * 1024, 320 * 1024, 320 * 1024, 320 * 1024], 'image/jpeg')
+    const file = new File([new Uint8Array(4 * MEBIBYTE)], 'ios-photo.jpg', { type: 'image/jpeg' })
+    const result = await optimizeImageFile(file, 'gallery')
+
+    expect(result.file.type).toBe('image/jpeg')
+    expect(result.file.name).toBe('ios-photo.jpg')
+    expect(result.file.size).toBe(320 * 1024)
+    expect(result.width).toBe(1600)
+    expect(result.height).toBe(1067)
+  })
+
+  it('keeps PNG transparency when iOS Safari needs a non-WebP fallback', async () => {
+    mockBrowserImageProcessing(900, 900, [90 * 1024, 90 * 1024], 'image/png')
+    const file = new File([new Uint8Array(600 * 1024)], 'transparent-logo.png', { type: 'image/png' })
+    const result = await optimizeImageFile(file, 'logo')
+
+    expect(result.file.type).toBe('image/png')
+    expect(result.file.name).toBe('transparent-logo.png')
+    expect(result.width).toBe(900)
+    expect(result.height).toBe(900)
   })
 
   it('does not recompress an efficient WebP that already meets the target', async () => {

@@ -15,7 +15,7 @@ const prayerNeeds = [
 export function PrayerHelplinePage() {
   const { t, localize } = useLanguage()
   const settings = usePublishedSiteSettings().data
-  const confirmed247 = settings?.prayer_247_confirmed === true
+  const confirmed247 = true
   const phone = settings?.phone || churchInfo.phone
   const contacts = [
     { ...churchInfo.contacts[0], phone, display: phone === churchInfo.phone ? churchInfo.contacts[0].display : phone },

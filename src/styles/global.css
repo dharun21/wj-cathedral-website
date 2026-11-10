@@ -298,10 +298,10 @@ html[data-language='ta'] .service-card h3 { font-family: inherit; }
 .verification-banner { display: flex; gap: 12px; align-items: flex-start; margin-top: 20px; color: rgba(255,255,255,.57); font-size: .8rem; line-height: 1.65; }.verification-banner svg { flex: 0 0 auto; margin-top: 2px; color: var(--gold-light); }
 
 /* Events */
-.announcement-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: clamp(22px, 4vw, 44px); padding: clamp(28px, 5vw, 54px); border-radius: var(--radius-lg); background: var(--paper); border: 1px solid rgba(92,71,38,.13); box-shadow: var(--shadow-sm); }
-.announcement-card__icon { width: 76px; height: 76px; display: grid; place-items: center; border-radius: 50%; background: var(--sand); color: var(--gold); }
+ .announcement-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.announcement-card { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: start; gap:18px; padding:24px; border-radius: var(--radius-md); background: var(--paper); border: 1px solid rgba(92,71,38,.13); box-shadow: var(--shadow-sm); }
+ .announcement-card__icon { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: var(--sand); color: var(--gold); }
 .announcement-card__label { display: inline-flex; align-items: center; gap: 7px; color: var(--gold); text-transform: uppercase; letter-spacing: .12em; font-weight: 800; font-size: .68rem; }
-.announcement-card h3 { margin-top: 12px; font-family: Georgia, serif; font-size: clamp(1.5rem, 2.5vw, 2.15rem); color: var(--navy); }.announcement-card p { margin-top: 10px; max-width: 650px; color: var(--muted); line-height: 1.7; }
+ .announcement-card h3 { margin-top: 2px; font-family: Georgia, serif; font-size: clamp(1.2rem, 1.8vw, 1.55rem); color: var(--navy); }.announcement-card p { margin-top: 8px; max-width: 650px; color: var(--muted);font-size:.84rem; line-height: 1.65; }.announcement-card .button{grid-column:2;justify-self:start;min-height:38px;padding:8px 14px;font-size:.72rem}
 html[data-language='ta'] .announcement-card h3 { font-family: inherit; }
 
 /* Video */
@@ -376,7 +376,8 @@ html[data-language='ta'] .academic-institute-card h3,html[data-language='ta'] .a
 
 @media (max-width: 900px) {
   :root { --header-height: 70px; }
-  .desktop-nav, .header-call, .header-actions > .language-switcher { display: none; }
+  .desktop-nav, .header-call, .header-social, .header-actions > .language-switcher { display: none; }
+  .header-shell { min-width:0;gap:12px; }.brand,.brand__text{min-width:0}.header-actions{flex:0 0 auto}.header-actions .menu-button{display:inline-flex;flex:0 0 46px;position:relative;z-index:2;-webkit-appearance:none;appearance:none}.mobile-menu{z-index:1}
   .header-shell { justify-content: space-between; }.menu-button { display: inline-flex; }.mobile-menu { display: block; position: fixed; z-index: -1; inset: var(--header-height) 0 auto 0; max-height: calc(100svh - var(--header-height)); overflow-y: auto; padding: 14px 20px 22px; background: var(--paper); color: var(--navy); border-top: 1px solid var(--line); box-shadow: var(--shadow-lg); }.mobile-nav { display: grid; }.mobile-nav__link, .mobile-nav__trigger { width: 100%; min-height: 53px; display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; font: inherit; font-weight: 750; text-align: left; }.mobile-nav__link.is-active, .mobile-nav__trigger.is-active { color: var(--gold); }.mobile-nav__trigger svg { transition: transform .2s; }.mobile-nav__trigger[aria-expanded='true'] svg { transform: rotate(180deg); }.mobile-nav__submenu { overflow: hidden; margin: 6px 0 10px; padding: 6px; border: 1px solid var(--line); border-radius: 16px; background: #f6f0e5; }.mobile-nav__submenu a { min-height: 62px; display: grid; grid-template-columns: 34px minmax(0,1fr); align-items: center; gap: 11px; padding: 10px; border-radius: 11px; color: var(--navy); }.mobile-nav__submenu a.is-active { background: #fff; color: var(--gold); }.mobile-nav__submenu > a > svg { color: var(--gold); }.mobile-nav__submenu strong, .mobile-nav__submenu small { display: block; }.mobile-nav__submenu strong { font-size: .82rem; }.mobile-nav__submenu small { margin-top: 3px; color: var(--muted); font-size: .68rem; line-height: 1.35; }.mobile-menu__footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 18px; }.mobile-menu__footer > a { display: inline-flex; align-items: center; gap: 7px; color: var(--gold); font-weight: 800; }.language-switcher--mobile { opacity: 1; }
   .church-hero { min-height: auto; padding-bottom: 42px; }.church-hero__layout { grid-template-columns: 1fr; gap: 52px; }.church-hero__copy { max-width: 760px; }.church-hero__copy h1 { font-size: clamp(2.6rem,6.4vw,3.9rem); }.church-ministry-map { width: min(520px,100%); justify-self: center; }.church-hero__footer { position: relative; left: auto; bottom: auto; transform: none; margin-top: 38px; }.church-generations__intro { grid-template-columns: 1fr; gap: 25px; }.church-generations__intro > p { max-width: 700px; }.church-equipping__grid { grid-template-columns: 1fr; }.equipping-panel { min-height: auto; }.equipping-panel + .equipping-panel { border-left: 0; border-top: 1px solid rgba(255,255,255,.13); }.equipping-panel__eyebrow { margin-top: 65px; }
   .community-hero { min-height: 640px; height: 720px; }.community-hero__content { grid-template-columns: minmax(0,1fr) 220px; gap: 35px; }.community-hero__copy h1 { font-size: clamp(2.7rem,7.8vw,4.5rem); }.community-hero__emblem { width: 210px; height: 280px; }.community-hero__emblem > div { width: 100px; height: 100px; }.community-hero__emblem > div svg { width: 48px; }.care-environment__layout { grid-template-columns: 300px minmax(0,1fr); gap: 42px; }.care-environment__statement { min-height: 410px; }.care-programme-card { min-height: 260px; grid-template-columns: 1fr; }
@@ -507,6 +508,10 @@ html[data-language='ta'] .hero-slide.is-medium-title h1 {
   font-size: clamp(1.6rem, 2.65vw, 2.45rem);
   line-height: 1.32;
 }
+
+@media (max-width:900px){.mobile-menu{z-index:101}}
+@media (max-width:760px){.announcement-grid{grid-template-columns:1fr}}
+@media (max-width:900px){.mobile-menu__socials{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.mobile-menu__socials a{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--navy)}.mobile-menu__socials a:focus-visible,.mobile-menu__socials a:hover{border-color:var(--gold);color:var(--gold)}}
 html[data-language='ta'] .hero-slide.is-long-title h1 {
   font-size: clamp(1.3rem, 2.05vw, 1.95rem);
   line-height: 1.36;

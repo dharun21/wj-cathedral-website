@@ -325,6 +325,11 @@ export function Header({ currentPage = 'home' }: { currentPage?: 'home' | 'about
                 {publicPhone}
               </a>
             </div>
+            <div className="mobile-menu__socials" aria-label={t('header.socialLinks')}>
+              <a href={youtubeUrl} target="_blank" rel="noreferrer" aria-label={t('header.youtube')} title={t('header.youtube')} onClick={closeMenu}><YoutubeIcon /></a>
+              <a href={instagramUrl} target="_blank" rel="noreferrer" aria-label={t('header.instagram')} title={t('header.instagram')} onClick={closeMenu}><InstagramIcon /></a>
+              {whatsappEnabled && <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={whatsappLabel} title={whatsappLabel} onClick={closeMenu}><WhatsAppIcon size={18} /></a>}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

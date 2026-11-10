@@ -23,9 +23,22 @@ const galleryPhotoFields = [
   { name: 'image_url', label: 'Approved image URL', type: 'text', requiredForPublish: true, fullWidth: true },
   { name: 'alt_en', label: 'English image description', type: 'text', requiredForPublish: true, placeholder: 'Briefly describe what is visible in the photo' },
   { name: 'alt_ta', label: 'Tamil image description', tamilLabel: 'தமிழ் பட விளக்கம்', type: 'text', requiredForPublish: true, placeholder: 'படத்தில் உள்ளதைச் சுருக்கமாக விவரிக்கவும்' },
-  { name: 'featured', label: 'Featured photo', type: 'boolean' },
   { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
 ] as const
+
+function internalSlug(prefix: string, title: unknown) {
+  const readable = String(title ?? '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48)
+  const suffix = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID().slice(0, 8) : Date.now().toString(36)
+  return `${prefix}-${readable || 'item'}-${suffix}`
+}
+
+function normalizeAcademicCourse(record: AdminRecord) {
+  return { ...record, slug: record.slug || internalSlug('course', record.title_en) }
+}
+
+function normalizeFaculty(record: AdminRecord) {
+  return { ...record, slug: record.slug || internalSlug('faculty', record.title_en), group_key: 'academics', icon_key: 'faculty' }
+}
 
 function normalizeVideo(record: AdminRecord) {
   const url = String(record.youtube_url ?? '')
@@ -73,19 +86,18 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
   announcements: {
     key: 'announcements', title: 'Announcements', singular: 'announcement', table: 'announcements', orderBy: 'updated_at',
     description: 'Publish timely church notices with optional expiry dates.', titleField: 'title_en', subtitleField: 'status',
-    defaults: { title_en: '', title_ta: '', description_en: '', description_ta: '', publish_at: '', expires_at: '', featured: false, status: 'draft' },
+    defaults: { title_en: '', title_ta: '', description_en: '', description_ta: '', publish_at: '', expires_at: '', status: 'draft' },
     fields: [
       ...bilingualTitleFields, ...bilingualDescriptionFields,
       { name: 'publish_at', label: 'Publish date and time', type: 'datetime' },
       { name: 'expires_at', label: 'Expiry date and time', type: 'datetime', help: 'Expired announcements automatically disappear from active public notices.' },
-      { name: 'featured', label: 'Feature on homepage', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
     ],
   },
   events: {
     key: 'events', title: 'Events', singular: 'event', table: 'events', orderBy: 'starts_at',
     description: 'Manage upcoming and past church events in Asia/Kolkata time.', titleField: 'title_en', subtitleField: 'starts_at',
-    defaults: { title_en: '', title_ta: '', description_en: '', description_ta: '', starts_at: '', ends_at: '', venue_en: '', venue_ta: '', contact: '', category: 'church', featured: false, registration_url: '', status: 'draft' },
+    defaults: { title_en: '', title_ta: '', description_en: '', description_ta: '', starts_at: '', ends_at: '', venue_en: '', venue_ta: '', contact: '', category: 'church', registration_url: '', status: 'draft' },
     fields: [
       ...bilingualTitleFields, ...bilingualDescriptionFields,
       { name: 'starts_at', label: 'Start date and time', type: 'datetime', requiredForPublish: true },
@@ -95,21 +107,19 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
       { name: 'contact', label: 'Public contact', type: 'text' },
       { name: 'category', label: 'Category', type: 'select', options: [{ value: 'church', label: 'Church gathering' }, { value: 'prayer', label: 'Prayer' }, { value: 'youth', label: 'Youth' }, { value: 'children', label: 'Children' }, { value: 'community', label: 'Community Care' }, { value: 'academics', label: 'Academics' }] },
       { name: 'registration_url', label: 'Optional contact/registration link', type: 'url' },
-      { name: 'featured', label: 'Featured event', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
     ],
   },
   videos: {
     key: 'videos', title: 'YouTube & Media', singular: 'video', table: 'videos', orderBy: 'display_order', orderable: true,
     description: 'Add official YouTube videos without downloading or re-hosting them.', titleField: 'title_en', subtitleField: 'category',
-    defaults: { youtube_url: '', youtube_id: '', title_en: '', title_ta: '', description_en: '', description_ta: '', category: 'sermon', featured: false, live_status: 'recorded', status: 'draft', display_order: 0 },
+    defaults: { youtube_url: '', youtube_id: '', title_en: '', title_ta: '', description_en: '', description_ta: '', category: 'sermon', live_status: 'recorded', status: 'draft', display_order: 0 },
     beforeSave: normalizeVideo,
     fields: [
       { name: 'youtube_url', label: 'YouTube URL', type: 'url', requiredForPublish: true, fullWidth: true },
       ...bilingualTitleFields, ...bilingualDescriptionFields,
       { name: 'category', label: 'Category', type: 'select', options: [{ value: 'sermon', label: 'Sermon' }, { value: 'service', label: 'Service' }, { value: 'worship', label: 'Worship' }, { value: 'song', label: 'Song' }, { value: 'testimony', label: 'Testimony' }, { value: 'live-session', label: 'Church live session' }] },
       { name: 'live_status', label: 'Video status', type: 'select', options: [{ value: 'recorded', label: 'Recorded' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'live_confirmed', label: 'Live — manually confirmed' }] },
-      { name: 'featured', label: 'Featured video', type: 'boolean' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
     ],
   },
@@ -129,17 +139,18 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     description: 'Only verified schedules can be published.', titleField: 'name_en', subtitleField: 'time_display_en',
     defaults: { name_en: '', name_ta: '', day_en: '', day_ta: '', start_time: '', end_time: '', time_display_en: '', time_display_ta: '', description_en: '', description_ta: '', location_en: '', location_ta: '', active: true, verified: false, status: 'draft', display_order: 0 },
     fields: [
-      { name: 'name_en', label: 'Service name — English', type: 'text', requiredForPublish: true },
-      { name: 'name_ta', label: 'Service name — Tamil', tamilLabel: 'ஆராதனை பெயர் — தமிழ்', type: 'text', requiredForPublish: true },
-      { name: 'day_en', label: 'Day — English', type: 'text', requiredForPublish: true },
-      { name: 'day_ta', label: 'Day — Tamil', tamilLabel: 'நாள் — தமிழ்', type: 'text', requiredForPublish: true },
+      { name: 'name_en', label: 'Service name — English', type: 'text', requiredForPublish: true, placeholder: 'Example: Sunday Worship Service' },
+      { name: 'name_ta', label: 'Service name — Tamil', tamilLabel: 'ஆராதனை பெயர் — தமிழ்', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: ஞாயிறு ஆராதனை' },
+      { name: 'day_en', label: 'Day — English', type: 'text', requiredForPublish: true, placeholder: 'Example: Every Sunday' },
+      { name: 'day_ta', label: 'Day — Tamil', tamilLabel: 'நாள் — தமிழ்', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: ஒவ்வொரு ஞாயிற்றுக்கிழமையும்' },
       { name: 'start_time', label: 'Start time', type: 'time' },
       { name: 'end_time', label: 'End time', type: 'time' },
-      { name: 'time_display_en', label: 'Displayed time — English', type: 'text', requiredForPublish: true },
-      { name: 'time_display_ta', label: 'Displayed time — Tamil', type: 'text', requiredForPublish: true },
-      ...bilingualDescriptionFields,
-      { name: 'location_en', label: 'Location — English', type: 'text' },
-      { name: 'location_ta', label: 'Location — Tamil', type: 'text' },
+      { name: 'time_display_en', label: 'Displayed time — English', type: 'text', requiredForPublish: true, placeholder: 'Example: 9:00 AM – 11:00 AM' },
+      { name: 'time_display_ta', label: 'Displayed time — Tamil', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: காலை 9:00 – 11:00' },
+      { name: 'description_en', label: 'English description', type: 'textarea', requiredForPublish: true, fullWidth: true, placeholder: 'Briefly describe this worship or prayer service' },
+      { name: 'description_ta', label: 'Tamil description', tamilLabel: 'தமிழ் விளக்கம்', type: 'textarea', requiredForPublish: true, fullWidth: true, placeholder: 'இந்த ஆராதனை அல்லது ஜெப சேவையைச் சுருக்கமாக விவரிக்கவும்' },
+      { name: 'location_en', label: 'Location — English', type: 'text', placeholder: 'Example: Main Cathedral Hall' },
+      { name: 'location_ta', label: 'Location — Tamil', type: 'text', placeholder: 'உதாரணம்: பிரதான பேராலய மண்டபம்' },
       { name: 'active', label: 'Active service', type: 'boolean' },
       { name: 'verified', label: 'Schedule confirmed by church', type: 'boolean', help: 'Required before publishing.' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
@@ -159,19 +170,26 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     ],
   },
   academics: {
-    key: 'academics', title: 'Academics Faculty Photos', singular: 'faculty photo', table: 'ministries', orderBy: 'display_order', filters: { group_key: 'academics' }, allowCreate: false, allowDelete: false,
-    description: 'Manage faculty portraits separately from Church ministry images.', titleField: 'title_en', subtitleField: 'eyebrow_en',
+    key: 'academics', title: 'Academics Faculty', singular: 'faculty member', table: 'ministries', orderBy: 'display_order', orderable: true, filters: { group_key: 'academics' }, allowCreate: true, allowDelete: true,
+    description: 'Add faculty members and manage the names, roles, qualifications and portraits shown on the Academics page.', titleField: 'title_en', subtitleField: 'eyebrow_en',
     defaults: { slug: '', group_key: 'academics', title_en: '', title_ta: '', eyebrow_en: '', eyebrow_ta: '', description_en: '', description_ta: '', image_url: '', icon_key: '', featured: false, status: 'draft', display_order: 0, metadata: {} },
+    beforeSave: normalizeFaculty,
     fields: [
+      ...bilingualTitleFields,
+      { name: 'eyebrow_en', label: 'Role — English', type: 'text', requiredForPublish: true, placeholder: 'Example: Principal' },
+      { name: 'eyebrow_ta', label: 'Role — Tamil', tamilLabel: 'பொறுப்பு — தமிழ்', type: 'text', requiredForPublish: true },
+      { name: 'description_en', label: 'Qualification — English', type: 'text', fullWidth: true, placeholder: 'Example: M.Th., B.D.' },
+      { name: 'description_ta', label: 'Qualification — Tamil', tamilLabel: 'தகுதி — தமிழ்', type: 'text', fullWidth: true },
       { name: 'image_url', label: 'Approved faculty portrait', type: 'text', requiredForPublish: true, fullWidth: true, help: 'Choose a replacement portrait from the approved Upload Library.' },
+      { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
     ],
   },
   'academic-courses': {
     key: 'academic-courses', title: 'Academic Courses', singular: 'course', table: 'academic_courses', orderBy: 'display_order', orderable: true,
     description: 'Manage the courses and durations shown on the Academics page.', titleField: 'title_en', subtitleField: 'short_name',
     defaults: { slug: '', short_name: '', title_en: '', title_ta: '', duration_en: '', duration_ta: '', status: 'draft', display_order: 0 },
+    beforeSave: normalizeAcademicCourse,
     fields: [
-      { name: 'slug', label: 'Course identifier', type: 'text', requiredForPublish: true, placeholder: 'example: bachelor-theology', help: 'Lowercase letters, numbers and hyphens only.' },
       { name: 'short_name', label: 'Short name', type: 'text', requiredForPublish: true, placeholder: 'Example: B.Th' },
       ...bilingualTitleFields,
       { name: 'duration_en', label: 'Duration — English', type: 'text', requiredForPublish: true, placeholder: 'Example: 3 years' },
@@ -191,13 +209,13 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
   'gallery-images': {
     key: 'gallery-images', title: 'Gallery Page Photos', singular: 'photo', table: 'gallery_images', orderBy: 'display_order', orderable: true, presentation: 'photo-grid', albumScope: 'gallery',
     description: 'Photos shown on the public Gallery page, organised under its albums.', titleField: 'alt_en', subtitleField: 'status',
-    defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', featured: false, status: 'draft', display_order: 0 },
+    defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', status: 'draft', display_order: 0 },
     fields: galleryPhotoFields,
   },
   'academic-gallery': {
     key: 'academic-gallery', title: 'Graduation Photos', singular: 'graduation photo', table: 'gallery_images', orderBy: 'display_order', orderable: true, presentation: 'photo-grid', albumScope: 'academics',
     description: 'Photos shown only in the Academics graduation section. Albums cannot be created here.', titleField: 'alt_en', subtitleField: 'status',
-    defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', featured: false, status: 'draft', display_order: 0 },
+    defaults: { album_id: '', image_url: '', caption_en: '', caption_ta: '', alt_en: '', alt_ta: '', status: 'draft', display_order: 0 },
     fields: galleryPhotoFields,
   },
 }

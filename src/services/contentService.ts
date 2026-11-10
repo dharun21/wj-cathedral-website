@@ -101,11 +101,10 @@ export async function fetchPublishedAnnouncements() {
   const now = new Date().toISOString()
   const { data, error } = await requireSupabase()
     .from('announcements')
-    .select('id, title_en, title_ta, description_en, description_ta, featured, publish_at')
+    .select('id, title_en, title_ta, description_en, description_ta, publish_at')
     .eq('status', 'published')
     .or(`publish_at.is.null,publish_at.lte.${now}`)
     .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .order('featured', { ascending: false })
     .order('publish_at', { ascending: false })
   throwIfError(error)
   return (data ?? []) as AnnouncementRow[]
@@ -124,9 +123,8 @@ export async function fetchPublishedEvents() {
 export async function fetchPublishedVideos() {
   const { data, error } = await requireSupabase()
     .from('videos')
-    .select('id, youtube_id, title_en, title_ta, description_en, description_ta, category, featured, live_status, display_order, created_at')
+    .select('id, youtube_id, title_en, title_ta, description_en, description_ta, category, live_status, display_order, created_at')
     .eq('status', 'published')
-    .order('featured', { ascending: false })
     .order('display_order')
   throwIfError(error)
   return (data ?? []) as VideoRow[]

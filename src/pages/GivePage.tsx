@@ -70,18 +70,18 @@ export function GivePage() {
   const { localize } = useLanguage()
   const settings = usePublishedSiteSettings().data
   const contactPhone = settings?.phone || churchInfo.phone
-  const useCmsDetails = settings?.giving_payment_verified === true
+  const useCmsDetails = Boolean(settings && (settings.giving_account_number || settings.giving_gpay_number || settings.giving_qr_url))
   const useLocalDetails = !isSupabaseConfigured
   const details = {
-    accountName: useCmsDetails ? settings.giving_account_name : useLocalDetails ? approvedGivingDetails.accountName : null,
-    bankName: useCmsDetails ? settings.giving_bank_name : useLocalDetails ? approvedGivingDetails.bankName : null,
-    bankBranch: useCmsDetails ? settings.giving_bank_branch : useLocalDetails ? approvedGivingDetails.bankBranch : null,
-    accountNumber: useCmsDetails ? settings.giving_account_number : useLocalDetails ? approvedGivingDetails.accountNumber : null,
-    ifsc: useCmsDetails ? settings.giving_ifsc : useLocalDetails ? approvedGivingDetails.ifsc : null,
-    gpayNumber: useCmsDetails ? settings.giving_gpay_number : useLocalDetails ? approvedGivingDetails.gpayNumber : null,
-    gpayName: useCmsDetails ? settings.giving_gpay_name : useLocalDetails ? approvedGivingDetails.gpayName : null,
-    upiId: useCmsDetails ? settings.giving_upi_id : useLocalDetails ? approvedGivingDetails.upiId : null,
-    qrUrl: useCmsDetails ? settings.giving_qr_url : useLocalDetails ? approvedGivingDetails.qrUrl : null,
+    accountName: useCmsDetails ? settings?.giving_account_name : useLocalDetails ? approvedGivingDetails.accountName : null,
+    bankName: useCmsDetails ? settings?.giving_bank_name : useLocalDetails ? approvedGivingDetails.bankName : null,
+    bankBranch: useCmsDetails ? settings?.giving_bank_branch : useLocalDetails ? approvedGivingDetails.bankBranch : null,
+    accountNumber: useCmsDetails ? settings?.giving_account_number : useLocalDetails ? approvedGivingDetails.accountNumber : null,
+    ifsc: useCmsDetails ? settings?.giving_ifsc : useLocalDetails ? approvedGivingDetails.ifsc : null,
+    gpayNumber: useCmsDetails ? settings?.giving_gpay_number : useLocalDetails ? approvedGivingDetails.gpayNumber : null,
+    gpayName: useCmsDetails ? settings?.giving_gpay_name : useLocalDetails ? approvedGivingDetails.gpayName : null,
+    upiId: useCmsDetails ? settings?.giving_upi_id : useLocalDetails ? approvedGivingDetails.upiId : null,
+    qrUrl: useCmsDetails ? settings?.giving_qr_url : useLocalDetails ? approvedGivingDetails.qrUrl : null,
   }
   const verified = useCmsDetails || useLocalDetails
   const hasBank = Boolean(verified && details.accountName && details.bankName && details.accountNumber && details.ifsc)
@@ -141,7 +141,6 @@ export function GivePage() {
           {hasBank && <Reveal className="give-payment-card"><header><span><Landmark size={24} /></span><h3>{localize(copy.bank)}</h3></header><CopyValue label={localize(copy.accountName)} value={details.accountName!} /><CopyValue label={localize(copy.bankName)} value={details.bankName!} />{details.bankBranch && <CopyValue label={localize(copy.bankBranch)} value={details.bankBranch} />}<CopyValue label={localize(copy.accountNumber)} value={details.accountNumber!} /><CopyValue label={localize(copy.ifsc)} value={details.ifsc!} /></Reveal>}
           {hasGpay && <Reveal className="give-payment-card give-payment-card--gpay" delay={.06}><header><span><QrCode size={24} /></span><h3>{localize(copy.gpay)}</h3></header>{hasQr && <img src={details.qrUrl!} alt={localize(copy.qrAlt)} loading="lazy" />}{details.gpayName && <CopyValue label={localize(copy.gpayName)} value={details.gpayName} />}<CopyValue label={localize(copy.gpayNumber)} value={details.gpayNumber!} />{details.upiId && <CopyValue label={localize(copy.upiId)} value={details.upiId} />}</Reveal>}
         </div> : <Reveal className="give-pending"><span><ShieldAlert size={30} aria-hidden="true" /></span><div><h3>{localize(copy.pendingTitle)}</h3><p>{localize(copy.pendingBody)}</p><a href={`tel:${contactPhone}`}><Phone size={17} />{contactPhone}</a></div></Reveal>}
-        {useCmsDetails && (settings.giving_note_en || settings.giving_note_ta) && <p className="give-owner-note">{localize({ en: settings.giving_note_en || '', ta: settings.giving_note_ta || '' })}</p>}
         <div className="give-safety"><ShieldCheck size={20} aria-hidden="true" /><strong>{localize(copy.safety)}</strong></div>
       </div>
     </section>

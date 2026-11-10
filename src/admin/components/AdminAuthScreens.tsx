@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, KeyRound, Mail, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, KeyRound, Mail, ShieldAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -13,6 +13,7 @@ type LoginValues = z.infer<typeof loginSchema>
 export function AdminLogin() {
   const { login } = useAdminAuth()
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const form = useForm<LoginValues>({ resolver: zodResolver(loginSchema), defaultValues: { email: '', password: '' } })
   const submit = form.handleSubmit(async (values) => {
     setError('')
@@ -33,7 +34,7 @@ export function AdminLogin() {
         {error && <div className="admin-form-error" role="alert"><ShieldAlert size={17} /> {error}</div>}
         <form onSubmit={submit} className="admin-auth-form">
           <label><span>Email address</span><div><Mail size={17} /><input type="email" autoComplete="email" {...form.register('email')} /></div><small>{form.formState.errors.email?.message}</small></label>
-          <label><span>Password</span><div><KeyRound size={17} /><input type="password" autoComplete="current-password" {...form.register('password')} /></div><small>{form.formState.errors.password?.message}</small></label>
+          <label><span>Password</span><div><KeyRound size={17} /><input type={showPassword ? 'text' : 'password'} autoComplete="current-password" {...form.register('password')} /><button type="button" className="admin-auth-password-toggle" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div><small>{form.formState.errors.password?.message}</small></label>
           <button type="submit" className="admin-primary-button" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'Signing in…' : 'Sign in securely'}</button>
         </form>
         <div className="admin-auth-actions">
@@ -75,6 +76,7 @@ export function ResetPassword() {
   const [confirm, setConfirm] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     setError('')
@@ -93,8 +95,8 @@ export function ResetPassword() {
       <p>Use at least 12 characters and avoid reusing a password from another service.</p>
       {message && <div className="admin-form-success">{message}</div>}{error && <div className="admin-form-error" role="alert">{error}</div>}
       <form onSubmit={submit} className="admin-auth-form">
-        <label><span>New password</span><div><KeyRound size={17} /><input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} /></div></label>
-        <label><span>Confirm password</span><div><KeyRound size={17} /><input type="password" required value={confirm} onChange={(event) => setConfirm(event.target.value)} /></div></label>
+        <label><span>New password</span><div><KeyRound size={17} /><input type={showPassword ? 'text' : 'password'} required value={password} onChange={(event) => setPassword(event.target.value)} /><button type="button" className="admin-auth-password-toggle" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? 'Hide passwords' : 'Show passwords'}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></label>
+        <label><span>Confirm password</span><div><KeyRound size={17} /><input type={showPassword ? 'text' : 'password'} required value={confirm} onChange={(event) => setConfirm(event.target.value)} /></div></label>
         <button className="admin-primary-button">Update password</button>
       </form>
       {message && <button className="admin-text-button" onClick={() => { window.location.hash = '#/admin/dashboard' }}>Continue to dashboard</button>}

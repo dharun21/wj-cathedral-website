@@ -1,6 +1,6 @@
-import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, Church, CirclePlay, Clock3, FileClock, GalleryHorizontalEnd, GraduationCap, Headphones, Images, LayoutDashboard, LogOut, Menu, MessageCircle, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
+import { BellRing, BookHeart, BookOpenCheck, CalendarDays, ChevronRight, CirclePlay, Clock3, FileClock, GalleryHorizontalEnd, GraduationCap, Headphones, Images, LayoutDashboard, LogOut, Menu, MessageCircle, PanelsTopLeft, Settings, ShieldCheck, UserCog, UserRoundCheck, X, type LucideIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
+import { useLayoutEffect, useState, type ReactNode } from 'react'
 import { LogoMark } from '../../components/common/LogoMark'
 import { fetchNewAdmissionApplicationCount } from '../../services/admissionService'
 import { useAdminAuth } from '../context/AdminAuthContext'
@@ -12,7 +12,7 @@ interface AdminNavigationSection { group: string; items: AdminNavigationItem[] }
 const navigation: AdminNavigationSection[] = [
   { group: 'Overview', items: [{ path: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }, { path: 'submissions', label: 'Pending Approval', icon: FileClock, editorOnly: true }, { path: 'approvals', label: 'Attention Required', icon: ShieldCheck, ownerOnly: true }, { path: 'admissions', label: 'Admission Applications', icon: UserRoundCheck, ownerOnly: true }] },
   { group: 'Homepage', items: [{ path: 'slides', label: 'Carousel Slides', icon: PanelsTopLeft }, { path: 'verses', label: 'Daily Bible Verses', icon: BookHeart }, { path: 'announcements', label: 'Announcements', icon: BellRing }, { path: 'services', label: 'Worship Times', icon: Clock3 }] },
-  { group: 'Church Content', items: [{ path: 'events', label: 'Events', icon: CalendarDays }, { path: 'videos', label: 'YouTube Videos & Live', icon: CirclePlay }, { path: 'audio-albums', label: 'Audio Albums', icon: Headphones }, { path: 'audio-library', label: 'Audio Uploads', icon: Headphones }, { path: 'ministries', label: 'Ministry Slides', icon: Church }] },
+  { group: 'Church Content', items: [{ path: 'events', label: 'Events', icon: CalendarDays }, { path: 'videos', label: 'YouTube Videos & Live', icon: CirclePlay }, { path: 'audio-albums', label: 'Audio Albums', icon: Headphones }, { path: 'audio-library', label: 'Audio Uploads', icon: Headphones }] },
   { group: 'Academics', items: [{ path: 'academic-settings', label: 'College Details', icon: GraduationCap, ownerOnly: true }, { path: 'academic-carousel', label: 'Admission Carousel', icon: PanelsTopLeft }, { path: 'academic-courses', label: 'Courses', icon: BookOpenCheck }, { path: 'academics', label: 'Faculty Photos', icon: GraduationCap }, { path: 'academic-gallery', label: 'Graduation Photos', icon: Images }] },
   { group: 'Gallery Page', items: [{ path: 'albums', label: 'Albums', icon: GalleryHorizontalEnd }, { path: 'gallery-images', label: 'Photos', icon: Images }] },
   { group: 'Uploads', items: [{ path: 'media-library', label: 'Upload Library', icon: Images }] },
@@ -34,6 +34,10 @@ export function AdminLayout({ route, children }: { route: string; children: Reac
     refetchIntervalInBackground: false,
   })
   const navigate = (path: string) => { setDrawerOpen(false); window.location.hash = `#/admin/${path}` }
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+    document.querySelector<HTMLElement>('.admin-workspace')?.scrollTo(0, 0)
+  }, [route])
   return (
     <div className="admin-shell">
       <aside className={`admin-sidebar ${drawerOpen ? 'is-open' : ''}`}>

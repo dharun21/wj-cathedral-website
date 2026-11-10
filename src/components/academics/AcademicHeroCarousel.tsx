@@ -37,15 +37,21 @@ export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen
     const builtIn = row.slide_kind === 'default' && row.default_key
       ? academicHeroSlides.find((slide) => slide.id === row.default_key)
       : undefined
-    if (builtIn) return {
-      id: row.id,
-      frame: builtIn.id,
-      eyebrow: builtIn.eyebrow,
-      title: { en: row.title_en, ta: row.title_ta },
-      description: { en: row.description_en, ta: row.description_ta },
-      ctaLabel: builtIn.ctaLabel,
-      ctaHref: builtIn.ctaHref,
-      imageUrl: row.image_url,
+    if (builtIn) {
+      const closedAdmission = !admissionsOpen && builtIn.id === 'admissions'
+      return {
+        id: row.id,
+        frame: builtIn.id,
+        eyebrow: closedAdmission ? { en: 'College information', ta: 'கல்லூரி தகவல்' } : builtIn.eyebrow,
+        title: closedAdmission
+          ? { en: row.closed_title_en || 'Worship To Jesus Bible Institute & College', ta: row.closed_title_ta || 'Worship To Jesus வேதாகம நிறுவனம் மற்றும் கல்லூரி' }
+          : { en: row.title_en, ta: row.title_ta },
+        description: closedAdmission
+          ? { en: row.closed_description_en || 'Bible-centred theological education, ministry formation and practical training for faithful service.', ta: row.closed_description_ta || 'வேதாகமத்தை மையமாகக் கொண்ட இறையியல் கல்வி, ஊழிய உருவாக்கம் மற்றும் உண்மையுள்ள சேவைக்கான நடைமுறை பயிற்சி.' }
+          : { en: row.description_en, ta: row.description_ta },
+        ...(!closedAdmission ? { ctaLabel: builtIn.ctaLabel, ctaHref: builtIn.ctaHref } : {}),
+        imageUrl: row.image_url,
+      }
     }
     return {
       id: row.id,
@@ -55,8 +61,7 @@ export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen
       description: { en: row.description_en, ta: row.description_ta },
       imageUrl: row.image_url,
     }
-  }) : academicHeroSlides.map((slide) => ({ ...slide, frame: slide.id })))
-    .filter((slide) => admissionsOpen || slide.frame !== 'admissions')
+  }) : academicHeroSlides.map((slide): AcademicCarouselSlide => slide.id === 'admissions' && !admissionsOpen ? ({ id: slide.id, frame: slide.id, eyebrow: { en: 'College information', ta: 'கல்லூரி தகவல்' }, title: { en: 'Worship To Jesus Bible Institute & College', ta: 'Worship To Jesus வேதாகம நிறுவனம் மற்றும் கல்லூரி' }, description: { en: 'Bible-centred theological education, ministry formation and practical training for faithful service.', ta: 'வேதாகமத்தை மையமாகக் கொண்ட இறையியல் கல்வி, ஊழிய உருவாக்கம் மற்றும் உண்மையுள்ள சேவைக்கான நடைமுறை பயிற்சி.' } }) : ({ ...slide, frame: slide.id })))
 
   const onSelect = useCallback(() => {
     if (emblaApi) setSelectedIndex(emblaApi.selectedScrollSnap())

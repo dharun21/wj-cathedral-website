@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { BackToTop } from './components/common/BackToTop'
 import { Footer } from './components/layout/Footer'
@@ -18,6 +18,8 @@ const MediaPage = lazy(() => import('./pages/MediaPage').then((module) => ({ def
 const GalleryPage = lazy(() => import('./pages/GalleryPage').then((module) => ({ default: module.GalleryPage })))
 const GivePage = lazy(() => import('./pages/GivePage').then((module) => ({ default: module.GivePage })))
 const AdminApp = lazy(() => import('./admin/AdminApp').then((module) => ({ default: module.AdminApp })))
+
+const pageRootHashes = new Set(['#home', '#about', '#events', '#media', '#sermons', '#gallery', '#give', '#academics', '#church', '#community-care', '#prayer-helpline'])
 
 function App() {
   const { t } = useLanguage()
@@ -50,20 +52,42 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
+  useEffect(() => {
+    if (!('scrollRestoration' in window.history)) return undefined
+    const previous = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    return () => { window.history.scrollRestoration = previous }
+  }, [])
+
   useEffect(() => subscribeToPublishedContentChanges(queryClient), [queryClient])
 
   useEffect(() => {
     if (!isAdmin) void recordPublicVisit()
   }, [isAdmin])
 
+  useLayoutEffect(() => {
+    if (isAdmin || !pageRootHashes.has(hash)) return
+    // Reset before the browser paints the newly selected route. This prevents
+    // lazy page replacement and scroll anchoring from retaining a footer/bottom position.
+    window.scrollTo(0, 0)
+  }, [currentPage, hash, isAdmin])
+
   useEffect(() => {
-    if (isAdmin) return undefined
-    const frame = window.requestAnimationFrame(() => {
-      const target = document.querySelector(hash)
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      else window.scrollTo({ top: 0, behavior: 'smooth' })
-    })
-    return () => window.cancelAnimationFrame(frame)
+    if (isAdmin || pageRootHashes.has(hash) || !hash.startsWith('#')) return undefined
+    const targetId = decodeURIComponent(hash.slice(1))
+    let attempts = 0
+    let timer = 0
+    const findSection = () => {
+      const target = document.getElementById(targetId)
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+      attempts += 1
+      if (attempts < 30) timer = window.setTimeout(findSection, 50)
+    }
+    timer = window.setTimeout(findSection, 0)
+    return () => window.clearTimeout(timer)
   }, [currentPage, hash, isAdmin])
 
   if (isAdmin) return <Suspense fallback={<main className="route-loading"><span>Loading administration…</span></main>}><AdminApp hash={hash} /></Suspense>
