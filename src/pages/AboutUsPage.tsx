@@ -9,6 +9,7 @@ import {
   churchVision,
 } from '../data/churchHistory'
 import { useLanguage } from '../context/LanguageContext'
+import { spiritualMentors, spiritualMentorsIntro } from '../data/spiritualMentors'
 
 const values = [
   { icon: Church, title: 'aboutPage.values.jesusTitle', body: 'aboutPage.values.jesusBody' },
@@ -73,6 +74,42 @@ export function AboutUsPage() {
         </div>
       </section>
 
+      <section className="section about-mentors" aria-labelledby="about-mentors-title">
+        <div className="container">
+          <div className="about-mentors__heading">
+            <Reveal>
+              <p className="eyebrow">{localize({ en: 'Spiritual heritage', ta: 'ஆவிக்குரிய பாரம்பரியம்' })}</p>
+              <h2 id="about-mentors-title">{localize({ en: 'The mentors who guided the founder.', ta: 'நிறுவனரை வழிநடத்திய ஆவிக்குரிய ஆசான்கள்.' })}</h2>
+            </Reveal>
+            <Reveal delay={0.08}><p>{localize(spiritualMentorsIntro)}</p></Reveal>
+          </div>
+          <div className="about-mentors__grid">
+            {spiritualMentors.map((mentor, index) => (
+              <Reveal className={`about-mentor-card${mentor.memorial ? ' is-memorial' : ''}`} delay={index * 0.08} key={mentor.id}>
+                <div className="about-mentor-card__portrait">
+                  <img src={mentor.image} alt={localize(mentor.imageAlt)} loading="lazy" />
+                  {mentor.memorial && <small>{localize({ en: 'In honoured memory', ta: 'மரியாதைக்குரிய நினைவாக' })}</small>}
+                </div>
+                <div className="about-mentor-card__copy">
+                  <div>
+                    <p>{localize(mentor.role)}</p>
+                  </div>
+                  <h3>{localize(mentor.name)}</h3>
+                  <span>{localize(mentor.description)}</span>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal className="about-mentors__legacy">
+            <Quote size={22} aria-hidden="true" />
+            <p>{localize({
+              en: 'Honouring the spiritual leadership that helped shape a life of faithful service.',
+              ta: 'உண்மையுள்ள சேவையின் வாழ்க்கையை வடிவமைக்க உதவிய ஆவிக்குரிய தலைமையை கௌரவிக்கிறோம்.',
+            })}</p>
+          </Reveal>
+        </div>
+      </section>
+
       <section id="about-history" className="section about-history">
         <div className="container">
           <Reveal className="about-section-heading">
@@ -131,6 +168,38 @@ export function AboutUsPage() {
               {churchHistoryFinal.image ? <img src={churchHistoryFinal.image} alt={localize(churchHistoryFinal.title)} loading="lazy" /> : null}
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      <section className="section about-founder-journey" aria-labelledby="founder-journey-title">
+        <div className="container about-founder-journey__layout">
+          <Reveal className="about-founder-journey__copy">
+            <p className="eyebrow">{localize({ en: 'Years of ministry', ta: 'பல ஆண்டுகளான ஊழியம்' })}</p>
+            <h2 id="founder-journey-title">{localize({
+              en: 'A life poured out in service to people.',
+              ta: 'மக்களுக்கு சேவை செய்வதற்காக அர்ப்பணிக்கப்பட்ட வாழ்க்கை.',
+            })}</h2>
+            <p>{localize({
+              en: 'These portraits reflect the long ministry journey of founder Rev. Pr. A. Paulraj and his wife—from the early years of serving people to the present day. Through many years of prayer, Gospel ministry, caring for families and strengthening believers, they have witnessed Worship to Jesus Ministries grow into the church family seen today.',
+              ta: 'இந்த இரு படங்களும் நிறுவனர் ரெவ. பாஸ்டர் A. பால்ராஜும் அவரது மனைவியும் மேற்கொண்ட நீண்ட ஊழியப் பயணத்தை பிரதிபலிக்கின்றன—மக்களுக்கு சேவை செய்யத் தொடங்கிய ஆரம்ப காலத்திலிருந்து இன்று வரை. பல ஆண்டுகளான ஜெபம், சுவிசேஷ ஊழியம், குடும்பங்களைப் பராமரித்தல் மற்றும் விசுவாசிகளைப் பலப்படுத்துதல் ஆகியவற்றின் மூலம், இயேசுவுக்கே ஆராதனை ஊழியங்கள் இன்று காணப்படும் திருச்சபைக் குடும்பமாக வளர்ந்ததை அவர்கள் கண்டுள்ளனர்.',
+            })}</p>
+            <strong>{localize({
+              en: 'The years changed their faces; the calling to serve people remained.',
+              ta: 'ஆண்டுகள் அவர்களின் முகங்களை மாற்றின; மக்களுக்கு சேவை செய்யும் அழைப்பு மாறவில்லை.',
+            })}</strong>
+          </Reveal>
+
+          <div className="about-founder-journey__photos">
+            <Reveal className="about-founder-journey__photo">
+              <div><img src="./about/founder-journey/early-years.jpg" alt={localize({ en: 'Rev. Pr. A. Paulraj and his wife during the early years of ministry', ta: 'ஊழியத்தின் ஆரம்ப காலத்தில் ரெவ. பாஸ்டர் A. பால்ராஜும் அவரது மனைவியும்' })} loading="lazy" /></div>
+              <div className="about-founder-journey__caption"><small>{localize({ en: 'Beginning the work', ta: 'ஊழியத்தின் தொடக்கம்' })}</small><span>{localize({ en: 'The early years of ministry and service to people', ta: 'ஊழியமும் மக்களுக்கான சேவையும் தொடங்கிய ஆரம்ப ஆண்டுகள்' })}</span></div>
+            </Reveal>
+            <Reveal className="about-founder-journey__arrow" delay={0.05}><ArrowRight size={24} aria-hidden="true" /></Reveal>
+            <Reveal className="about-founder-journey__photo is-present" delay={0.1}>
+              <div><img src="./about/founder-journey/present-day.jpg" alt={localize({ en: 'Present-day portrait of Rev. Pr. A. Paulraj and his wife after many years of ministry', ta: 'பல ஆண்டுகளான ஊழியத்திற்குப் பிறகு ரெவ. பாஸ்டர் A. பால்ராஜும் அவரது மனைவியும் இடம்பெற்ற தற்போதைய படம்' })} loading="lazy" /></div>
+              <div className="about-founder-journey__caption"><small>{localize({ en: 'Continuing the calling', ta: 'அழைப்பைத் தொடருதல்' })}</small><span>{localize({ en: 'After years spent serving people and building the ministry', ta: 'மக்களுக்கு சேவை செய்தும் ஊழியத்தை வளர்த்தும் கடந்த பல ஆண்டுகளுக்குப் பிறகு' })}</span></div>
+            </Reveal>
+          </div>
         </div>
       </section>
 

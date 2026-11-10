@@ -28,7 +28,7 @@ export function AdminLogin() {
       <section className="admin-auth-card" aria-labelledby="admin-login-title">
         <div className="admin-auth-brand"><LogoMark /></div>
         <p className="admin-auth-eyebrow">WJ Cathedral CMS</p>
-        <h1 id="admin-login-title">Administrator sign in</h1>
+        <h1 id="admin-login-title">Sign in</h1>
         <p>Manage approved church content, events, photos and service information.</p>
         {error && <div className="admin-form-error" role="alert"><ShieldAlert size={17} /> {error}</div>}
         <form onSubmit={submit} className="admin-auth-form">
