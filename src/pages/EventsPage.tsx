@@ -1,8 +1,11 @@
-import { BookOpenText, CalendarDays, Church, Clock3, HeartHandshake, Link2, MapPin, MoonStar, Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowUpRight, BookOpenText, CalendarDays, Church, Clock3, HeartHandshake, Link2, Mail, MapPin, MoonStar, Phone, Sparkles, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLanguage } from '../context/LanguageContext'
 import { recurringGatherings } from '../data/recurringGatherings'
 import { usePublishedEvents, usePublishedWorship } from '../hooks/usePublishedContent'
+import type { EventRow } from '../types/database'
+import { eventContactHref, opensInNewTab } from '../utils/eventLinks'
 
 const gatheringIcons = [Church, Sparkles, BookOpenText, MoonStar, HeartHandshake, Link2] as const
 
@@ -11,6 +14,7 @@ export function EventsPage() {
   const eventsQuery = usePublishedEvents()
   const gatheringsQuery = usePublishedWorship(recurringGatherings)
   const [now] = useState(() => Date.now())
+  const [selectedEvent, setSelectedEvent] = useState<EventRow | null>(null)
   const events = eventsQuery.data ?? []
   const currentAndUpcoming = events.filter((event) => {
     const startsAt = new Date(event.starts_at).getTime()
@@ -27,20 +31,43 @@ export function EventsPage() {
     dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Kolkata',
   }).format(new Date(value))
 
+  useEffect(() => {
+    if (!selectedEvent) return
+    document.body.classList.add('lightbox-open')
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedEvent(null)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.classList.remove('lightbox-open')
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [selectedEvent])
+
   const eventCard = (event: typeof events[number]) => {
     const startsAt = new Date(event.starts_at).getTime()
     const endsAt = event.ends_at ? new Date(event.ends_at).getTime() : startsAt
     const isHappeningNow = startsAt <= now && endsAt >= now
+    const contactHref = eventContactHref(event.contact)
+    const registrationHref = event.registration_url?.trim() || null
+    const ContactIcon = contactHref?.startsWith('mailto:') ? Mail : Phone
 
     return <article className="event-page-card" key={event.id}>
-      <span>{isHappeningNow ? localize({ en: 'Happening now', ta: 'இப்போது நடைபெறுகிறது' }) : event.category}</span>
+      <div className="event-page-card__top">
+        <span>{isHappeningNow ? localize({ en: 'Happening now', ta: 'இப்போது நடைபெறுகிறது' }) : event.category}</span>
+        <button type="button" onClick={() => setSelectedEvent(event)} aria-label={localize({ en: `View full details for ${event.title_en}`, ta: `${event.title_ta} முழு விவரங்களைக் காண்க` })}><ArrowUpRight aria-hidden="true" /></button>
+      </div>
       <h2>{language === 'ta' ? event.title_ta : event.title_en}</h2>
-      <p>{language === 'ta' ? event.description_ta : event.description_en}</p>
+      <p className="event-page-card__summary">{language === 'ta' ? event.description_ta : event.description_en}</p>
       <dl>
-        <div><CalendarDays /><dt>{format(event.starts_at)}</dt></div>
-        <div><MapPin /><dt>{language === 'ta' ? event.venue_ta : event.venue_en}</dt></div>
-        {event.ends_at && <div><Clock3 /><dt>{format(event.ends_at)}</dt></div>}
+        <div><CalendarDays aria-hidden="true" /><span><dt>{localize({ en: 'Starts', ta: 'தொடக்கம்' })}</dt><dd>{format(event.starts_at)}</dd></span></div>
+        {event.ends_at && <div><Clock3 aria-hidden="true" /><span><dt>{localize({ en: 'Ends', ta: 'முடிவு' })}</dt><dd>{format(event.ends_at)}</dd></span></div>}
+        <div><MapPin aria-hidden="true" /><span><dt>{localize({ en: 'Venue', ta: 'இடம்' })}</dt><dd>{language === 'ta' ? event.venue_ta : event.venue_en}</dd></span></div>
       </dl>
+      {(contactHref || registrationHref) && <div className="event-page-card__actions">
+        {registrationHref && <a className="button button--navy" href={registrationHref} target={opensInNewTab(registrationHref) ? '_blank' : undefined} rel={opensInNewTab(registrationHref) ? 'noreferrer' : undefined}>{localize({ en: 'Register', ta: 'பதிவு செய்ய' })}<ArrowUpRight aria-hidden="true" /></a>}
+        {contactHref && <a className="button button--outline-navy" href={contactHref} target={opensInNewTab(contactHref) ? '_blank' : undefined} rel={opensInNewTab(contactHref) ? 'noreferrer' : undefined}><ContactIcon aria-hidden="true" />{localize({ en: 'Contact', ta: 'தொடர்பு கொள்ள' })}</a>}
+      </div>}
     </article>
   }
 
@@ -98,6 +125,35 @@ export function EventsPage() {
           {past.length > 0 && <><div className="page-section-heading page-section-heading--spaced"><h2>{localize({ en: 'Past Events', ta: 'கடந்த நிகழ்வுகள்' })}</h2></div><div className="event-page-grid">{past.map(eventCard)}</div></>}
         </div>
       </section>
+      {selectedEvent && createPortal(<div className="event-detail" role="dialog" aria-modal="true" aria-labelledby="event-detail-title">
+        <button type="button" className="event-detail__backdrop" onClick={() => setSelectedEvent(null)} aria-label={localize({ en: 'Close event details', ta: 'நிகழ்வு விவரங்களை மூடுக' })} />
+        <article className="event-detail__panel">
+          <header>
+            <span>{selectedEvent.category}</span>
+            <button type="button" onClick={() => setSelectedEvent(null)} aria-label={localize({ en: 'Close event details', ta: 'நிகழ்வு விவரங்களை மூடுக' })}><X aria-hidden="true" /></button>
+          </header>
+          <div className="event-detail__content">
+            <p className="eyebrow">{localize({ en: 'Event details', ta: 'நிகழ்வு விவரங்கள்' })}</p>
+            <h2 id="event-detail-title">{language === 'ta' ? selectedEvent.title_ta : selectedEvent.title_en}</h2>
+            <p className="event-detail__description">{language === 'ta' ? selectedEvent.description_ta : selectedEvent.description_en}</p>
+            <dl>
+              <div><CalendarDays aria-hidden="true" /><span><dt>{localize({ en: 'Starts', ta: 'தொடக்கம்' })}</dt><dd>{format(selectedEvent.starts_at)}</dd></span></div>
+              {selectedEvent.ends_at && <div><Clock3 aria-hidden="true" /><span><dt>{localize({ en: 'Ends', ta: 'முடிவு' })}</dt><dd>{format(selectedEvent.ends_at)}</dd></span></div>}
+              <div><MapPin aria-hidden="true" /><span><dt>{localize({ en: 'Venue', ta: 'இடம்' })}</dt><dd>{language === 'ta' ? selectedEvent.venue_ta : selectedEvent.venue_en}</dd></span></div>
+            </dl>
+            {(() => {
+              const contactHref = eventContactHref(selectedEvent.contact)
+              const registrationHref = selectedEvent.registration_url?.trim() || null
+              const ContactIcon = contactHref?.startsWith('mailto:') ? Mail : Phone
+              if (!contactHref && !registrationHref) return null
+              return <div className="event-detail__actions">
+                {registrationHref && <a className="button button--navy" href={registrationHref} target={opensInNewTab(registrationHref) ? '_blank' : undefined} rel={opensInNewTab(registrationHref) ? 'noreferrer' : undefined}>{localize({ en: 'Register', ta: 'பதிவு செய்ய' })}<ArrowUpRight aria-hidden="true" /></a>}
+                {contactHref && <a className="button button--outline-navy" href={contactHref} target={opensInNewTab(contactHref) ? '_blank' : undefined} rel={opensInNewTab(contactHref) ? 'noreferrer' : undefined}><ContactIcon aria-hidden="true" />{localize({ en: 'Contact', ta: 'தொடர்பு கொள்ள' })}</a>}
+              </div>
+            })()}
+          </div>
+        </article>
+      </div>, document.body)}
     </main>
   )
 }

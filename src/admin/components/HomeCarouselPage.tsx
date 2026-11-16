@@ -4,6 +4,7 @@ import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordi
 import { LockKeyhole, Plus, Presentation, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { HOME_LIVE_SLIDE_SLOT_ID } from '../../constants/heroSlides'
+import { CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH } from '../../constants/contentLimits'
 import { invalidatePublishedContent } from '../../lib/contentCache'
 import { deleteAdminRecord, listAdminRecords, reorderAdminRecords, saveAdminRecord } from '../../services/contentService'
 import type { ContentStatus, HeroSlideRow, MediaAssetRow } from '../../types/database'
@@ -44,9 +45,12 @@ function HomeSlideEditor({ initial, owner, saving, onClose, onSave }: { initial:
       ['description_en', 'English supporting text'], ['description_ta', 'Tamil supporting text'],
     ]
     if (!builtIn) required.push(['image_url', 'Background image'])
-    const missing = required.filter(([name]) => !String(record[name] ?? '').trim()).map(([, label]) => `${label} is required.`)
-    setErrors(missing)
-    if (!missing.length) onSave(record, status)
+    const issues = required.filter(([name]) => !String(record[name] ?? '').trim()).map(([, label]) => `${label} is required.`)
+    for (const [name, label] of required.filter(([name]) => name.startsWith('description_'))) {
+      if (String(record[name] ?? '').trim().length > CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH) issues.push(`${label} must be ${CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} characters or fewer.`)
+    }
+    setErrors(issues)
+    if (!issues.length) onSave(record, status)
   }
   const chooseImage = (asset: MediaAssetRow) => {
     setRecord((current) => ({ ...current, image_url: asset.public_url ?? '', image_media_id: asset.id }))
@@ -66,8 +70,8 @@ function HomeSlideEditor({ initial, owner, saving, onClose, onSave }: { initial:
         <div className="admin-form-grid">
           <label><span>English heading</span><input disabled={!canEdit} value={String(record.title_en ?? '')} onChange={(event) => update('title_en', event.target.value)} placeholder="Enter the main slide heading" /></label>
           <label><span>Tamil heading <small lang="ta">தமிழ் தலைப்பு</small></span><input disabled={!canEdit} lang="ta" value={String(record.title_ta ?? '')} onChange={(event) => update('title_ta', event.target.value)} placeholder="முக்கிய தலைப்பை உள்ளிடவும்" /></label>
-          <label className="is-full"><span>English supporting text</span><textarea disabled={!canEdit} rows={4} value={String(record.description_en ?? '')} onChange={(event) => update('description_en', event.target.value)} placeholder="Add a short supporting sentence" /></label>
-          <label className="is-full"><span>Tamil supporting text <small lang="ta">தமிழ் துணை உரை</small></span><textarea disabled={!canEdit} lang="ta" rows={4} value={String(record.description_ta ?? '')} onChange={(event) => update('description_ta', event.target.value)} placeholder="குறுகிய துணை உரையை உள்ளிடவும்" /></label>
+          <label className="is-full"><span>English supporting text</span><textarea disabled={!canEdit} rows={4} maxLength={CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} value={String(record.description_en ?? '')} onChange={(event) => update('description_en', event.target.value)} placeholder="Add a short supporting sentence" /><em>{String(record.description_en ?? '').length}/{CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} characters · maximum 3 lines on the website</em></label>
+          <label className="is-full"><span>Tamil supporting text <small lang="ta">தமிழ் துணை உரை</small></span><textarea disabled={!canEdit} lang="ta" rows={4} maxLength={CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} value={String(record.description_ta ?? '')} onChange={(event) => update('description_ta', event.target.value)} placeholder="குறுகிய துணை உரையை உள்ளிடவும்" /><em>{String(record.description_ta ?? '').length}/{CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} எழுத்துகள் · இணையதளத்தில் அதிகபட்சம் 3 வரிகள்</em></label>
           <label className="is-full"><span>Background image</span><input readOnly value={String(record.image_url ?? '')} placeholder="Choose an approved image from the Upload Library" /><button type="button" className="admin-inline-action" disabled={!canEdit} onClick={() => setMediaPicker(true)}>Choose from Upload Library</button><em>{builtIn ? 'Changing this image does not change the protected button.' : 'There are intentionally no button options for custom slides.'}</em></label>
           {builtIn && <label className="is-full academic-fixed-button"><span>Protected public button</span><input readOnly value={`${String(record.cta_label_en ?? '')} → ${String(record.cta_href ?? '')}`} /><em>Button text and destination stay unchanged.</em></label>}
         </div>

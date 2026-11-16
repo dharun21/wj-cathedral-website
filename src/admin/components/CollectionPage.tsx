@@ -2,7 +2,7 @@ import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Archive, Eye, GripVertical, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { Archive, GripVertical, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { invalidatePublishedContent } from '../../lib/contentCache'
 import { deleteAdminRecord, listAdminGalleryImages, listAdminRecords, reorderAdminRecords, saveAdminRecord } from '../../services/contentService'
@@ -68,6 +68,7 @@ function validationErrors(definition: AdminModuleDefinition, record: AdminRecord
   for (const field of definition.fields) {
     const value = String(record[field.name] ?? '').trim()
     if (field.type === 'url' && value && !/^(https:\/\/|tel:|mailto:)/i.test(value)) errors.push(`${field.label} must use an approved https, telephone or email link.`)
+    if (field.maxLength && value.length > field.maxLength) errors.push(`${field.label} must be ${field.maxLength} characters or fewer.`)
   }
   for (const key of ['cta_href', 'secondary_cta_href']) {
     const value = String(record[key] ?? '').trim()
@@ -125,7 +126,6 @@ function SortableGalleryPhoto({ record, definition, albumName, orderNumber, owne
 function RecordEditor({ definition, initial, saving, owner, onSave, onClose }: { definition: AdminModuleDefinition; initial: AdminRecord; saving: boolean; owner: boolean; onSave: (record: AdminRecord, status: ContentStatus) => void; onClose: () => void }) {
   const [record, setRecord] = useState<AdminRecord>(initial)
   const [errors, setErrors] = useState<string[]>([])
-  const [preview, setPreview] = useState(false)
   const [mediaField, setMediaField] = useState<string | null>(null)
   const latestRecord = useRef<AdminRecord>(initial)
   const lastValidationStatus = useRef<ContentStatus | null>(null)
@@ -135,7 +135,6 @@ function RecordEditor({ definition, initial, saving, owner, onSave, onClose }: {
     if (lastValidationStatus.current) setErrors(validationErrors(definition, next, lastValidationStatus.current))
   }
   const update = (name: string, value: unknown) => commitRecord({ ...latestRecord.current, [name]: value })
-  const showPreview = definition.presentation !== 'photo-grid' && definition.key !== 'announcements'
   const submit = (status: ContentStatus) => {
     lastValidationStatus.current = status
     const next = { ...latestRecord.current, status }
@@ -152,19 +151,18 @@ function RecordEditor({ definition, initial, saving, owner, onSave, onClose }: {
         <header><div><small>{initial.id ? 'Edit' : 'Add'} {definition.singular}</small><h2 id="editor-title">{displayValue(record[definition.titleField]) || `New ${definition.singular}`}</h2></div><button type="button" onClick={onClose} aria-label="Close"><X /></button></header>
         <div className="admin-editor__content">
           {errors.length > 0 && <div className="admin-validation" role="alert"><strong>Review before saving</strong><ul>{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
-          {preview && <div className="admin-content-preview"><span>Preview</span>{Boolean(record.image_url) && <img src={String(record.image_url)} alt="" />}<h3>{displayValue(record.title_en) || displayValue(record.name_en) || displayValue(record.content_en)}</h3><p lang="ta">{displayValue(record.title_ta) || displayValue(record.name_ta) || displayValue(record.content_ta)}</p><p>{displayValue(record.description_en)}</p></div>}
           <div className="admin-form-grid">
             {definition.fields.filter((field) => field.name !== 'status').map((field) => <label className={field.fullWidth ? 'is-full' : ''} key={field.name}><span>{field.label}{field.tamilLabel && <small lang="ta">{field.tamilLabel}</small>}</span>
-              {field.type === 'textarea' ? <textarea rows={5} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)} placeholder={field.placeholder} />
+              {field.type === 'textarea' ? <textarea rows={5} maxLength={field.maxLength} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)} placeholder={field.placeholder} />
                 : field.type === 'select' ? <select value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, event.target.value)}>{field.options?.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>
                 : field.type === 'boolean' ? <span className="admin-switch"><input type="checkbox" checked={record[field.name] === true} onChange={(event) => update(field.name, event.target.checked)} /><i /><b>{record[field.name] === true ? 'Yes' : 'No'}</b></span>
                 : field.type === 'datetime' ? <div className="admin-datetime-fields"><input aria-label={`${field.label} date`} type="date" value={dateTimePart(record[field.name], 'date')} onChange={(event) => update(field.name, combineDateTime(record[field.name], 'date', event.target.value))} /><input aria-label={`${field.label} time`} type="time" value={dateTimePart(record[field.name], 'time')} onChange={(event) => update(field.name, combineDateTime(record[field.name], 'time', event.target.value))} /></div>
-                : <><input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'time' ? 'time' : field.type === 'url' ? 'url' : 'text'} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, field.type === 'number' ? Number(event.target.value) : event.target.value)} placeholder={field.placeholder} />{(field.name === 'image_url' || field.name === 'background_image_url' || field.name === 'cover_image_url') && <button type="button" className="admin-inline-action" onClick={() => setMediaField(field.name)}>Choose from Upload Library</button>}</>}
+                : <><input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'time' ? 'time' : field.type === 'url' ? 'url' : 'text'} maxLength={field.maxLength} value={inputValue(field, record[field.name])} onChange={(event) => update(field.name, field.type === 'number' ? Number(event.target.value) : event.target.value)} placeholder={field.placeholder} />{(field.name === 'image_url' || field.name === 'background_image_url' || field.name === 'cover_image_url') && <button type="button" className="admin-inline-action" onClick={() => setMediaField(field.name)}>Choose from Upload Library</button>}</>}
               {field.help && <em>{field.help}</em>}
             </label>)}
           </div>
         </div>
-        <footer>{showPreview && <button type="button" className="admin-secondary-button" onClick={() => setPreview((current) => !current)}><Eye size={17} /> {preview ? 'Hide preview' : 'Preview'}</button>}<span /><button type="button" className="admin-secondary-button" disabled={saving} onClick={() => submit('draft')}>Save Draft</button><button type="button" className="admin-primary-button" disabled={saving} onClick={() => submit(owner ? 'published' : 'pending_review')}>{saving ? 'Saving…' : owner ? initial.status === 'pending_review' ? 'Approve & Publish' : 'Publish' : 'Send for Approval'}</button></footer>
+        <footer><span /><button type="button" className="admin-secondary-button" disabled={saving} onClick={() => submit('draft')}>Save Draft</button><button type="button" className="admin-primary-button" disabled={saving} onClick={() => submit(owner ? 'published' : 'pending_review')}>{saving ? 'Saving…' : owner ? initial.status === 'pending_review' ? 'Approve & Publish' : 'Publish' : 'Send for Approval'}</button></footer>
       </div>
       {mediaField && <MediaPicker onClose={() => setMediaField(null)} onSelect={(asset) => {
         const next = { ...latestRecord.current, [mediaField]: asset.public_url ?? '' }

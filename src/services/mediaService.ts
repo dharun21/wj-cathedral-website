@@ -5,7 +5,9 @@ import { maxOptimizedImageBytes, optimizeImageFile, validateImageSelection, vali
 
 const allowedAudioTypes = new Set(['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/x-wav', 'audio/ogg'])
 export const maxImageBytes = maxOptimizedImageBytes
-export const maxAudioBytes = 10 * 1024 * 1024
+export const maxAudioBytes = 5 * 1024 * 1024
+export const storageSafetyThresholdBytes = 800 * 1024 * 1024
+export const storageCleanupMessage = 'You are close to running out of storage. Please remove old images, audio, or other unused files from the libraries before uploading more. This helps keep the website fast and reliable.'
 
 function untypedClient(): SupabaseClient {
   return requireSupabase() as unknown as SupabaseClient
@@ -17,7 +19,30 @@ export function validateImageFile(file: File) {
 
 export function validateAudioFile(file: File) {
   if (!allowedAudioTypes.has(file.type)) throw new Error('Use an MP3, M4A, WAV or OGG audio file.')
-  if (file.size > maxAudioBytes) throw new Error('The audio file must be 10 MB or smaller.')
+  if (file.size > maxAudioBytes) throw new Error('The audio file must be 5 MB or smaller.')
+}
+
+export async function fetchCmsStorageUsageBytes() {
+  const pageSize = 1000
+  let offset = 0
+  let total = 0
+  while (true) {
+    const { data, error } = await untypedClient().from('media_assets').select('file_size').order('id', { ascending: true }).range(offset, offset + pageSize - 1)
+    if (error) throw new Error('Storage availability could not be checked. Please try again.')
+    const rows = (data ?? []) as Array<{ file_size: number | string }>
+    total += rows.reduce((sum, row) => sum + Number(row.file_size || 0), 0)
+    if (rows.length < pageSize) return total
+    offset += pageSize
+  }
+}
+
+export function hasCmsStorageCapacity(usedBytes: number, incomingBytes: number) {
+  return usedBytes + incomingBytes < storageSafetyThresholdBytes
+}
+
+async function ensureStorageCapacity(incomingBytes: number) {
+  const usedBytes = await fetchCmsStorageUsageBytes()
+  if (!hasCmsStorageCapacity(usedBytes, incomingBytes)) throw new Error(storageCleanupMessage)
 }
 
 function extensionForMime(mimeType: string) {
@@ -40,6 +65,7 @@ export async function uploadDraftImage(file: File, altEn: string, altTa: string,
   onProgress?.(5)
   const optimized = await optimizeImageFile(file)
   validateOptimizedImage(optimized.file)
+  await ensureStorageCapacity(optimized.file.size)
   const extension = extensionForMime(optimized.file.type)
   const path = `${user.id}/${new Date().getUTCFullYear()}/${crypto.randomUUID()}.${extension}`
   onProgress?.(35)
@@ -78,6 +104,7 @@ export async function uploadDraftAudio(file: File, titleEn: string, titleTa: str
   const { data: userData } = await client.auth.getUser()
   const user = userData.user
   if (!user) throw new Error('Your admin session has expired.')
+  await ensureStorageCapacity(file.size)
   const extension = extensionForMime(file.type)
   const path = `${user.id}/audio/${new Date().getUTCFullYear()}/${crypto.randomUUID()}.${extension}`
   onProgress?.(15)

@@ -1,4 +1,5 @@
 import { canonicalYouTubeUrl, extractYouTubeId } from '../utils/youtube'
+import { CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH } from '../constants/contentLimits'
 import type { AdminModuleDefinition, AdminRecord } from './types'
 
 const statusOptions = [
@@ -16,6 +17,11 @@ const bilingualTitleFields = [
 const bilingualDescriptionFields = [
   { name: 'description_en', label: 'English description', type: 'textarea', requiredForPublish: true, fullWidth: true },
   { name: 'description_ta', label: 'Tamil description', tamilLabel: 'தமிழ் விளக்கம்', type: 'textarea', requiredForPublish: true, fullWidth: true },
+] as const
+
+const carouselSupportingTextFields = [
+  { name: 'description_en', label: 'English supporting text', type: 'textarea', requiredForPublish: true, fullWidth: true, maxLength: CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH, help: `Maximum ${CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} characters. The website displays up to 3 lines.` },
+  { name: 'description_ta', label: 'Tamil supporting text', tamilLabel: 'தமிழ் துணை உரை', type: 'textarea', requiredForPublish: true, fullWidth: true, maxLength: CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH, help: `அதிகபட்சம் ${CAROUSEL_SUPPORTING_TEXT_MAX_LENGTH} எழுத்துகள். இணையதளத்தில் 3 வரிகள் வரை காட்டப்படும்.` },
 ] as const
 
 const galleryPhotoFields = [
@@ -69,7 +75,7 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     fields: [
       { name: 'eyebrow_en', label: 'English short label', type: 'text', requiredForPublish: true },
       { name: 'eyebrow_ta', label: 'Tamil short label', tamilLabel: 'தமிழ் குறுந்தலைப்பு', type: 'text', requiredForPublish: true },
-      ...bilingualTitleFields, ...bilingualDescriptionFields,
+      ...bilingualTitleFields, ...carouselSupportingTextFields,
       { name: 'image_url', label: 'Approved image URL', type: 'text', requiredForPublish: true, fullWidth: true, help: 'Select an approved media URL or use an existing local approved asset path.' },
       { name: 'image_alt_en', label: 'English image description', type: 'text', requiredForPublish: true },
       { name: 'image_alt_ta', label: 'Tamil image description', tamilLabel: 'தமிழ் பட விளக்கம்', type: 'text', requiredForPublish: true },
@@ -99,14 +105,17 @@ export const moduleDefinitions: Record<string, AdminModuleDefinition> = {
     description: 'Manage upcoming and past church events in Asia/Kolkata time.', titleField: 'title_en', subtitleField: 'starts_at',
     defaults: { title_en: '', title_ta: '', description_en: '', description_ta: '', starts_at: '', ends_at: '', venue_en: '', venue_ta: '', contact: '', category: 'church', registration_url: '', status: 'draft' },
     fields: [
-      ...bilingualTitleFields, ...bilingualDescriptionFields,
-      { name: 'starts_at', label: 'Start date and time', type: 'datetime', requiredForPublish: true },
-      { name: 'ends_at', label: 'End date and time', type: 'datetime' },
-      { name: 'venue_en', label: 'Venue — English', type: 'text', requiredForPublish: true },
-      { name: 'venue_ta', label: 'Venue — Tamil', tamilLabel: 'இடம் — தமிழ்', type: 'text', requiredForPublish: true },
-      { name: 'contact', label: 'Public contact', type: 'text' },
+      { name: 'title_en', label: 'English title', type: 'text', requiredForPublish: true, placeholder: 'Example: Annual Thanksgiving Service' },
+      { name: 'title_ta', label: 'Tamil title', tamilLabel: 'தமிழ் தலைப்பு', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: ஆண்டு நன்றி ஆராதனை' },
+      { name: 'description_en', label: 'English description', type: 'textarea', requiredForPublish: true, fullWidth: true, placeholder: 'Briefly describe the event and who is invited' },
+      { name: 'description_ta', label: 'Tamil description', tamilLabel: 'தமிழ் விளக்கம்', type: 'textarea', requiredForPublish: true, fullWidth: true, placeholder: 'நிகழ்ச்சியையும் யார் கலந்துகொள்ளலாம் என்பதையும் சுருக்கமாக எழுதவும்' },
+      { name: 'starts_at', label: 'Start date and time', type: 'datetime', requiredForPublish: true, help: 'Choose the event start date and local India time.' },
+      { name: 'ends_at', label: 'End date and time', type: 'datetime', help: 'Optional. Leave empty when an end time is not needed.' },
+      { name: 'venue_en', label: 'Venue — English', type: 'text', requiredForPublish: true, placeholder: 'Example: WJ Cathedral, Nannilam' },
+      { name: 'venue_ta', label: 'Venue — Tamil', tamilLabel: 'இடம் — தமிழ்', type: 'text', requiredForPublish: true, placeholder: 'உதாரணம்: WJ பேராலயம், நன்னிலம்' },
+      { name: 'contact', label: 'Public contact', type: 'text', placeholder: 'Example: +91 97503 08877 or office@example.com', help: 'Optional. A Contact button appears on this event only when a phone number, email address or link is entered.' },
       { name: 'category', label: 'Category', type: 'select', options: [{ value: 'church', label: 'Church gathering' }, { value: 'prayer', label: 'Prayer' }, { value: 'youth', label: 'Youth' }, { value: 'children', label: 'Children' }, { value: 'community', label: 'Community Care' }, { value: 'academics', label: 'Academics' }] },
-      { name: 'registration_url', label: 'Optional contact/registration link', type: 'url' },
+      { name: 'registration_url', label: 'Registration link', type: 'url', placeholder: 'Example: https://forms.example.com/event-registration', help: 'Optional. A Register button appears on this event only when this link is entered.' },
       { name: 'status', label: 'Publication status', type: 'select', options: statusOptions },
     ],
   },

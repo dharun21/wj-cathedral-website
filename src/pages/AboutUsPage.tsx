@@ -203,6 +203,74 @@ export function AboutUsPage() {
         </div>
       </section>
 
+      <section className="section about-field-ministry" aria-labelledby="field-ministry-title">
+        <div className="container">
+          <div className="about-field-ministry__heading">
+            <Reveal>
+              <p className="eyebrow">{localize({ en: 'The Gospel among the people', ta: 'மக்களிடையே சுவிசேஷம்' })}</p>
+              <h2 id="field-ministry-title">{localize({
+                en: 'The road became a mission field.',
+                ta: 'பாதையே ஒரு ஊழியத் தளமாக மாறியது.',
+              })}</h2>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <p>{localize({
+                en: 'The ministry moved towards people—travelling through Nannilam, opening Scripture in village gatherings, praying with families and inviting lives to follow Jesus.',
+                ta: 'மக்களைத் தேடிச் சென்ற இந்த ஊழியம், நன்னிலத்தின் பாதைகளில் பயணித்து, கிராமக் கூடுகைகளில் வேதவசனத்தைத் திறந்து, குடும்பங்களோடு ஜெபித்து, இயேசுவைப் பின்பற்ற மக்களை அழைத்தது.',
+              })}</p>
+            </Reveal>
+          </div>
+
+          <div className="about-field-ministry__story">
+            <Reveal className="about-field-ministry__frame is-arrival">
+              <img src="./about/field-ministry/journey-through-nannilam.jpg" alt={localize({ en: 'Rev. Pr. A. Paulraj and his wife travelling along a road in Nannilam by bicycle', ta: 'நன்னிலம் சாலையில் மிதிவண்டியில் பயணிக்கும் ரெவ. பாஸ்டர் A. பால்ராஜும் அவரது மனைவியும்' })} loading="lazy" />
+              <div><span>{localize({ en: 'Going where people were', ta: 'மக்கள் இருந்த இடங்களைத் தேடிச் சென்று' })}</span><p>{localize({ en: 'The journey began with a willingness to carry the Gospel beyond familiar walls.', ta: 'பழக்கமான சுவர்களுக்கு அப்பால் சுவிசேஷத்தை எடுத்துச் செல்லும் மனப்பான்மையோடு பயணம் தொடங்கியது.' })}</p></div>
+            </Reveal>
+
+            <Reveal className="about-field-ministry__frame is-scripture" delay={0.06}>
+              <img src="./about/field-ministry/scripture-under-the-tree.jpg" alt={localize({ en: 'Paulraj and his wife sharing Scripture with people gathered beneath a tree in Nannilam', ta: 'நன்னிலத்தில் மரத்தின் கீழ் கூடிய மக்களுடன் வேதவசனத்தைப் பகிரும் பால்ராஜும் அவரது மனைவியும்' })} loading="lazy" />
+              <div><span>{localize({ en: 'The Word, shared face to face', ta: 'முகமுகமாகப் பகிரப்பட்ட தேவவசனம்' })}</span></div>
+            </Reveal>
+
+            <Reveal className="about-field-ministry__frame is-gathering">
+              <img src="./about/field-ministry/open-air-word-ministry.jpg" alt={localize({ en: 'Paulraj preaching from the Bible at an open-air village gathering', ta: 'கிராம திறந்தவெளிக் கூட்டத்தில் வேதாகமத்திலிருந்து பிரசங்கிக்கும் பால்ராஜ்' })} loading="lazy" />
+              <div><span>{localize({ en: 'A church could gather beneath a tree', ta: 'ஒரு மரத்தின் கீழும் திருச்சபை கூட முடிந்தது' })}</span></div>
+            </Reveal>
+
+            <Reveal className="about-field-ministry__message" delay={0.06}>
+              <BookOpenCheck size={28} aria-hidden="true" />
+              <blockquote>{localize({
+                en: 'No hall was required for the Gospel to be heard—only open hearts, an open Bible and the courage to begin.',
+                ta: 'சுவிசேஷம் கேட்கப்பட ஒரு மண்டபம் தேவையில்லை—திறந்த இதயங்களும், திறந்த வேதாகமமும், தொடங்கும் தைரியமும் போதுமானவை.',
+              })}</blockquote>
+              <p>{localize({
+                en: 'These scenes portray the heart of the ministry’s village outreach: close to the people, grounded in Scripture and sustained by prayer.',
+                ta: 'இந்தக் காட்சிகள் கிராம ஊழியத்தின் இதயத்தை எடுத்துக்காட்டுகின்றன: மக்களுக்கு அருகில், வேதவசனத்தில் வேரூன்றி, ஜெபத்தால் தாங்கப்பட்ட ஊழியம்.',
+              })}</p>
+            </Reveal>
+
+            <Reveal className="about-field-ministry__frame is-panorama">
+              <img src="./about/field-ministry/village-gospel-gathering.jpg" alt={localize({ en: 'An open-air Gospel gathering beneath a roadside tree in Nannilam', ta: 'நன்னிலத்தில் சாலையோர மரத்தின் கீழ் நடைபெற்ற திறந்தவெளி சுவிசேஷக் கூட்டம்' })} loading="lazy" />
+              <div><span>{localize({ en: 'Faith taking root in Nannilam', ta: 'நன்னிலத்தில் வேரூன்றிய விசுவாசம்' })}</span><p>{localize({ en: 'One gathering at a time, people heard, prayed and grew together.', ta: 'ஒவ்வொரு கூடுகையிலும் மக்கள் கேட்டார்கள், ஜெபித்தார்கள், ஒன்றாக வளர்ந்தார்கள்.' })}</p></div>
+            </Reveal>
+
+            <Reveal className="about-field-ministry__frame is-baptism">
+              <img src="./about/field-ministry/baptism-at-sunset.jpg" alt={localize({ en: 'A baptism in water at sunset surrounded by the church community', ta: 'திருச்சபை சமூகத்தின் முன்னிலையில் சூரிய அஸ்தமன நேரத்தில் நடைபெற்ற தண்ணீர் ஞானஸ்நானம்' })} loading="lazy" />
+            </Reveal>
+
+            <Reveal className="about-field-ministry__closing" delay={0.06}>
+              <HeartHandshake size={28} aria-hidden="true" />
+              <p className="eyebrow">{localize({ en: 'A visible response of faith', ta: 'விசுவாசத்தின் வெளிப்படையான பதில்' })}</p>
+              <h3>{localize({ en: 'Lives answering with a new beginning.', ta: 'புதிய தொடக்கத்தோடு பதிலளித்த வாழ்க்கைகள்.' })}</h3>
+              <p>{localize({
+                en: 'The ministry was never measured only by meetings held, but by people encountering the Word, choosing faith and taking their next step with the church family beside them.',
+                ta: 'நடைபெற்ற கூட்டங்களின் எண்ணிக்கையால் மட்டும் இந்த ஊழியம் அளவிடப்படவில்லை; தேவவசனத்தைச் சந்தித்து, விசுவாசத்தைத் தேர்ந்தெடுத்து, திருச்சபைக் குடும்பத்துடன் அடுத்த படியை எடுத்த மக்களின் வாழ்க்கைகளால் அது வெளிப்பட்டது.',
+              })}</p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       <section className="section about-values">
         <div className="container">
           <Reveal className="about-section-heading about-section-heading--light">

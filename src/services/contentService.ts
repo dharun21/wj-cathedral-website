@@ -113,7 +113,7 @@ export async function fetchPublishedAnnouncements() {
 export async function fetchPublishedEvents() {
   const { data, error } = await requireSupabase()
     .from('events')
-    .select('id, title_en, title_ta, description_en, description_ta, starts_at, ends_at, venue_en, venue_ta, category')
+    .select('id, title_en, title_ta, description_en, description_ta, starts_at, ends_at, venue_en, venue_ta, contact, category, registration_url')
     .eq('status', 'published')
     .order('starts_at')
   throwIfError(error)

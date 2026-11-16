@@ -10,7 +10,7 @@ const cards = [
   ['upcomingEvents', 'Upcoming events', CalendarDays],
   ['gallery', 'Published photos', Images],
   ['slides', 'Active slides', PanelsTopLeft],
-  ['videos', 'Published videos', CirclePlay],
+  ['videos', 'Published YouTube videos', CirclePlay],
   ['verses', 'Active daily verses', BookHeart],
   ['drafts', 'Draft content', FileClock],
   ['pendingApprovals', 'Awaiting owner approval', ShieldCheck],

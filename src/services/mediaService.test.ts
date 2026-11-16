@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
-import { maxAudioBytes, maxImageBytes, validateAudioFile, validateImageFile } from './mediaService'
+import { hasCmsStorageCapacity, maxAudioBytes, maxImageBytes, storageSafetyThresholdBytes, validateAudioFile, validateImageFile } from './mediaService'
 import { maxSourceImageBytes, validateOptimizedImage } from '../utils/imageOptimization'
 
 describe('media upload validation', () => {
@@ -39,8 +39,13 @@ describe('media upload validation', () => {
     expect(() => validateAudioFile(file)).toThrow(/MP3, M4A, WAV or OGG/)
   })
 
-  it('rejects audio larger than 10 MB', () => {
+  it('rejects audio larger than 5 MB', () => {
     const file = { name: 'large.mp3', type: 'audio/mpeg', size: maxAudioBytes + 1 } as File
-    expect(() => validateAudioFile(file)).toThrow(/10 MB or smaller/)
+    expect(() => validateAudioFile(file)).toThrow(/5 MB or smaller/)
+  })
+
+  it('blocks uploads that reach the internal storage safety threshold', () => {
+    expect(hasCmsStorageCapacity(storageSafetyThresholdBytes - 2, 1)).toBe(true)
+    expect(hasCmsStorageCapacity(storageSafetyThresholdBytes - 1, 1)).toBe(false)
   })
 })

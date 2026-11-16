@@ -125,11 +125,6 @@ export function AcademicHeroCarousel({ admissionsOpen = true }: { admissionsOpen
                       {slide.ctaHref && slide.ctaLabel && <a className="button button--gold" href={slide.ctaHref}>{localize(slide.ctaLabel)} <ArrowUpRight size={18} aria-hidden="true" /></a>}
                     </motion.div>
                   )}
-                  <div className="academic-hero__emblem" aria-hidden="true">
-                    <span><Icon size={62} /></span>
-                    <small>WJ</small>
-                    <strong>Academics</strong>
-                  </div>
                 </div>
               </article>
             )

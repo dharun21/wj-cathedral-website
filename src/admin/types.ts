@@ -18,6 +18,7 @@ export interface AdminField {
   tamilLabel?: string
   type: AdminFieldType
   placeholder?: string
+  maxLength?: number
   requiredForPublish?: boolean
   options?: readonly { value: string; label: string }[]
   help?: string
